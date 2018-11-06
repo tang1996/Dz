@@ -1,0 +1,180 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+body{
+	min-height: 100%;
+	position: relative;
+}
+#fixed_div{
+	position: fixed;
+	z-index: -1000;
+	width: 100%;
+	height: 100%
+}
+.top{
+    background: #f5f5f5;
+    padding: 5px 0;
+    text-align: center;
+}
+.search input{
+    font-size: 12px;
+    padding: 7px 20px;
+    border: none;
+    border-radius: 50px;
+    background: #dfdfdf;
+    width: 84%;
+    outline: none;
+}
+.map_div{
+    position: relative;
+    width: 100%;
+    min-height: 230px;
+    overflow: hidden;
+}
+.location{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 50%;
+}
+.location i{
+    display: block;
+    position: absolute;
+    bottom: 0;
+    right: -10px;
+    width: 20px;
+    height: 31px;
+    background: url("location.png") no-repeat center;
+    z-index: 1;
+}
+#allmap{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.origin{
+    width: 30px;
+    height: 30px;
+    background: #FFFFff;
+    position: absolute;
+    bottom: 5px;
+    left: 10px;
+    text-align: center;
+    border-radius: 5px;
+}
+.origin i{
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    display: inline-block;
+    background: url("ipLocation_ac75181.png") no-repeat center;
+    background-size: 100%;
+    margin: 5px;
+}
+.address_div{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 290px;
+    width: 100%;
+    overflow-y: auto;
+}
+.addressList_div{
+    position: relative;
+}
+#addressList{
+    list-style: none;
+    font-size: 12px;
+    color: #666666;
+}
+#addressList li{
+    margin: 0 15px 0 25px;
+    padding: 5px 0;
+    border-bottom: 1px solid #F5F5F5;
+}
+#addressList li p{
+    line-height: 23px;
+}
+#addressList li:nth-of-type(1) p:nth-of-type(1){
+    color: #FF7E00;
+}
+.iconLocation{
+    background: url("iconLocation.png") no-repeat center;
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-size: 100%;
+    top: 10px;
+    left: 10px;
+}
+.noFind{
+    line-height: 290px;
+    text-align: center;
+    font-size: 12px;
+    color: #333333;
+    display: none;
+}
+.search_Top{
+    line-height: 45px;
+    background: #FF7E00;
+    position: fixed;
+    width: 100%;
+    height: 45px;
+    top: 0;
+    left: 0;
+    z-index: 2;
+}
+.search_Top a{
+    position: absolute;
+    width: 40px;
+    height: 45px;
+    top: 0;
+    left: 0;
+    background: url("iconjt.png") no-repeat center;
+}
+.search_Top input{
+    padding: 5px 15px;
+    background: #FFFFff;
+    border: none;
+    outline: none;
+    width: 60%;
+    border-radius: 50px;
+    margin-left: 15%;
+}
+.search_Top span{
+    float: right;
+    width: 12%;
+    display: inline-block;
+    font-size: 14px;
+    color: #FFFFff;
+    text-align: center;
+}
+.result_Div{
+    margin-top: 46px;
+    overflow-y: auto;
+    min-height: 600px;
+}
+#resultList li{
+    position: relative;
+    font-size: 12px;
+    margin-left: 12px;
+    border-bottom: 1px solid #EEEEEE;
+    list-style: none;
+    padding: 5px 0;
+}
+#resultList li p{
+    line-height: 23px;
+}
+#resultList li p.address{
+    line-height: 23px;
+    color: #666666;
+}
+#resultList li p span{
+    float: right;
+    color: #666666;
+    font-size: 10px;
+}

@@ -1,0 +1,145 @@
+function toggleDetails(btn, pressed){
+      var view = grid.getView();
+      view.showPreview = pressed;
+      view.refresh();
+}
+
+function createTab(node,icon)
+{
+	var obj = {
+		id:node.id,
+		title:node.text,
+		closable:true,
+		script:true,
+		layout:"fit",
+		iconCls:icon,
+		autoScroll:true
+	};
+	obj.html="<iframe src='"+node.attributes.url+"' width='100%' height='100%'></iframe>";
+	return new Ext.Panel(obj);
+}
+
+//创建一个Tab by URL
+function createTabUrl(url,icon,id,title){
+
+	var obj={
+		id:id,
+		title:title,
+		closable:true,
+		layout:"fit",
+		iconCls:icon,
+		autoScroll:true,
+		scripts: true
+	};
+	obj.autoLoad={url:url,scripts: true};
+	return new Ext.Panel(obj);
+}
+newMain = centerPanel;
+
+//创建一个Panel by URL
+function newPanelByUrl(url,icon,id,title){
+	p=newMain.getComponent(id);
+	if(!p){
+		p=createTabUrl(url,icon,id,title);
+		newMain.add(p);
+	}
+		newMain.activate(p); 	
+}
+
+Ext.onReady(function(){
+
+    var clock = new Ext.Toolbar.TextItem('');
+
+	var viewport = new Ext.Viewport({
+		layout:'border',
+		items:[
+		 	north,
+		  new Ext.Panel({
+				region:'south',	
+				height:30,
+				split:true,
+				minSize:100,
+				maxSize:200,
+				bbar: new Ext.StatusBar({
+		            id: 'word-status',
+		            text: '广西地税局--欢迎您!',
+        			iconCls: 'ready-icon',
+		            items: ['广西地税局　版权所有&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',clock, ' ']
+		        }),
+		        listeners: {
+		            'render': {
+		                fn: function(){
+		                    Ext.fly(clock.getEl().parentNode).addClass('x-status-text-panel').createChild({cls:'spacer'});
+		          		    Ext.TaskMgr.start({
+						        run: function(){
+						            Ext.fly(clock.getEl()).update(new Date().format('g:i:s A'));
+						        },
+						        interval: 1000
+						    });
+		                }
+		            }
+		        }
+			}),
+		      {
+				region:'west',
+				id:'west-panel',
+				title:'功能导航',
+				split:true,
+				width:180,
+				minSize:175,
+				maxSize:400,
+				margins:'0 0 0 5',
+				layout:'accordion',
+	    		collapsible: true,
+				iconCls:'home',
+				layoutConfig:{
+					animate:true
+				},
+				items:[{
+					title:'报表展示',
+					broder:false,
+					iconCls:'chart',
+					items:ReportTree
+				},{
+					title:'数据采集',
+					broder:false,
+					iconCls:'gather',
+					items:incomeTree
+				},{
+					title:'自定义条件查询',
+					broder:false,
+					iconCls:'tongyong',
+					items:QueryTree
+				},{ 
+					title:'国库对账处理',
+					broder:false,
+					iconCls:'duiz',
+					items:GXTree
+				},{ 
+					title:'数据监控',
+					broder:false,
+					iconCls:'data',
+					items:Jankon
+				},{
+					title:'系统管理',
+					broder:false,
+					hidden:isSystem,
+					iconCls:'system',
+					items:systemTree
+				},{
+					title:'在线答疑',
+					broder:false,
+					hidden:isSystem,
+					iconCls:'help',
+					items:faqTree
+				}]
+			},
+			centerPanel
+		]
+	});
+
+	setTimeout(function(){
+        Ext.get('loading').remove();
+        Ext.get('loading-mask').fadeOut({remove:true});
+    }, 250);
+});

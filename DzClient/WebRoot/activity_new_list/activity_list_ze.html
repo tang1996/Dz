@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>折扣活动列表</title>
+<link rel="stylesheet" href="./activity_new_list.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+
+</head>
+
+<body>
+<script type="text/javascript">
+			$(document).ready(function(){ 
+					load();
+			
+		    });
+function edit(wid,fid){
+	var url="../activity_edit/discount_edit.html";
+	window.location.href=url+"?"+"wid="+wid+"&fid="+fid;
+}
+
+function clo(cid){
+		$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.ACTIVITYUPDATESTATUS,
+					data:{ 
+            			id:cid,
+            			status:0
+					},
+					success:function(data) {
+						if(data.success){
+								 valLink("alert","活动关闭成功");
+									load();
+							
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+}
+function ope(cid){
+		$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.ACTIVITYUPDATESTATUS,
+					data:{ 
+            			id:cid,
+            			status:1
+					},
+					success:function(data) {
+						if(data.success){
+							 	valLink("alert","活动打开成功");
+									load();
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}
+
+function del(cid){
+               $.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.ACTIVITYDELETE,
+					data:{ 
+            			id:cid
+					},
+					success:function(data) {
+						if(data.success){
+								valLink("alert","活动删除成功");
+									load();
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+}
+
+function load(){
+				var fid=GetQueryString("fid");
+				$("#manjian").html('<a href="../activity/discount.html?fid='+fid+'"><img src="../common/img/sp33.png" ><span>添加折扣活动</span></a>');
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.COMGETCOMPANYACTIVITY,
+					data:{ 
+            			companyId:getCookie('cid'),
+            			activityId:fid
+					},
+					success:function(data) {
+					    var list = data.list;
+						 var html='';
+						for(var i = 0;i < list.length;i++){
+							var status=list[i].status;
+							var isOpen=list[i].isOpen;
+							var button='';
+							var kk='';
+							var dd='';
+								var sta='';
+							if(status==1){//已结束
+								button='<button type="button" id='+list[i].id+' onclick="del('+list[i].id+')">删除活动</button>';
+								sta='<p style="color:#666;">当前活动状态:活动已结束</p>';
+							  }else if(status==2){
+								
+									if(isOpen==0){
+										huo='<button type="button" id='+list[i].id+' onclick="ope('+list[i].id+')">打开活动</button>';
+										sta='<p style="color:#666;">当前活动状态:活动已关闭</p>';
+									}else if(isOpen==1){
+										huo='<button type="button" id='+list[i].id+' onclick="clo('+list[i].id+')">关闭活动</button>';
+										sta='<p style="color:#666;">当前活动状态:活动进行中</p>';
+									}
+									button='<button type="button" onclick="edit('+list[i].id+','+fid+');" >编辑活动</button>'+huo;
+							  }
+							  
+							 if(list[i].depict!=undefined){
+									kk='<p style="color:#666;">活动描述:'+list[i].depict+'</p>';
+							  }
+							   if(list[i].content!=undefined){
+									dd='<p style="color:#666;">活动内容:'+list[i].content+'</p>';
+							  }
+							html=html+'<li>'+
+							'<a href="#">'+
+								'<div class="top">'+
+									'<img src="../common/images/zk.png" style="width:50px;height:51px;">'+
+									'<h3>'+list[i].name+'<p class="xin" style="color:#FF7E00;">外卖</p></h3>'+
+									'<p>开始时间:'+list[i].startTime+'</p>'+
+									'<p>结束时间:'+list[i].endTime+'</p>'+sta+kk+dd+
+								'</div>'+
+								'<div class="bottom">'+button+
+								'</div>'+
+							'</a>'+
+						    '</li>';
+					
+										
+						}
+							$("#sp-right").html(html);
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+}
+	
+	
+	
+		</script>
+
+
+<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="../activity_list/activity_list.html"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>折扣活动列表</p>
+			<!--<a class="h-r" href="#"><img class="sp-ss" src="../common/img/sp-ss.png" alt=""></a>-->
+		</div>
+	</div>
+    <div class="wrap sp">
+		<div class="sp-right">
+			<ul id="sp-right">
+				
+			</ul>
+		</div>
+    </div>
+<ul class="foot-nav foot-sort">
+		<li class="active" id="manjian">
+		</li>
+	</ul>
+</body>
+
+</html>

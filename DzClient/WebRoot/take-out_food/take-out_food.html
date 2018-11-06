@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>外卖费用</title>
+<link rel="stylesheet" href="./take-out_food.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+<script type="text/javascript" src="../common/js/numberUtils.js"></script>
+
+</head>
+<body>
+<script type="text/javascript">	
+$(document).ready(function(){ 
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.VIEWQUALITY,
+				 	data: { 
+            			companyId:getCookie('cid')
+        			},
+					success:function(data) {
+						$('#miniPriceMS').val(data.miniPriceMS);
+						$('#distributionPrice').val(data.distributionPrice);
+
+						},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+
+
+});
+	
+	function add(){
+			var miniPriceMS=$('#miniPriceMS').val();
+			var distributionPrice=$('#distributionPrice').val();
+			if(miniPriceMS.length==0){
+				valLink("alert","请填写起送价格!");
+					return false;
+			}
+			if(!isNumber(miniPriceMS)){//2018-11-01 @Tyy
+					valLink("alert","起送价格格式不正确");
+						return false;
+				}
+			if(distributionPrice.length==0){
+				valLink("alert","请填写配送费!");
+					return false;
+
+			}else{
+				if(!isNumber(distributionPrice)){//2018-11-01 @Tyy
+					valLink("alert","配送费格式不正确");
+						return false;
+				}
+				distributionPrice=parseFloat(distributionPrice);
+				if(distributionPrice<3){
+					valLink("alert","配送费用不能低于3元!");
+					return false;
+				}
+			}
+					$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.DISTRIBUTIONUPDATE,
+				 	data: { 
+            			miniPrice:miniPriceMS,
+						distributionPrice:distributionPrice,
+						companyId:getCookie('cid')
+        			},
+					success:function(data) {
+						if(data.success){
+							var url="../cost/cost.html";
+							window.location.href=url;
+							
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+			}	
+		
+		</script>
+		<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="../cost/cost.html"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>外卖费用</p>
+		</div>
+	</div>
+    <div class="wrap sort_add">
+        <p>起送价格</p>
+		<input type="text" name="miniPriceMS" id="miniPriceMS" placeholder="请填写起送价格" value="" />
+		<p>配送费</p>
+		<input type="text" name="distributionPrice" id="distributionPrice" placeholder="请输写配送费,配送费用不能低于3元" value="" />
+    </div>
+	<div class="foot_sort">
+		<button type="button" onclick="add();">保存</button>
+	</div>
+</body>
+
+</html>

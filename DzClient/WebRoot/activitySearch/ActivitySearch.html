@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>动致活动</title>
+    <link rel="stylesheet" type="text/css" href="../common/css/common.css"/>
+    <link rel="stylesheet" type="text/css" href="./ActivitySearch.css"/>
+    <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../common/js/baseUrl.js"></script>
+    <script type="text/javascript" src="../common/js/common.js"></script>
+    <script type="text/javascript" src="../common/js/jquery.lazyload.min.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+
+    var activityId = GetQueryString("activityId");
+
+    $(document).ready(function () {
+
+        jiazai();
+        //销量最高排序
+        $("#volume").click(function () {
+            $(".active").removeClass("active");
+            $("#volume").addClass("active");
+            $("#list-box").html('');
+            $.ajax({
+                type: 'POST',
+                url: BASE_URL + LOGIN_ACTION.DO_SEARCH,
+                data: {
+                    location: GetQueryString("lng"),//获取来自手机端传递经纬度
+                    start: 0,
+                    limit: 100,
+                    activityId: activityId
+                },
+                success: function (data) {
+                    //var list = data.list;
+
+
+                    for (var i = 0; i < data.length; i++) {
+                        var type = data[i].type;
+                        var lineType = '';
+                        var lineHtml = '';
+                        switch (type) {
+                            case 1:
+                                lineType = '<span>外卖</span>';
+                                lineHtml = '<a href="javascript:valLink(\'search\',' + data[i].id + ')">';
+                                break;
+                            case 2:
+                                lineType = '<span>美食</span>';
+                                lineHtml = '<a href="javascript:valLink(\'foodDetail\',' + data[i].id + ')">';
+                                break;
+                            default:
+                                lineType = '';
+                                break;
+                        }
+
+                        var jian = '';
+
+                        switch (activityId) {
+                            case "1":
+                                jian = '<p><span class="icon-minus">减</span><span>' + data[i].activity + '</span></p>';
+                                break;
+                            case "2":
+                                jian = '<p><span class="icon-minus">新</span><span>' + data[i].activity + '</span></p>';
+                                break;
+                            case "3":
+                                jian = '<p><span class="icon-redpaper" style="color:#ffffff;">折</span><span>' + data[i].activity + '</span></p>';
+                                break;
+                            case "4":
+                                jian = '<p><span class="icon-coupon">券</span><span>' + data[i].activity + '</span></p>';
+                                break;
+                            default :
+                                jian = '';
+                                break;
+                        }
+
+                        var isBusiness = data[i].isBusiness;
+                        var businessHtml = '';
+                        var businessHtml_2 = '';
+                        if (isBusiness == false) {
+                            businessHtml = '<div  style="width:100%;position:relative;z-index:555;background-color: #fff;opacity:0.5;">';
+                            businessHtml_2 = '</div><span style="text-align: center;z-index:10000;color:#ccc;left: 40%;position:relative;">本店已打烊</span>';
+                        }
+
+                        var html = lineHtml + '<div class="item">' + businessHtml + '<div class="avatar-wrap">' +
+                            ' <img src="../common/img/defual.jpg" data-original=' + data[i].logo + ' style="display: inline;border-radius: 5px;border: 1px solid #eaeaea;">' +
+                            '</div>' +
+                            '<div class="content">' +
+                            '<div class="clear"><h4>' + data[i].name + '</h4>' +
+                            '<p class="xg-h">' + lineType + '</p></div>' +
+                            '<div class="rating-box">' +
+                            '<img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iMTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IHgxPSIwJSIgeTE9IjUwJSIgeTI9IjUwJSIgaWQ9ImEiPjxzdG9wIHN0b3AtY29sb3I9IiNGRkRFMDAiIG9mZnNldD0iMCUiLz48c3RvcCBzdG9wLWNvbG9yPSIjRkZCMDAwIiBvZmZzZXQ9IjEwMCUiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cGF0aCBkPSJNNTQuMDE3IDguMDcybC0yLjU1MiAxLjU2MWMtLjQ3Ni4yOTEtLjc1OC4wOTYtLjYyNi0uNDU1bC42OTYtMi45MDktMi4yNzMtMS45NDRjLS40MjQtLjM2Mi0uMzI1LS42OTEuMjM5LS43MzZsMi45ODItLjIzN0w1My42My41ODljLjIxMy0uNTE1LjU1Ny0uNTIzLjc3NCAwbDEuMTQ2IDIuNzYzIDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2bC0yLjI3NCAxLjk0NC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6bS00OCAwTDMuNDY1IDkuNjMzYy0uNDc2LjI5MS0uNzU4LjA5Ni0uNjI2LS40NTVsLjY5Ni0yLjkwOS0yLjI3My0xLjk0NGMtLjQyNC0uMzYyLS4zMjUtLjY5MS4yMzktLjczNmwyLjk4Mi0uMjM3TDUuNjMuNTg5Yy4yMTMtLjUxNS41NTctLjUyMy43NzQgMEw3LjU1IDMuMzUybDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2TDguNDk3IDYuMjY5bC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6bTEyIDBsLTIuNTUyIDEuNTYxYy0uNDc2LjI5MS0uNzU4LjA5Ni0uNjI2LS40NTVsLjY5Ni0yLjkwOS0yLjI3My0xLjk0NGMtLjQyNC0uMzYyLS4zMjUtLjY5MS4yMzktLjczNmwyLjk4Mi0uMjM3TDE3LjYzLjU4OWMuMjEzLS41MTUuNTU3LS41MjMuNzc0IDBsMS4xNDYgMi43NjMgMi45ODIuMjM3Yy41NTYuMDQ0LjY3LjM2OC4yNC43MzZsLTIuMjc0IDEuOTQ0LjY5NiAyLjkxYy4xMy41NDItLjE0My43NS0uNjI2LjQ1NGwtMi41NTEtMS41NnptMTIgMGwtMi41NTIgMS41NjFjLS40NzYuMjkxLS43NTguMDk2LS42MjYtLjQ1NWwuNjk2LTIuOTA5LTIuMjczLTEuOTQ0Yy0uNDI0LS4zNjItLjMyNS0uNjkxLjIzOS0uNzM2bDIuOTgyLS4yMzdMMjkuNjMuNTg5Yy4yMTMtLjUxNS41NTctLjUyMy43NzQgMGwxLjE0NiAyLjc2MyAyLjk4Mi4yMzdjLjU1Ni4wNDQuNjcuMzY4LjI0LjczNmwtMi4yNzQgMS45NDQuNjk2IDIuOTFjLjEzLjU0Mi0uMTQzLjc1LS42MjYuNDU0bC0yLjU1MS0xLjU2em0xMiAwbC0yLjU1MiAxLjU2MWMtLjQ3Ni4yOTEtLjc1OC4wOTYtLjYyNi0uNDU1bC42OTYtMi45MDktMi4yNzMtMS45NDRjLS40MjQtLjM2Mi0uMzI1LS42OTEuMjM5LS43MzZsMi45ODItLjIzN0w0MS42My41ODljLjIxMy0uNTE1LjU1Ny0uNTIzLjc3NCAwbDEuMTQ2IDIuNzYzIDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2bC0yLjI3NCAxLjk0NC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6IiBmaWxsPSJ1cmwoI2EpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=" alt="">' +
+                            '<span>' + data[i].assess + '</span>' +
+                            '</div>' +
+                            '<div class="price">' +
+                            '<span class="separator">' + data[i].position + '</span>' +
+                            '</div>' +
+                            '<div class="coupon-wrap">' + jian +
+                            ' </div>' +
+                            '<div class="distance-wrap">' + data[i].distance + '</div>' +
+                            '</div>' +
+                            '</div>' + businessHtml_2 + '</a>';
+                        $("#list-box").append(html);
+                    }
+
+                    if (data.length == 0) {
+                        var windowHeight = $(window).height() - 123;
+                        $("#list-box").html('<div id="noData" style="height:' + windowHeight + 'px"><img src="../common/images/null.png"><p>暂没有活动内容</p></div>');
+                    }
+
+                    $("img").lazyload({
+                        placeholder: "../common/img/defual.jpg",
+                        threshold: 200
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        });
+        $("#active").click(function () {
+            $("#list-box").html('');
+            $(".active").removeClass("active");
+            $("#active").addClass("active");
+            jiazai();
+        });
+        $("#sort").click(function () {
+            $("#list-box").html('');
+            $(".active").removeClass("active");
+            $("#sort").addClass("active");
+            $.ajax({
+                type: 'POST',
+                url: BASE_URL + LOGIN_ACTION.DO_SEARCH,
+                data: {
+                    location: GetQueryString("lng"),//获取来自手机端传递经纬度
+                    start: 0,
+                    limit: 100,
+                    activityId: activityId
+                },
+                success: function (data) {
+                    var list = data.list;
+                    for (var i = 0; i < data.length; i++) {
+                        var type = data[i].type;
+                        var lineType = '';
+                        var lineHtml = '';
+                        switch (type) {
+                            case 1:
+                                lineType = '<span>外卖</span>';
+                                lineHtml = '<a href="javascript:valLink(\'search\',' + data[i].id + ')">';
+                                break;
+                            case 2:
+                                lineType = '<span>美食</span>';
+                                lineHtml = '<a href="javascript:valLink(\'foodDetail\',' + data[i].id + ')">';
+                                break;
+                            default:
+                                lineType = '';
+                                break;
+                        }
+
+                        var jian = '';
+
+                        switch (activityId) {
+                            case "1":
+                                jian = '<p><span class="icon-minus">减</span><span>' + data[i].activity + '</span></p>';
+                                break;
+                            case "2":
+                                jian = '<p><span class="icon-minus">新</span><span>' + data[i].activity + '</span></p>';
+                                break;
+                            case "3":
+                                jian = '<p><span class="icon-redpaper" style="color:#ffffff;">折</span><span>' + data[i].activity + '</span></p>';
+                                break;
+                            case "4":
+                                jian = '<p><span class="icon-coupon">券</span><span>' + data[i].activity + '</span></p>';
+                                break;
+                            default :
+                                jian = '';
+                                break;
+                        }
+
+                        var isBusiness = data[i].isBusiness;
+                        var businessHtml = '';
+                        var businessHtml_2 = '';
+                        if (isBusiness == false) {
+                            businessHtml = '<div  style="width:100%;position:relative;z-index:555;background-color: #fff;opacity:0.5;">';
+                            businessHtml_2 = '</div><span style="text-align: center;z-index:10000;color:#ccc;left: 40%;position:relative;">本店已打烊</span>';
+                        }
+
+                        var html = lineHtml + '<div class="item">' + businessHtml + '<div class="avatar-wrap">' +
+                            ' <img src="../common/img/defual.jpg" data-original=' + data[i].logo + ' style="display: inline;border-radius: 5px;border: 1px solid #eaeaea;">' +
+                            '</div>' +
+                            '<div class="content">' +
+                            '<div class="clear"><h4>' + data[i].name + '</h4>' +
+                            '<p class="xg-h">' + lineType + '</p></div>' +
+                            '<div class="rating-box">' +
+                            '<img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iMTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IHgxPSIwJSIgeTE9IjUwJSIgeTI9IjUwJSIgaWQ9ImEiPjxzdG9wIHN0b3AtY29sb3I9IiNGRkRFMDAiIG9mZnNldD0iMCUiLz48c3RvcCBzdG9wLWNvbG9yPSIjRkZCMDAwIiBvZmZzZXQ9IjEwMCUiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cGF0aCBkPSJNNTQuMDE3IDguMDcybC0yLjU1MiAxLjU2MWMtLjQ3Ni4yOTEtLjc1OC4wOTYtLjYyNi0uNDU1bC42OTYtMi45MDktMi4yNzMtMS45NDRjLS40MjQtLjM2Mi0uMzI1LS42OTEuMjM5LS43MzZsMi45ODItLjIzN0w1My42My41ODljLjIxMy0uNTE1LjU1Ny0uNTIzLjc3NCAwbDEuMTQ2IDIuNzYzIDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2bC0yLjI3NCAxLjk0NC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6bS00OCAwTDMuNDY1IDkuNjMzYy0uNDc2LjI5MS0uNzU4LjA5Ni0uNjI2LS40NTVsLjY5Ni0yLjkwOS0yLjI3My0xLjk0NGMtLjQyNC0uMzYyLS4zMjUtLjY5MS4yMzktLjczNmwyLjk4Mi0uMjM3TDUuNjMuNTg5Yy4yMTMtLjUxNS41NTctLjUyMy43NzQgMEw3LjU1IDMuMzUybDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2TDguNDk3IDYuMjY5bC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6bTEyIDBsLTIuNTUyIDEuNTYxYy0uNDc2LjI5MS0uNzU4LjA5Ni0uNjI2LS40NTVsLjY5Ni0yLjkwOS0yLjI3My0xLjk0NGMtLjQyNC0uMzYyLS4zMjUtLjY5MS4yMzktLjczNmwyLjk4Mi0uMjM3TDE3LjYzLjU4OWMuMjEzLS41MTUuNTU3LS41MjMuNzc0IDBsMS4xNDYgMi43NjMgMi45ODIuMjM3Yy41NTYuMDQ0LjY3LjM2OC4yNC43MzZsLTIuMjc0IDEuOTQ0LjY5NiAyLjkxYy4xMy41NDItLjE0My43NS0uNjI2LjQ1NGwtMi41NTEtMS41NnptMTIgMGwtMi41NTIgMS41NjFjLS40NzYuMjkxLS43NTguMDk2LS42MjYtLjQ1NWwuNjk2LTIuOTA5LTIuMjczLTEuOTQ0Yy0uNDI0LS4zNjItLjMyNS0uNjkxLjIzOS0uNzM2bDIuOTgyLS4yMzdMMjkuNjMuNTg5Yy4yMTMtLjUxNS41NTctLjUyMy43NzQgMGwxLjE0NiAyLjc2MyAyLjk4Mi4yMzdjLjU1Ni4wNDQuNjcuMzY4LjI0LjczNmwtMi4yNzQgMS45NDQuNjk2IDIuOTFjLjEzLjU0Mi0uMTQzLjc1LS42MjYuNDU0bC0yLjU1MS0xLjU2em0xMiAwbC0yLjU1MiAxLjU2MWMtLjQ3Ni4yOTEtLjc1OC4wOTYtLjYyNi0uNDU1bC42OTYtMi45MDktMi4yNzMtMS45NDRjLS40MjQtLjM2Mi0uMzI1LS42OTEuMjM5LS43MzZsMi45ODItLjIzN0w0MS42My41ODljLjIxMy0uNTE1LjU1Ny0uNTIzLjc3NCAwbDEuMTQ2IDIuNzYzIDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2bC0yLjI3NCAxLjk0NC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6IiBmaWxsPSJ1cmwoI2EpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=" alt="">' +
+                            '<span>' + data[i].assess + '</span>' +
+                            '</div>' +
+                            '<div class="price">' +
+                            '<span class="separator">' + data[i].position + '</span>' +
+                            '</div>' +
+                            '<div class="coupon-wrap">' + jian +
+                            ' </div>' +
+                            '<div class="distance-wrap">' + data[i].distance + '</div>' +
+                            '</div>' +
+                            '</div>' + businessHtml_2 + '</a>';
+                        $("#list-box").append(html);
+                    }
+
+                    if (data.length == 0) {
+                        var windowHeight = $(window).height() - 123;
+                        $("#list-box").html('<div id="noData" style="height:' + windowHeight + 'px"><img src="../common/images/null.png"><p>暂没有活动内容</p></div>');
+                    }
+
+                    $("img").lazyload({
+                        placeholder: "../common/img/defual.jpg",
+                        threshold: 200
+                    });
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        });
+
+
+    });
+
+    function jiazai() {
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.DO_SEARCH,
+            data: {
+                location: GetQueryString("lng"),//获取来自手机端传递经纬度
+                start: 0,
+                limit: 100,
+                activityId: activityId
+            },
+            success: function (data) {
+
+                //var list = data.list;
+                for (var i = 0; i < data.length; i++) {
+                    var type = data[i].type;
+                    var lineType = '';
+                    var lineHtml = '';
+                    switch (type) {
+                        case 1:
+                            lineType = '<span>外卖</span>';
+                            lineHtml = '<a href="javascript:valLink(\'search\',' + data[i].id + ')">';
+                            break;
+                        case 2:
+                            lineType = '<span>美食</span>';
+                            lineHtml = '<a href="javascript:valLink(\'foodDetail\',' + data[i].id + ')">';
+                            break;
+                        default:
+                            lineType = '';
+                            break;
+                    }
+
+
+                    var jian = '';
+
+                    switch (activityId) {
+                        case "1":
+                            jian = '<p><span class="icon-minus">减</span><span>' + data[i].activity + '</span></p>';
+                            break;
+                        case "2":
+                            jian = '<p><span class="icon-minus">新</span><span>' + data[i].activity + '</span></p>';
+                            break;
+                        case "3":
+                            jian = '<p><span class="icon-redpaper" style="color:#ffffff;">折</span><span>' + data[i].activity + '</span></p>';
+                            break;
+                        case "4":
+                            jian = '<p><span class="icon-coupon">券</span><span>' + data[i].activity + '</span></p>';
+                            break;
+                        default :
+                            jian = '';
+                            break;
+                    }
+
+                    var isBusiness = data[i].isBusiness;
+                    var businessHtml = '';
+                    var businessHtml_2 = '';
+                    if (isBusiness == false) {
+                        businessHtml = '<div  style="width:100%;position:relative;z-index:555;background-color: #fff;opacity:0.5;">';
+                        businessHtml_2 = '</div><span style="text-align: center;z-index:10000;color:#ccc;left: 40%;position:relative;">本店已打烊</span>';
+                    }
+
+                    var html = lineHtml + '<div class="item">' + businessHtml + '<div class="avatar-wrap">' +
+                        ' <img src="../common/img/defual.jpg" data-original=' + data[i].logo + ' style="display: inline;border-radius: 5px;border: 1px solid #eaeaea;">' +
+                        '</div>' +
+                        '<div class="content">' +
+                        '<div class="clear"><h4>' + data[i].name + '</h4>' +
+                        '<p class="xg-h">' + lineType + '</p></div>' +
+                        '<div class="rating-box">' +
+                        '<img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iMTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IHgxPSIwJSIgeTE9IjUwJSIgeTI9IjUwJSIgaWQ9ImEiPjxzdG9wIHN0b3AtY29sb3I9IiNGRkRFMDAiIG9mZnNldD0iMCUiLz48c3RvcCBzdG9wLWNvbG9yPSIjRkZCMDAwIiBvZmZzZXQ9IjEwMCUiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cGF0aCBkPSJNNTQuMDE3IDguMDcybC0yLjU1MiAxLjU2MWMtLjQ3Ni4yOTEtLjc1OC4wOTYtLjYyNi0uNDU1bC42OTYtMi45MDktMi4yNzMtMS45NDRjLS40MjQtLjM2Mi0uMzI1LS42OTEuMjM5LS43MzZsMi45ODItLjIzN0w1My42My41ODljLjIxMy0uNTE1LjU1Ny0uNTIzLjc3NCAwbDEuMTQ2IDIuNzYzIDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2bC0yLjI3NCAxLjk0NC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6bS00OCAwTDMuNDY1IDkuNjMzYy0uNDc2LjI5MS0uNzU4LjA5Ni0uNjI2LS40NTVsLjY5Ni0yLjkwOS0yLjI3My0xLjk0NGMtLjQyNC0uMzYyLS4zMjUtLjY5MS4yMzktLjczNmwyLjk4Mi0uMjM3TDUuNjMuNTg5Yy4yMTMtLjUxNS41NTctLjUyMy43NzQgMEw3LjU1IDMuMzUybDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2TDguNDk3IDYuMjY5bC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6bTEyIDBsLTIuNTUyIDEuNTYxYy0uNDc2LjI5MS0uNzU4LjA5Ni0uNjI2LS40NTVsLjY5Ni0yLjkwOS0yLjI3My0xLjk0NGMtLjQyNC0uMzYyLS4zMjUtLjY5MS4yMzktLjczNmwyLjk4Mi0uMjM3TDE3LjYzLjU4OWMuMjEzLS41MTUuNTU3LS41MjMuNzc0IDBsMS4xNDYgMi43NjMgMi45ODIuMjM3Yy41NTYuMDQ0LjY3LjM2OC4yNC43MzZsLTIuMjc0IDEuOTQ0LjY5NiAyLjkxYy4xMy41NDItLjE0My43NS0uNjI2LjQ1NGwtMi41NTEtMS41NnptMTIgMGwtMi41NTIgMS41NjFjLS40NzYuMjkxLS43NTguMDk2LS42MjYtLjQ1NWwuNjk2LTIuOTA5LTIuMjczLTEuOTQ0Yy0uNDI0LS4zNjItLjMyNS0uNjkxLjIzOS0uNzM2bDIuOTgyLS4yMzdMMjkuNjMuNTg5Yy4yMTMtLjUxNS41NTctLjUyMy43NzQgMGwxLjE0NiAyLjc2MyAyLjk4Mi4yMzdjLjU1Ni4wNDQuNjcuMzY4LjI0LjczNmwtMi4yNzQgMS45NDQuNjk2IDIuOTFjLjEzLjU0Mi0uMTQzLjc1LS42MjYuNDU0bC0yLjU1MS0xLjU2em0xMiAwbC0yLjU1MiAxLjU2MWMtLjQ3Ni4yOTEtLjc1OC4wOTYtLjYyNi0uNDU1bC42OTYtMi45MDktMi4yNzMtMS45NDRjLS40MjQtLjM2Mi0uMzI1LS42OTEuMjM5LS43MzZsMi45ODItLjIzN0w0MS42My41ODljLjIxMy0uNTE1LjU1Ny0uNTIzLjc3NCAwbDEuMTQ2IDIuNzYzIDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2bC0yLjI3NCAxLjk0NC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6IiBmaWxsPSJ1cmwoI2EpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=" alt="">' +
+                        '<span>' + data[i].assess + '</span>' +
+                        '</div>' +
+                        '<div class="price">' +
+                        '<span class="separator">' + data[i].position + '</span>' +
+                        '</div>' +
+                        '<div class="coupon-wrap">' + jian +
+                        '</div>' +
+                        '<div class="distance-wrap">' + data[i].distance + '</div>' +
+                        '</div>' +
+                        '</div>' + businessHtml_2 + '</a>';
+                    $("#list-box").append(html);
+                }
+
+                if (data.length == 0) {
+                    var windowHeight = $(window).height() - 123;
+                    $("#list-box").html('<div id="noData" style="height:' + windowHeight + 'px"><img src="../common/images/null.png"><p>暂没有活动内容</p></div>');
+                }
+
+                $("img").lazyload({
+                    placeholder: "../common/img/defual.jpg",
+                    threshold: 200
+                });
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+</script>
+
+<div class="filter-box">
+    <ul class="clearfix">
+        <li class="active" id="active">综合排序</li>
+        <li id="volume">销量最高</li>
+        <li id="sort">距离最近</li>
+    </ul>
+</div>
+<div class="list-box" id="list-box">
+
+
+</div>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+     <title>Ecnt.html</title>
+	 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+     <script language='javascript'>
+      var Ecntdss= new Ext.data.GroupingStore({
+		  proxy: new Ext.data.HttpProxy({url:'/GXDS/ecntInfor'}),
+		  reader: new Ext.data.JsonReader({totalProperty:'totalCount', root:'list',id:'itm',
+		  successProperty :'@success',
+		  fields:['YEAR'
+		  		  ,'Jjxz'
+		  		  ,'BigValue'
+		  		  ,'ValSet1'
+		  		  ,'ValSet2'
+		  		  ,'ValSet3'
+		  		  ,'ValSet4'
+		  		  ,'ValSet5'
+		  		  ,'objValue'
+		  		  ,'itm']
+		   })
+      });
+      var Ecntcbsm=new Ext.grid.CheckboxSelectionModel();
+      var Ecntcm=new Ext.grid.ColumnModel(
+				 [new Ext.grid.RowNumberer(),
+			     Ecntcbsm,
+			     {header: '年份', dataIndex: 'YEAR', width:20, sortable: true},
+				 {header: '登记注册类型', dataIndex: 'Jjxz', width:20, sortable: true},
+				 {header: '必保初始值', dataIndex: 'BigValue', width:10, sortable: true},
+				 {header: '必保调整1', dataIndex: 'ValSet1', width:30, sortable: true},
+				 {header: '必保调整2', dataIndex: 'ValSet2', width:20, sortable: true},
+				 {header: '必保调整3', dataIndex: 'ValSet3', width:20, sortable: true},
+				 {header: '必保调整4', dataIndex: 'ValSet4', width:20, sortable: true},
+				 {header: '必保调整5', dataIndex: 'ValSet5', width:20, sortable: true},
+				 {header: '奋斗目标', dataIndex:  'objValue ', width:20, sortable: true},
+				 {header: '经济代码', dataIndex:  'itm ', width:20, sortable: true,hidden:true}
+      ]);
+ Ext.onReady(function(){
+	var Ecntgrid =new Ext.grid.GridPanel({
+			   ds:Ecntdss,
+			   cm:Ecntcm,
+			   sm:Ecntcbsm,
+			   width: document.body.clientWidth,
+       		   height: document.body.clientHeight,
+			   bbar: new Ext.PagingToolbar({
+					pageSize: 15,
+					store: dss,
+					displayInfo: true,
+					displayMsg: '显示第 {0} 条到 {1} 条记录，一共 {2} 条',
+					emptyMsg:'没有记录'
+				}),
+			   tbar:[{
+				text:'增加',
+				iconCls:'add-fredd',
+				handler:function(){
+						if(jihua){
+							jihua.destroy();
+						}
+						
+						var bibao = new Ext.form.TextField({
+								fieldLabel: '必保初始值',
+								allowBlank: false,
+								width:200,
+								name:'bignValue'
+						});
+						
+						var bibao1 = new Ext.form.TextField({
+								fieldLabel: '必保调整1',
+								width:200,
+								name:'valueSet1'
+						});
+						
+						var bibao2 = new Ext.form.TextField({
+								fieldLabel: '必保调整2',
+								width:200,
+								name:'valueSet2'
+						});
+						
+						var bibao3 = new Ext.form.TextField({
+								fieldLabel: '必保调整3',
+								width:200,
+								name:'valueSet3'
+						});
+						
+						var bibao4 = new Ext.form.TextField({
+								fieldLabel: '必保调整4',
+								width:200,
+								name:'valueSet4'
+						});
+						
+						var bibao5 = new Ext.form.TextField({
+								fieldLabel: '必保调整5',
+								width:200,
+								name:'valueSet5'
+						});
+						
+						var fendou = new Ext.form.TextField({
+								fieldLabel: '奋斗目标值',
+								width:200,
+								name:'objValue'
+						});
+
+						var grade = [['2008'],['2009'],['2010'],['2011'],['2012'],['2013'],['2014'],['2015'],['2016'],['2017'],['2018'],['2019'],['2020'],['2021'],['2022']];
+						var gradeStore = new Ext.data.SimpleStore({fields:['text'],data:grade});
+
+						var year = new Ext.form.ComboBox({
+						 		store: gradeStore,
+								fieldLabel: '年份选择',
+								displayField: "text",
+							    name:'year',
+								mode: 'local',
+								emptyText:'选择...',
+								forceSelection: true,
+								allowBlank:true,
+								editable: false,
+								width:73,
+								triggerAction:'all'
+						});
+
+						var jihua = new Ext.Window({
+					        title: '分税种计划',
+					        width: 340,
+					        height:320,
+					        layout: 'fit',
+					        resizable:false,
+					        bodyStyle:'padding:5px;',
+					        closable :false,
+					        buttonAlign:'center',
+					        items: addEcntForm =new Ext.form.FormPanel({
+								    baseCls: 'x-plain',
+							        labelWidth: 70,
+							        defaultType: 'textfield',
+							       	items:[dates,city,bibao,bibao1,bibao2,bibao3,bibao4,bibao5,fendou]
+							}),
+					        modal: true,
+					        buttons: [{
+					            text: '确定',
+					            handler:function(){
+							 	if(addEcntForm.getForm().isValid()){
+						       		addEcntForm.getForm().submit({
+						       			waitMsg : '处理中，请稍等...',
+										waitTitle:'请稍等',
+						       		    url:'/GXDS/addEcntInfor',
+						        		success :function(form,action)
+						        		{
+						        			 addEcntForm.getForm().reset();
+						        			 Ecntdss.reload();
+						        		},
+						        		failure :function(form,action)
+						        		{
+						        			Ext.Msg.alert('温馨提示','保存成功');
+						        		}	
+						        	});
+						        	     jihua.hide();
+						        		
+							       	} else {
+							       		Ext.MessageBox.alert("错误","不允许为空!" );
+							       	}
+					         	 }
+					        },{
+					            text: '取消',
+					            handler: function(){
+					            addEcntForm.getForm().reset();
+					           	jihua.destroy();
+					          }
+					        }]
+					});
+						jihua.show();
+				}}]
+			});
+
+	  Ecntdss.load({params:{start:0,limit:10}});
+	  Ecntgrid.render('grid-Ecntgrid');
+    });
+    </script>  
+  </head>
+  
+  <body>
+  </body>
+</html>

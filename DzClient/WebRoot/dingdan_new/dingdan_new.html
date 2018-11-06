@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>新订单</title>
+<link rel="stylesheet" href="./dingdan_new.css">
+<link rel="stylesheet" type="text/css" href="./chuang.css" />
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/jquery.timers.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+
+</head>
+
+<body>
+<script type="text/javascript">	
+		$(document).ready(function(){ 
+			init();
+			$('body').everyTime('30s','ds1',function (){
+	             init();
+	        });
+		});
+		
+		function init(){
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.NEWORDER,
+				 	data: { 
+            			companyId:getCookie('cid')
+        			},
+					success:function(data) {
+					 	var menusLine = '';//外卖
+					 	var money = 0;//总金额
+					 	$("#dd-li").html('');
+					 	var msMoney = 0;
+						for(var i = 0;i < data.length;i++){
+							switch(data[i].type){
+							case '1'://外卖
+								 var children=data[i].children;
+								 for(var y=0;y < children.length;y++){
+								 	menusLine +='<div class="lb">'+
+									   '<p>'+children[y].name+'</p>'+
+									   '<p>x'+children[y].number+'</p>'+
+									   '<p>￥'+children[y].subtotal+'元</p>'+
+								       '</div>';
+								       money+=children[y].subtotal;
+								 }
+								var packing_fee=data[i].packing_fee;
+								var pack='';
+								if(packing_fee>0){
+									pack= '<div class="lb">'+
+										   '<p>包装费</p>'+
+										   '<p style="float:right;">￥'+packing_fee+'元</p>'+
+									       '</div>';
+								}
+								var activity=data[i].activity;
+								var acti='';
+								if(activity>0){
+									acti= '<div class="lb">'+
+										    '<p style="width:35px;text-align:center;height:20px;background-color:#f55b23;color:#ffffff;margin-right:90px;">优惠</p>'+
+										    '<p class="red" style="float:right;">-¥'+activity+'</p>'+
+									       '</div>';
+								}
+												 var remarkes=data[i].remarks;
+													var reshtml='';
+													if(remarkes.length>0){
+														reshtml='<div class="bz">'+
+													       	    '<p>备注</p>'+
+															    '<textarea disabled="disabled"  rows="5" cols="">'+remarkes+'</textarea>'+			 
+															    '</div>';
+													}
+								 html = '<ul>'+
+										   '<li>'+
+										   '<div class="n-li">'+
+										   '<p>'+data[i].userName+'</p>'+
+										   '<span>'+data[i].userPhone+'</span>'+  
+									       '</div>'+
+									       '<div class="n-li n-li1">'+
+										   '<p class="p-hs">下单时间：'+data[i].time+'</p>'+
+										   '<span class="p-hs dd-r">'+data[i].distance+'<img class="dd-img" src="../common/img/dd.jpg" ></span>'+
+									       '</div>'+
+									       '<div class="n-li n-li1">'+
+										   '<p class="p-hs">配送地址：</p>'+
+										   '<span class="p-hs">'+data[i].userAddress+data[i].room+'</span>'+  
+									       '</div>'+
+										   '</li>'+
+										   '<li>'+menusLine+
+								           '</li>'+
+								           '<li>'+pack+
+									        '<div class="lb">'+
+										   '<p>总计</p>'+
+										   '<p style="float:right;">￥'+(data[i].total_new)+'元</p>'+
+									       '</div>'+acti+
+									       '<div class="lb">'+
+										   '<p>实&nbsp;收</p>'+
+										   '<p class="red" style="float:right;">￥'+data[i].pay+'元</p>'+
+									       '</div>'+reshtml+
+											'<div class="btn-zu">'+
+											'<a onclick="status('+data[i].orderId+',\'companyTaking\');">外卖接单</a>'+
+											'<a onclick="status('+data[i].orderId+',\'unknow\');">无法接单</a>'+
+											'</div>'+
+										'</div>'+
+									'</li>'+
+								'</ul>';
+							
+								$("#dd-li").append(html);
+							break;
+							case '2'://美食
+									 var children=data[i].children;
+									 var msLine = '';//美食
+									 if(children != null){
+										  for(var y=0;y < children.length;y++){
+										 	msLine += '<div class="lb">'+
+											   '<p>'+children[y].name+'</p>'+
+											   '<p>x'+children[y].number+'</p>'+
+											   '<p>￥'+children[y].subtotal+'元</p>'+
+										       '</div>';
+										      // msLine += children[y].subtotal;
+										 }
+									 }
+									
+									var meals = '';
+									if(data[i].meals ==null){
+										meals = '0';
+									}else{
+										meals = data[i].meals;
+									}
+									
+									var seat = '大厅';
+									if(data[i].seat == 'bx'){
+										seat = '包厢';
+									}
+									var position_fee=data[i].position_fee;
+									var posit='';
+									if(position_fee>0){
+									posit= '<div class="lb">'+
+										   '<p>茶位费</p><p>￥'+data[i].fee+'元</p>'+
+										   '<p style="float:right;">￥'+position_fee+'元</p>'+
+									       '</div>';
+									}
+									var activity=data[i].activity;
+									var acti='';
+									if(activity>0){
+										acti= '<div class="lb">'+
+											    '<p style="width:35px;text-align:center;height:20px;background-color:#f55b23;color:#ffffff;margin-right:90px;">优惠</p>'+
+											    '<p class="red" style="float:right;">-¥'+activity+'</p>'+
+										       '</div>';
+									}
+									 var remarkes=data[i].remarks;
+													var reshtml='';
+													if(remarkes.length > 0){
+														reshtml='<div class="bz">'+
+													       	    '<p>备注</p>'+
+															    '<textarea disabled="disabled"  rows="5" cols="">'+remarkes+'</textarea>'+			 
+															    '</div>';
+													}
+									html ='';
+									var reachTime=data[i].reachTime;
+									if(msLine == ''){
+										html = '<ul><li><div class="n-li"><p>预订人：'+data[i].userName+'</p><a href=\'tel:\''+data[i].userPhone+'><span>'+data[i].userPhone+'</span></a></div><div class="n-li n-li1">'+
+										'<p class="p-hs">预约时间：'+reachTime+'</p><span class="p-hs dd-r"></span></div></li><li>'+
+										'<p class="p-hs">座位号：'+seat+' - '+data[i].tableNo+' 桌 '+
+												'</br>'+
+												'<p class="p-hs">用餐人数(餐具)'+meals+'人</p><p></p><div class="lb">'+
+											'<p>押金:</p><p class="lb-g"></p><p class="red" style="float:right;">￥'+data[i].pay+'元</p></div>'+reshtml+
+											'<div class="btn-zu">'+
+											'<a onclick="view('+data[i].orderId+',\'companyTaking\',\''+reachTime+'\');">美食接单</a>'+
+										'<a onclick="status('+data[i].orderId+',\'unknow\');">无法接单</a></div></div></li></ul>';
+									}else{
+										html =  '<ul><li><div class="n-li"><p>预订人：</p><span>'+data[i].userPhone+'</span></div><div class="n-li n-li1">'+
+										'<p class="p-hs">预约时间：'+reachTime+'</p><span class="p-hs dd-r"></span></div>'+
+										'<div class="n-li n-li1">'+
+										'<p class="p-hs">座位号：'+seat+' - '+data[i].tableNo+' 桌 </p><span class="p-hs dd-r"></span></div>'+
+										'</li><li>'+
+											msLine+
+												'<div class="lb">'+
+												'</li><li><div class="lb">'+
+												'<p>用餐人数(餐具)</p><p>'+meals+'人</p><p></p></div>'+posit+
+												'<div class="lb">'+
+											'<p>总金额</p><p class="lb-g"></p><p class="red" style="float:right;">￥'+data[i].total_new+'元</p>'+
+											'</div>'+acti+
+											'<div class="lb"><p>实收</p><p class="lb-g"></p><p class="red" style="float:right;">￥'+data[i].pay+'元</p></div>'+reshtml+
+											'<div class="btn-zu">'+
+											'<a onclick="view('+data[i].orderId+',\'companyTaking\',\''+reachTime+'\');">美食接单</a>'+
+										'<a onclick="status('+data[i].orderId+',\'unknow\');">无法接单</a></div></div></li></ul>';
+									}
+									
+									$("#dd-li").append(html);
+							break;
+							}
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+		}
+		
+	function view(orderId,parstatus,reachTime){
+	        $.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.BOOKTIMEBACKVIEW,
+				 	data: { 
+            			orderId:orderId
+        			},
+					success:function(data) {
+						 var totalCount=data.totalCount;
+						if(totalCount>0){
+							var list = data.list;
+							var html='';
+							var n=list.length;
+							$('#dTime').html('当前客人预订时间:'+reachTime);
+							for(var i = 0;i < list.length;i++){
+								html=html+'<p>'+list[i].time+'</p>';
+								$("#time").html("已有客人预订时间:"+html);
+							}
+							$("#tips-box").html('<p>重要提示:当前桌已有'+n+'人预定,还接受预定吗？</p>');
+							$("#footer-box").html('<span onclick="javascript:status('+orderId+',\''+parstatus+'\');">确认接单</span>');
+							$("#foot-ul").hide();
+							$("#mask").show();
+						}else{
+							$("#mask").hide();
+							$("#foot-ul").show();
+							status(orderId, parstatus);
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});		
+}	
+		
+function cancel(){
+		$("#foot-ul").css("display", "block");
+		  $("#mask").css("display", "none");
+		
+	}		
+function status(orderId,status){
+			$("#mask").css("display", "none");
+			$("#foot-ul").css("display", "block");
+
+			$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RECEIPT,
+				 	data: { 
+            			orderId : orderId,
+            			status : status
+        			},
+					success:function(data) {
+						$.ajax({
+							type:'POST',
+							url: BASE_URL + LOGIN_ACTION.JOB_SAVE,
+						 	data: { 
+			          			orderId:orderId
+			           		},
+							success:function(data) {
+								if(data.success){
+									valLink("alert",data.message);
+									if(status=="companyTaking"){
+										window.location.href='../dingdan_list/dingdan_list.html';
+									}else{
+										window.location.href='../dingdan_list/dingdan_list_cancel.html';
+									}
+									
+								}
+							},
+							error:function(error) {
+								console.log(error);
+							}
+						});
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+		}
+		
+		</script>
+			<div class="mask" id="mask" style="display:none;z-index:9999;" >
+			<div class="container">
+				<div class="info" id="info">
+					
+				</div>
+				<div class="tel-box" id="tel-box">
+					<p class="title" id="dTime"></p><div class="input-box" id="time"></div>
+				</div>
+				<div class="tips-box" id="tips-box" style="color:red;">
+						
+				</div>
+
+				<div class="footer-box clearfix" id="footer-box">
+			
+				</div>
+				<span onclick="cancel();">
+				<img class="close-btn" src="../common/img/close.png" alt="">
+				</span>
+			</div>
+		</div>
+			<div class="head">
+				<ul class="dd-ul">
+					<li class="active">
+						<a href="../dingdan_new/dingdan_new.html">
+							<img src="../common/img/dd1.png" >
+							<p>新订单</p>
+						</a>
+					</li>
+					<li>
+						<a href="../dingdan_yc/dingdan_yc.html">
+							<img src="../common/img/dd2.png" >
+							<p>异常配送</p>
+						</a>
+					</li>
+					<!--<li>
+						<a href="../dingdan_cd/dingdan_cd.html">
+							<img src="../common/img/dd3.png" >
+							<p>催单</p>
+						</a>
+					</li>-->
+					<li>
+						<a href="../dingdan_tk/dingdan_tk.html">
+							<img src="../common/img/dd4.png" >
+							<p>退款</p>
+						</a>
+					</li>
+				</ul>
+		</div>
+    <div class="wrap top70" >
+        <div class="dd">
+            <div class="dd-li" id="dd-li">
+			</div>
+        </div>
+    </div>
+				<ul class="foot-ul" id="foot-ul">
+			<li>
+				<a href="../dingdan_list/dingdan_list.html">
+					<img src="../common/img/f1.png" >
+					待处理
+				</a>
+			</li>
+			<li class="active">
+				<a href="javascript:void(0);">
+					<img src="../common/img/f2.png" >
+					订单管理
+				</a>
+			</li>
+			<li>
+				<a href="../admin_index/admin_index.html">
+					<img src="../common/img/f3.png" >
+					我的
+				</a>
+			</li>
+		</ul>
+</body>
+
+</html>

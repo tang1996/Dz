@@ -1,0 +1,225 @@
+*{
+	margin: 0;
+	padding: 0
+}
+
+li {
+	list-style: none
+}
+
+input {
+	border: none
+}
+
+.f-left {
+	float: left
+}
+
+.f-right {
+	float: right
+}
+
+body {
+	background-color: #fff
+}
+
+.clearfix {
+	zoom: 1;
+	clear: both;
+	display: block;
+	content: " ";
+}
+
+.clearfix::after {
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: " ";
+	clear: both;
+	height: 0
+}
+
+.box {
+	padding-top: 17px;
+	margin-bottom: 50px
+}
+
+.type-meat {
+	width: 26%;
+	max-height: 500px;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	font-size: 13px;
+	color: #666;
+	background-color: #f7f7f7;
+	position: fixed;
+}
+
+.type-meat li {
+	line-height: 51px;
+	text-indent: 1em;
+}
+.type-meat a{
+	display: block;
+	width: 100%
+}
+
+.type-meat li.active {
+	font-size: 16px;
+	color: #ff7300;
+	font-weight: bold;
+	background-color: #fff;
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+.meat-detail {
+	width: 74%;
+	min-height: 700px;
+	overflow-y: auto;
+	float:right;
+	-webkit-overflow-scrolling: touch
+}
+
+.meat-detail li {
+	position: relative;
+	padding: 0 15px 15px 5px
+}
+
+.meat-detail .food-img {
+	width: 75px;
+	height: 75px;
+	margin-right: 10px
+}
+
+.meat-detail .food-img img {
+	max-width: 100%;
+	height: 100px;
+	border-radius: 4px
+}
+
+.meat-detail .food-info {
+	font-size: 12px;
+	overflow: hidden
+}
+
+.meat-detail .food-info .title {
+	font-size: 16px;
+	color: #333;
+	margin-bottom: 2px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap
+}
+
+.meat-detail .food-info .info {
+	color: #999;
+	margin-bottom: 5px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap
+}
+
+.meat-detail .food-info .sale-number {
+	color: #666
+}
+
+.meat-detail .food-info .label-box {
+	display: flex;
+	margin-top: 6px;
+	margin-bottom: 5px
+}
+
+.meat-detail .food-info .label-box span {
+	padding: 1px;
+	color: #ff7300;
+	border: 1px solid #ff7300
+}
+
+.meat-detail .food-info .price {
+	font-size: 16px;
+	color: #f55b23
+}
+
+.meat-detail .food-info .btn-box {
+	position: absolute;
+	right: 15px;
+	bottom: 30px
+}
+
+.meat-detail .food-info .btn-box .btn {
+	display: inline-block;
+	width: 26px;
+	height: 25px;
+	vertical-align: middle
+}
+
+.meat-detail .food-info .btn-box .reduce {
+	display: inline-block;
+	width: 26px;
+	height: 25px;
+	vertical-align: middle
+}
+
+.meat-detail .food-info .btn-box .num {
+	display: inline-block;
+	margin: 0 6px;
+	font-size: 16px;
+	color: #666;
+	vertical-align: middle
+}
+
+.footer-box {
+	position: fixed;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: 49px;
+	line-height: 49px;
+	color: #fff;
+	background-color: #666
+}
+
+.footer-box .cart-info,.footer-box .checkout-btn {
+	display: inline-block
+}
+
+.footer-box .cart-info {
+	width: 70%;
+	text-indent: 20%
+}
+
+.footer-box .checkout-btn {
+	float: right;
+	width: 28.5%;
+	font-size: 18px;
+	text-align: center;
+}
+
+.footer-box .cart {
+	position: absolute;
+	bottom: 16px;
+	left: 12px;
+	width: 50px;
+	height: 50px;
+	text-align: center;
+	border-radius: 100%;
+	background-color: #ff7300
+}
+
+.footer-box .cart img {
+	vertical-align: middle
+}
+
+.footer-box .cart span {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 17px;
+	height: 17px;
+	line-height: 17px;
+	background-color: #f55b23;
+	border-radius: 50%;
+	font-size: 8px;
+}

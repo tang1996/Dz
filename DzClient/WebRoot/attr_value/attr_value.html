@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>商品属性值</title>
+<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+<link rel="stylesheet" href="./attr_value.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+
+<body>
+<script type="text/javascript">		
+			$(document).ready(function(){ 
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.NATUREFIND,
+				 	data: { 
+            			attributeId:1
+        			},
+					success:function(data) {
+						 var list = data.list;
+						 var html='';
+					for(var i = 0;i < list.length;i++){
+							html='<li>'+
+								 '<p>'+list[i].content+'</p>'+
+								 '<button type="button">删除</button>'+
+								 '</li>';		
+						$("#attr").append(html);
+					 }	
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+		});
+		
+		</script>
+    <div class="wrap">
+        <ul class="attr" id="attr">
+			
+		</ul>
+    </div>
+</body>
+
+</html>

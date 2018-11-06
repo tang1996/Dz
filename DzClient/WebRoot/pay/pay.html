@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>支付</title>
+    <style type="text/css">
+    	a {text-decoration: none;display: block;}
+    	p {color:#aeaeae}
+    	div{font-size:18px}
+		.footer{display:block;position:fixed;height:50px;filter:alpha(opacity:90); opacity:0.9;width:100%;z-index:3;bottom:0px;color:#f03c03;background:#FF7E00;line-height:35px;font-size:15px;}
+		.footer .left{float:left;margin:5px 10px;}
+		.footer .right{float:right; }
+		.footer .right .disable{background:#818181;font-size:16px}
+		.footer .xhlbtn{font-size:20px;display:block;text-align:center;line-height:50px;padding:0 15px;color:#fff;}
+    </style>
+        <link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+    <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../common/js/common.js"></script>
+	<script type="text/javascript">
+		var clock=new clock(); 
+		var outNo;
+		var timer; 
+		window.onload=function(){ 
+   			 timer=setInterval("clock.move()",1000); 
+    	} 
+    	
+		function clock(){ 
+		  
+		    this.s=900; 
+		    this.move=function(){ 
+		        
+		        document.getElementById("timer").innerHTML=exchange(this.s); 
+		        
+		        this.s=this.s-1; 
+		       
+		        if(this.s<0){ 
+		            alert("时间到"); 
+		            clearTimeout(timer); 
+		            } 
+		        } 
+		} 
+		
+		function exchange(time){ 
+		    
+		    this.m=Math.floor(time/60); 
+		   
+		    this.s=(time%60); 
+		    this.text=this.m+"分"+this.s+"秒"; 
+		   
+		    return this.text; 
+		} 
+		
+							$.ajax( {
+								type : 'POST',
+								url : BASE_URL + LOGIN_ACTION.GET_PAY,
+								data : {
+									token: GetQueryString("token"),
+									orderId: GetQueryString("orderId")
+								},
+								success:function(data) {
+									$("#btnselect").html("确认支付: ￥"+data.pay);
+									$("#price").html("¥"+data.pay);
+									$("#order").html(data.companyName+"-"+data.orderNo);
+									outNo = data.orderNo
+								},
+								error:function(error) {
+									console.log(error);
+								}
+							});
+							function select(str) {
+								if(str === 'wx'){
+									$("#"+str).attr("src", "../common/img/select.png");
+									$("#zfb").attr("src", "../common/img/defualt.png");
+								}
+								if(str === 'zfb'){
+									$("#"+str).attr("src", "../common/img/select.png");
+									$("#wx").attr("src", "../common/img/defualt.png");
+								}
+							}
+							
+								$(function(){
+									$("#btnselect").click(function(){
+										$('#loading').show();
+						   				valLink('mspay',outNo);		
+					   				})
+								});
+</script>
+</head>
+<body>
+<br/>
+	<center><p id="timer"></p></center>
+	<center><h1 id="price">0</h1></center>
+	<center><p id="order"></p></center><br/><br/>
+	<div style="margin-left: 14px;">
+		<span onclick="select('wx');"><img src="../common/img/wx_pay.png" style="vertical-align:middle;" width="25px" height="25px">&nbsp;&nbsp;<span>微信支付</span><img  id="wx" style="vertical-align:middle;float: right;margin-top: 4px;margin-right: 20px;"  width="25px" height="25px" src="../common/img/select.png" ></span>
+		<br/><br/>
+	</div>
+	  <div class="footer">  
+	<!-- <a id="btnselect" class="xhlbtn disable" href="go:pay">0</a> -->
+	<a id="btnselect" class="xhlbtn disable">0</a>
+	</div>
+		<div id="loading" style="display:none;width:100%;position: absolute;top: 0px;height:100%;z-index: 100000;background-color: #000;opacity: 0.5;">
+    <span style="text-align: center;color: #fff;left: 30%;top: 50%;position: absolute;">加载微信中..请稍等</span>
+    </div>
+</body>
+</html>

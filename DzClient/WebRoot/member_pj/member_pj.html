@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>用户评价</title>
+<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+<link rel="stylesheet" href="./member_pj.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+<script type="text/javascript" src="../common/js/jquery.lazyload.min.js"></script>
+</head>
+
+<body>
+
+	<script type="text/javascript">
+	
+		$(document).ready(function() {
+			onload();
+			$('#cha').click(function() {
+	
+				yi();
+	
+				$("#pjcha").css("display", "block");
+				$("#weicha").css("display", "none");
+				$("#quan").css("display", "none");
+			});
+			$('#wei').click(function() {
+				$("#cha").attr("style", "");
+				$("#wei").attr("style", "color:#ff7e00");
+				$("#quangbu").attr("style", "");
+	
+				$("#weicha").css("display", "block");
+				$("#pjcha").css("display", "none");
+				$("#quan").css("display", "none");
+	
+			});
+			$('#quangbu').click(function() {
+	
+				quan();
+				$("#quan").css("display", "block");
+				$("#pjcha").css("display", "none");
+				$("#weicha").css("display", "none");
+			});
+		});
+	
+	
+		function onload() {
+			$("img").lazyload({
+				placeholder : "../common/img/defual.png",
+				threshold : 200
+			});
+			$.ajax({
+				type : 'POST',
+				url : BASE_URL + LOGIN_ACTION.COMPANYVIEW,
+				data : {
+					customId : getCookie('cid'),//22,
+					isReply : 0
+				},
+				success : function(data) {
+					var list = data.list;
+					$("#weicha").html('');
+					for (var i = 0; i < list.length; i++) {
+						var html = '';
+						var img = '';
+	
+						var taste = list[i].taste;
+						var lineType = '';
+						if (taste > 0 && taste < 1) {
+							lineType = '<img src="../common/img/null.png" alt="">';
+						} else if (taste == 1) {
+							lineType = '<img src="../common/img/favourable.png" alt="">';
+						} else if (taste > 1 && taste < 2) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+						} else if (taste == 2) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+						} else if (taste > 2 && taste < 3) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+						} else if (taste == 3) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+						} else if (taste > 3 && taste < 4) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+						} else if (taste == 4) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+						} else if (taste > 4 && taste < 5) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+						} else if (taste == 5) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+	
+						}
+						if (typeof (list[i].images0) != 'undefined') {
+	
+							img = img + '<img src="' + list[i].images0 + '" >'
+						}
+						if (typeof (list[i].images1) != 'undefined') {
+							img = img + '<img src="' + list[i].images1 + '" >'
+						}
+						if (typeof (list[i].images2) != 'undefined') {
+							img = img + '<img src="' + list[i].images2 + '" >'
+						}
+						if (typeof (list[i].images3) != 'undefined') {
+							img = img + '<img src="' + list[i].images3 + '" >'
+						}
+						if (typeof (list[i].images4) != 'undefined') {
+							img = img + '<img src="' + list[i].images4 + '" >'
+						}
+	
+						html = '<li>' +
+							'<div class="left">' +
+							'<img class="tx" src="' + list[i].logo + '" alt="">' +
+							'</div>' +
+							'<div class="right">' +
+							'<div class="list">' +
+							'<div class="list-l">' +
+							'<h3>' + list[i].companyName + '</h3>' +
+							'<p>评分：' + lineType +
+							'</p>' +
+							'</div>' +
+							'<span class="time">' + list[i].createTime + '</span>' +
+							'</div>' +
+							'<div class="list">' +
+							'<p class="list-p">' +
+							'<span>' + list[i].nickName + '：</span>' + list[i].content +
+							'</p>' +
+							'<div class="list-img">' + img +
+							'</div>' +
+							'</div>' +
+							'<div class="list">' +
+							'<a class="btn-hf" href="../reply/reply.html?id=' + list[i].id + '">回复</a>' +
+							'</div>' +
+							'</div>' +
+							'</li>';
+						$("#weicha").append(html);
+					}
+				},
+				error : function(error) {
+					console.log(error);
+				}
+			});
+	
+		}
+	
+		function yi() {
+			$("#cha").attr("style", "color:#ff7e00");
+			$("#wei").attr("style", "");
+			$("#quangbu").attr("style", "");
+	
+			$("img").lazyload({
+				placeholder : "../common/img/defual.png",
+				threshold : 200
+			});
+	
+			$.ajax({
+				type : 'POST',
+				url : BASE_URL + LOGIN_ACTION.COMPANYVIEW,
+				data : {
+					customId : getCookie('cid'),//22,
+					isReply : 1
+				},
+				success : function(data) {
+					var list = data.list;
+					$("#pjcha").html('');
+					for (var i = 0; i < list.length; i++) {
+						var html = '';
+						var img = '';
+	
+						var taste = list[i].taste;
+						var lineType = '';
+						if (taste > 0 && taste < 1) {
+							lineType = '<img src="../common/img/null.png" alt="">';
+						} else if (taste == 1) {
+							lineType = '<img src="../common/img/favourable.png" alt="">';
+						} else if (taste > 1 && taste < 2) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+						} else if (taste == 2) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+						} else if (taste > 2 && taste < 3) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+						} else if (taste == 3) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+						} else if (taste > 3 && taste < 4) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+						} else if (taste == 4) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+						} else if (taste > 4 && taste < 5) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+						} else if (taste == 5) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+	
+						}
+						if (typeof (list[i].images0) != 'undefined') {
+	
+							img = img + '<img src="' + list[i].images0 + '" >'
+						}
+						if (typeof (list[i].images1) != 'undefined') {
+							img = img + '<img src="' + list[i].images1 + '" >'
+						}
+						if (typeof (list[i].images2) != 'undefined') {
+							img = img + '<img src="' + list[i].images2 + '" >'
+						}
+						if (typeof (list[i].images3) != 'undefined') {
+							img = img + '<img src="' + list[i].images3 + '" >'
+						}
+						if (typeof (list[i].images4) != 'undefined') {
+							img = img + '<img src="' + list[i].images4 + '" >'
+						}
+	
+						html = '<li>' +
+							'<div class="left">' +
+							'<img class="tx" src="' + list[i].logo + '" alt="">' +
+							'</div>' +
+							'<div class="right">' +
+							'<div class="list">' +
+							'<div class="list-l">' +
+							'<h3>' + list[i].companyName + '</h3>' +
+							'<p>评分：' + lineType +
+							'</p>' +
+							'</div>' +
+							'<span class="time">' + list[i].createTime + '</span>' +
+							'</div>' +
+							'<div class="list">' +
+							'<p class="list-p">' +
+							'<span>' + list[i].nickName + '：</span>' + list[i].content +
+							'</p>' +
+							'<div class="list-img">' + img +
+							'</div>' +
+							'</div>' +
+							'<div class="list">' +
+							'</div>' +
+							'<span>商家回复：</span>' + list[i].reply +
+							'</div>' +
+							'</li>';
+						$("#pjcha").append(html);
+	
+					}
+	
+	
+				},
+				error : function(error) {
+					console.log(error);
+				}
+			});
+		}
+	
+		function quan() {
+			$("#cha").attr("style", "");
+			$("#wei").attr("style", "");
+			$("#quangbu").attr("style", "color:#ff7e00");
+	
+			$("img").lazyload({
+				placeholder : "../common/img/defual.png",
+				threshold : 200
+			});
+	
+			$.ajax({
+				type : 'POST',
+				url : BASE_URL + LOGIN_ACTION.COMPANYVIEW,
+				data : {
+					customId : getCookie('cid')//22
+	
+				},
+				success : function(data) {
+					var list = data.list;
+					$("#quan").html('');
+					for (var i = 0; i < list.length; i++) {
+						var html = '';
+						var img = '';
+	
+						var taste = list[i].taste;
+						var lineType = '';
+						if (taste > 0 && taste < 1) {
+							lineType = '<img src="../common/img/null.png" alt="">';
+						} else if (taste == 1) {
+							lineType = '<img src="../common/img/favourable.png" alt="">';
+						} else if (taste > 1 && taste < 2) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+						} else if (taste == 2) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+						} else if (taste > 2 && taste < 3) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+						} else if (taste == 3) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+						} else if (taste > 3 && taste < 4) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+						} else if (taste == 4) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+						} else if (taste > 4 && taste < 5) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+						} else if (taste == 5) {
+							lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+	
+						}
+						if (typeof (list[i].images0) != 'undefined') {
+	
+							img = img + '<img src="' + list[i].images0 + '" >'
+						}
+						if (typeof (list[i].images1) != 'undefined') {
+							img = img + '<img src="' + list[i].images1 + '" >'
+						}
+						if (typeof (list[i].images2) != 'undefined') {
+							img = img + '<img src="' + list[i].images2 + '" >'
+						}
+						if (typeof (list[i].images3) != 'undefined') {
+							img = img + '<img src="' + list[i].images3 + '" >'
+						}
+						if (typeof (list[i].images4) != 'undefined') {
+							img = img + '<img src="' + list[i].images4 + '" >'
+						}
+	
+						var isReply = '';
+						var reply = '';
+						if (list[i].reply != null) {
+							isReply = '<span>商家回复：</span>' + list[i].reply;
+	
+						}
+	
+						if (list[i].reply == null) {
+							reply = '<a class="btn-hf" href="../reply/reply.html?id=' + list[i].id + '">回复</a>';
+						}
+	
+						html = '<li>' +
+							'<div class="left">' +
+							'<img class="tx" src="' + list[i].logo + '" alt="">' +
+							'</div>' +
+							'<div class="right">' +
+							'<div class="list">' +
+							'<div class="list-l">' +
+							'<h3>' + list[i].companyName + '</h3>' +
+							'<p>评分：' + lineType +
+							'</p>' +
+							'</div>' +
+							'<span class="time">' + list[i].createTime + '</span>' +
+							'</div>' +
+							'<div class="list">' +
+							'<p class="list-p">' +
+							'<span>' + list[i].nickName + '：</span>' + list[i].content +
+							'</p>' +
+							'<div class="list-img">' + img +
+							'</div>' +
+							'</div>' +
+							'<div class="list">' +
+							reply +
+							'</div>' +
+							isReply +
+							'</div>' +
+							'</li>';
+						$("#quan").append(html);
+	
+					}
+				},
+				error : function(error) {
+					console.log(error);
+				}
+			});
+		}
+	</script>
+	<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="../admin_index/admin_index.html"><img
+				class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>用户评价</p>
+		</div>
+	</div>
+	<div class="wrap">
+		<div class="pj-top">
+			<p id="wei" style="color:#ff7e00">未回复</p>
+			<p id="cha">已回复</p>
+			<p id="quangbu">全部</p>
+		</div>
+		<ul class="pj" id="pjcha" style="display:none;">
+		</ul>
+		<ul class="pj" id="weicha" style="display:block;">
+		</ul>
+		<ul class="pj" id="quan" style="display:none;">
+		</ul>
+	</div>
+</body>
+
+</html>

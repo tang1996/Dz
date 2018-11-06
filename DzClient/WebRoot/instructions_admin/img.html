@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=0.1">
+    <title>Title</title>
+    <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+<script>
+    $(document).ready(function () {
+        var windowHeight = $(window).height();
+        $("body").height(windowHeight);
+        $(".bg").click(function () {
+            window.history.back(-1);
+        })
+        var imgSrc = GetQueryString("img");
+        $("img").attr("src",imgSrc)
+    })
+</script>
+	<body style="margin: 0px;padding:0;background: #0e0e0e;display: flex;align-items: center;min-height: 100%;position: relative">
+	    <div class="bg" style="height: 100%;width: 100%;position: absolute;"></div>
+	    <div style="flex: 1;text-align: center;position: relative;z-index: 100">
+	        <img style="width: 98%">
+	    </div>
+	</body>
+</html>

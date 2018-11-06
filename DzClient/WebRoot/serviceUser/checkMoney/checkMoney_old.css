@@ -1,0 +1,223 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+.clear:after{
+    display: block;
+    clear: both;
+    content: " ";
+}
+#body{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+.left{
+    width: 30%;
+    height: 100%;
+    float: left;
+    overflow: hidden;
+}
+.left_head{
+    height: 60px;
+    width: 100%;
+    background: #373c40;
+    position: relative;
+}
+.left_head .return{
+    width: 42px;
+    height: 42px;
+    display: block;
+    position: absolute;
+    background: url("../../common/img/beak.png")  no-repeat center;
+    background-size: 100%;
+    top: 9px;
+    left: 12px;
+
+}
+.left_head_p{
+    text-align: center;
+    color: #ffffff;
+    line-height:60px;
+    font-size: 14px;
+}
+.left_head_p span{
+    margin: 0 10px;
+}
+.left_body{
+    border-right: 1px solid #CCCCCC;
+}
+
+#menus{
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+    color: #333333;
+}
+#menus tr{
+    height: 45px;
+}
+
+#menus tr:last-of-type td{
+    border-top: 1px solid #cccccc;
+    border-bottom: 1px solid #CCCCCC;
+}
+#menus tr:nth-of-type(odd){
+	background: #eee;
+}
+
+.right{
+    width: 70%;
+    height: 100%;
+    float: right;
+
+}
+.right_div{
+    padding: 30px;
+    position: relative;
+}
+.right_title{
+    line-height: 45px;
+    font-size: 6px;
+    line-height: 45px;
+    font-size: 14px;
+}
+.right_title i{
+    display: inline-block;
+    width: 16px;
+    height: 14px;
+    background: url("sdfaxnz-1.png") no-repeat center;
+    background-size: 100%;
+    vertical-align: -3px;
+    margin: 0 5px;
+}
+
+.prive_div{
+    line-height: 50px;
+    font-size: 14px;
+    color: #999999;
+}
+.prive_div span{
+    margin: 0 5px;
+}
+.people{
+    font-size: 16px;
+    color: #333333;
+    width: 250px;
+    line-height: 60px;
+
+}
+.people_num{
+    float: right;
+    border: 1px solid #CCCCCC;
+    font-size: 20px;
+    text-align: center;
+}
+.people_num span{
+    display: inline-block;
+    width: 50px;
+    float: left;
+    background: #EEEEEE;
+    cursor: pointer;
+}
+.people_num input{
+    font-size: 20px;
+    text-align: center;
+    width: 80px;
+    height: 60px;
+    float: left;
+    border: none;
+    border-right: 1px solid #CCCCCC;
+    border-left: 1px solid #CCCCCC;
+}
+
+.input_div{
+    font-size: 16px;
+    line-height: 60px;
+    color: #333333;
+}
+.input_div input{
+    height: 45px;
+    width: 220px;
+    margin: 0 20px;
+    border: none;
+    outline: none;
+    background: #EEEEEE;
+    padding: 0 5px;
+}
+.result{
+    font-size: 25px;
+    line-height: 50px;
+    color: #f40;
+}
+.button{
+    position: absolute;
+    right: 30px;
+    bottom: 30px;
+    background: #f45a22;
+    color: #ffffff;
+    font-size: 18px;
+    width: 200px;
+    line-height: 50px;
+    border-radius: 10px;
+    text-align: center;
+}
+.message{
+    color: #f00;
+    font-size: 12px;
+    font-style: normal;
+    margin-left: 15px;
+}
+
+
+.keyboard_div{
+	margin: 0 30px;
+	width: 303px;
+	border-top: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	background: #f5f5f5;
+}
+.keyboard_div span{
+	display:inline-block;
+	border-bottom: 1px solid #ccc;
+	border-right: 1px solid #ccc;
+	width: 100px;
+	float: left;
+	height: 65px;
+	line-height: 65px;
+	font-weight: bold;
+	text-align: center;
+	color: #333;
+	
+}
+
+.background_onlyOKPrompt{
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.2);
+	z-index: 100;
+}
+.onlyOKPrompt{
+	background: #fff;
+	width: 350px;
+	height: 200px;
+	margin: 180px auto;
+	border-radius:10px;
+	overflow: hidden;
+	box-shadow: 3px 3px 35px rgba(0,0,0,0.5);
+}
+.onlyOKPrompt_content{
+	line-height: 150px;
+	text-align: center;
+	font-size: 20px;
+}
+.onlyOKPrompt_button{
+	text-align: center;
+	line-height: 50px;
+}
+.onlyOKPrompt_button p{
+	text-align: center;
+	background: #ff7e00;
+	color: #fff;
+}

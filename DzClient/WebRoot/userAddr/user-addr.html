@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>我的地址</title>
+    	<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+  		  <link rel="stylesheet" href="./user-addr.css">
+    	<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+<body>
+	<script type="text/javascript">
+			var UplinkData =[{
+	        value:'广东省',
+	        childs:[{
+	                value:'深圳市',
+	                childs:[{
+	                        value:'福田区'
+	                    },{
+	                        value:'龙华区'
+	                    },{
+	                        value:'南山区'
+	                    },{
+	                        value:'盐田区'
+	                    },{
+	                        value:'罗湖区'
+	                    },{
+	                        value:'宝安区'
+	                    },{
+	                        value:'龙岗区'
+	                    },{
+	                        value:'坪山区'
+	                    },{
+	                        value:'光明区'
+	                    },{
+	                        value:'大鹏新区'
+	                    }
+	                ]
+	            }]
+	         }];
+		
+	
+			$(document).ready(function(){ 
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RECEIVEADDRESS,
+				 	data: { 
+            			token: GetQueryString("token")
+        			},
+					success:function(data) {
+						var list = data.list;
+						
+						for(var i = 0;i < list.length;i++){
+							var id = parseInt(list[i].id);
+							var lineType = '';
+							
+							if(list[i].is_default==true){
+								lineType = '<p class="addr-detail" style="color:#FF7E00;">默认地址</p>';
+							}else {
+								lineType = '<p class="addr-detail" style="color:#FF7E00;"></p>';
+							}
+							
+							
+							/*
+							if(list[i].is_default==true){
+								lineType='<p class="addr-detail"  style="color:#FF7E00;">默认地址</p><div onclick="del('+ list[i].id +')" class="updateh"><span class="updatec">删除</span></div>';
+							}else{
+								lineType='<p class="addr-detail"></p><div onclick="del('+ list[i].id +')" class="update"><span class="updatec">删除</span></div>';
+							}
+							var html = '<a href="javascript:selectAddr('+ list[i].id +')"><li>'+ 
+	               					   '<p class="name-tel"><span>'+list[i].name+'</span><span>'+list[i].phone+'</span></p>'+
+	               					   '<p class="addr-detail">'+list[i].address+list[i].room+'</p></a>'+lineType+
+	            					   '</li>';
+							*/
+							
+							var html = '<li><a class="selectAddr" href="javascript:selectAddr('+ list[i].id +')"><p class="name-tel"><span>'+list[i].name+'</span><span>'+list[i].phone+'</span></p>'+
+							           '<p class="addr-detail">'+list[i].address+list[i].room+'</p>' + lineType + '</a>' +
+							           '<div class="bottom_div del"><p style="background:#ff7e00;" onclick="update('+ list[i].id +')">编辑</p><p onclick="del('+ list[i].id +')">删除</p></div></li>';
+							$("#address").append(html);
+						}
+					},
+					error:function(error) {
+						alert("错误")
+						console.log(error);
+					}
+				});
+		});
+		//valLink(\'updateAddr\',\' '+list[i].id+'\')
+		function update(id){
+			valLink('updateAddr',id);
+		}
+		
+		function selectAddr(id){
+			$.ajax({
+				type:'POST',
+				url: BASE_URL + LOGIN_ACTION.UPDATE_ADDR,
+			 	data: { 
+			 		token: GetQueryString("token"),
+           			id: id
+       			},
+				success:function(data) {
+					valLink("alert", data.message);
+					link('selectAddr');
+				},
+				error:function(error) {
+					console.log(error);
+				}
+			});
+		}
+		
+		function edit(id){
+			window.location.href = BASE_URL + "/DzClient/userAddr/update-addr.html?id="+id+"&token="+GetQueryString("token");
+		}
+		
+		function del(id){
+			$.ajax({
+				type:'POST',
+				url: BASE_URL + LOGIN_ACTION.DEL_ADDRESS,
+			 	data: { 
+			 		token: GetQueryString("token"),
+           			id: id
+       			},
+				success:function(data) {
+					valLink("alert", data.message);
+					window.location.reload();
+				},
+				error:function(error) {
+					console.log(error);
+				}
+			});
+		}
+		
+		</script>
+  <a href="#" onclick="link('newAddr')">
+  	<div class="add-addr">
+        <img src="../common/img/plus-icon.png" alt="">
+        添加收货地址
+    </div></a>
+    <div class="addr-list">
+        <p class="header">常用地址</p>
+        <ul id="address">
+        </ul>
+    </div>
+</body>
+</html>

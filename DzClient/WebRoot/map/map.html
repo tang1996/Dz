@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="./map.css" rel="stylesheet"  >
+    <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=F7Ctdtxfr7RoxiP0TW7nR7nGBzQnxU2o"></script>
+	<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../common/js/common.js"></script>
+	<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+    <title>地图定点</title>
+</head>
+
+<body>
+
+	<div id="fixed_div"></div>
+    <div id="bigDiv">
+        <div class="top">
+            <div class="search"><input class="bigDivSearch" type="text" placeholder="查找小区/大厦/学校等" readonly="readonly"/></div>
+        </div>
+
+        <div class="map_div">
+            <p class="location"><i></i></p>
+            <div id="allmap"></div>
+            <p class="origin"><i></i></p>
+        </div>
+
+        <div class="address_div">
+            <div class="addressList_div">
+                <p class="iconLocation"></p>
+                <ul id="addressList">
+
+                </ul>
+                <p></p>
+            </div>
+            <div class="noFind">没找到？在地图上拖动试试</div>
+        </div>
+
+    </div>
+
+    <div id="search_Div" style="display: none">
+        <div class="search_Top">
+            <a class="hidden"></a>
+            <input type="text" placeholder="请输入小区/大厦/学校等进行搜索" class="searchContent" oninput="inputChange()"/>
+            <span>搜索</span>
+        </div>
+
+        <div class="result_Div">
+            <ul id="resultList">
+                
+            </ul>
+        </div>
+    </div>
+
+</body>
+</html>
+<script>
+
+	var bodyHeight = window.screen.height;
+	//var windowHeight = $(window).height();
+	var windowHeight = getCookie("bodyHeight");
+	var topHeight = $(".top").height();
+	$(".map_div").height(windowHeight-topHeight-300);
+	//alert($(".map_div").height())
+	//alert(windowHeight+","+topHeight);
+	$(document).ready(function () {
+		
+		
+    })
+	
+	
+	
+	
+    
+    var map = new BMap.Map("allmap");
+    var point = new BMap.Point(GetQueryString("lng"),GetQueryString("lat"));
+    var oPoint; //原点
+
+    map.centerAndZoom(point,19);
+    var myIcon = new BMap.Icon("location.png", new BMap.Size(20,62));
+
+    $(".origin").click(function () {
+        map.panTo(oPoint);//地图中心移动
+        point = oPoint;
+        displayPOI()
+    })
+
+    $("#cur_city_name").css("background","#f00");
+
+
+    var geolocation = new BMap.Geolocation();
+    geolocation.getCurrentPosition(function(r){
+
+        if(this.getStatus() == BMAP_STATUS_SUCCESS){
+            //point = r.point;
+            oPoint = point;//原点
+            var mk = new BMap.Marker(point,{icon:myIcon});  // 创建标注
+            //map.addOverlay(mk);//标出所在地
+            map.panTo(point);//地图中心移动
+            displayPOI();
+            POI();
+            $(".ui_city_change").attr("id","aaaaa")
+
+            $(".ui_city_change").click(function () {
+                if($(this).hasClass("ui_city_change_click")){
+                    $(".location").hide();
+                }else{
+                    $(".location").show();
+                }
+            })
+        }else {
+            alert('failed'+this.getStatus());
+        }
+    },{enableHighAccuracy: true})
+
+    map.addEventListener("dragend",function () {
+        //alert("拖动结束")
+        console.log(map.getViewport(map.setViewport()).center);
+        point = map.getViewport(map.setViewport()).center;
+        displayPOI();
+    })
+
+
+    var mOption = {
+        poiRadius : 1000,           //半径为1000米内的POI,默认100米
+        numPois : 50                //列举出50个POI,默认10个
+    }
+
+    var myGeo = new BMap.Geocoder();        //创建地址解析实例
+    function displayPOI(){
+        //map.addOverlay(new BMap.Circle(mPoint,500));        //添加一个圆形覆盖物
+        
+        document.getElementById("addressList").innerHTML = "";
+        myGeo.getLocation(point,
+            function mCallback(rs){
+                var allPois = rs.surroundingPois;       //获取全部POI（该点半径为100米内有6个POI点）
+                if(allPois.length != 0){
+                    $(".noFind").hide();
+                    $(".addressList_div").show();
+                    for(i=0;i<allPois.length;++i){
+                        document.getElementById("addressList").innerHTML += "<li onclick='change(\""+allPois[i].title+"\","+allPois[i].point.lat+","+allPois[i].point.lng+")'><p>" + allPois[i].title + "</p><p>" + allPois[i].address + "</p></li>";
+                    }
+                }else {
+                    $(".addressList_div").hide();
+                    $(".noFind").show();
+                }
+            },mOption
+        );
+    }
+
+	function change(address, lat, lng){
+	  orderCheck('saveMap', address, lat, lng);
+	}
+
+    function POI(){
+        document.getElementById("resultList").innerHTML = "";
+        myGeo.getLocation(oPoint,
+            function mCallback(rs){
+                var allPois = rs.surroundingPois;       //获取全部POI（该点半径为100米内有6个POI点）
+                if(allPois.length != 0){
+                    $(".noFind").hide();
+                    $(".addressList_div").show();
+                    for(i=0;i<allPois.length;++i){
+                        var distance = "";
+                        if(map.getDistance(oPoint,allPois[i].point) >= 1000){
+                            distance = (map.getDistance(oPoint,allPois[i].point) * 0.001).toFixed(1) + "千米";
+                        }else {
+                            distance = map.getDistance(oPoint,allPois[i].point).toFixed(1) + "米";
+                        }
+                        console.log(map.getDistance(oPoint,allPois[i].point) + " , " + distance);
+
+                        document.getElementById("resultList").innerHTML += "<li onclick='change(\""+allPois[i].title+"\","+allPois[i].point.lat+","+allPois[i].point.lng+")'><p class='title'>" + allPois[i].title + "<span>" + distance + "</span></p><p class='address'>" + allPois[i].address + "</p></li>";
+                    }
+                }else {
+                    $(".addressList_div").hide();
+                    $(".noFind").show();
+                }
+            },mOption
+        );
+    }
+
+
+
+    var size = new BMap.Size(5, 5);
+    map.addControl(new BMap.CityListControl({
+        anchor: BMAP_ANCHOR_TOP_LEFT,
+        offset: size,
+        onChangeAfter:function(){
+            point = map.getViewport(map.setViewport()).center;
+            displayPOI();
+            map.centerAndZoom(point,19);
+            $(".location").show();
+        }
+    }));
+
+
+    var options = {
+        onSearchComplete: function(results){
+            // 判断状态是否正确
+            if (local.getStatus() == BMAP_STATUS_SUCCESS){
+                var s = [];
+                for (var i = 0; i < results.getCurrentNumPois(); i ++){
+                    var distance = "";
+                    if(map.getDistance(oPoint,results.getPoi(i).point) >= 1000){
+                        distance = (map.getDistance(oPoint,results.getPoi(i).point) * 0.001).toFixed(1) + "千米";
+                    }else {
+                        distance = map.getDistance(oPoint,results.getPoi(i).point).toFixed(1) + "米";
+                    }
+
+                    s.push("<li><a onclick='change(\""+results.getPoi(i).title+"\","+results.getPoi(i).point.lat+","+results.getPoi(i).point.lng+")'><p class='title'>" + results.getPoi(i).title + "<span>" + distance + "</span></p><p class='address'>" + results.getPoi(i).address + "</p></a></li>");
+                }
+                document.getElementById("resultList").innerHTML = s.join("");
+            }
+        }
+    };
+    
+    var local = new BMap.LocalSearch(map, options);
+
+    function inputChange(){
+        if($(".searchContent").val().length == 0){
+            POI();
+        }else {
+            local.search($(".searchContent").val());
+        }
+    };
+
+    $(".bigDivSearch").click(function () {
+        $("#search_Div").show();
+        $("#bigDiv").hide();
+        POI();
+    })
+    $(".hidden").click(function () {
+        $("#search_Div").hide();
+        $("#bigDiv").show();
+        $(".searchContent").val("");
+    })
+
+	
+    
+
+</script>

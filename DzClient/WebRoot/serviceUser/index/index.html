@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>开台</title>
+
+<link href="./index.css" type="text/css" rel="stylesheet">
+<link href="./Popup.css" type="text/css" rel="stylesheet">
+<!-- 增加浏览器小图标 -->
+<link rel="icon" href="../../common/images/logo.jpg" type="image/x-icon">
+<!-- 加入弹窗的样式文件 -->
+<script type="text/javascript" src="../../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../../common/js/jquery.lazyload.min.js"></script>
+<script type="text/javascript" src="../../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../../common/js/common.js"></script>
+<script type="text/javascript" src="../../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../../common/js/jquery.timers.js"></script>
+
+<!--  <script type="text/javascript" src="js/serviceUser.js">-->
+</head>
+
+<body>
+	<script type="text/javascript">
+		companyId = getCookie("companyId");
+		token = getCookie("token");
+		var seat = 'dt';
+		var status = 0;
+	
+		$(document).ready(function() {
+			loginCookie();
+			getTable(seat, status);
+			$.cookie("token", token);
+			$(".box_div").hide();
+			$(".choose_div p").click(function() { //点击切换事件
+				$(this).addClass("action");
+				$(this).siblings().removeClass("action");
+				if ($(this).hasClass("hall_p")) { //大厅
+					seat = 'dt';
+					getTable(seat, status);
+					$(".hall_div").show();
+					$(".box_div").hide();
+				} else if ($(this).hasClass("box_p")) { //包厢
+					seat = 'bx';
+					getTable(seat, status);
+					$(".box_div").show();
+					$(".hall_div").hide();
+				}
+			})
+	
+			$(".hall_choose li").click(function() { //点击切换事件
+				if ($(this).hasClass("nullTable")) { //空桌	
+					status = 0;
+					getTable(seat, status);
+				} else if ($(this).hasClass("reserve")) { //预定
+					status = 1;
+					getTable(seat, status);
+				} else if ($(this).hasClass("eatting")) { //就餐中
+					status = 2;
+					getTable(seat, status);
+				}
+				$(this).addClass("click");
+				$(this).siblings().removeClass("click");
+			})
+	
+			$(".box_choose li").click(function() { //点击切换事件
+				
+				if ($(this).hasClass("nullTable")) { //空桌	
+					status = 0;
+					getTable(seat, status);
+				} else if ($(this).hasClass("reserve")) { //预定
+					status = 1;
+					getTable(seat, status);
+				} else if ($(this).hasClass("eatting")) { //就餐中
+					status = 2;
+					getTable(seat, status);
+				}
+				$(this).addClass("click");
+				$(this).siblings().removeClass("click");
+			})
+	
+			//LJH
+			$(".left_ul li").click(function() {
+				$(this).siblings().removeClass("click");
+				$(this).addClass("click");
+				if ($(this).hasClass("Index")) {
+					gotoIndex();
+				} else if ($(this).hasClass("Inventory")) {
+					gotoInventory();
+				} else if ($(this).hasClass("NetReserve")) {
+					gotoNetReserve();
+				} else if ($(this).hasClass("MSreceive")) {
+					gotoMSreceive();
+				}
+			})
+	
+	
+			init();
+			 $('body').everyTime('10s','ds1',function (){
+	             init();
+	        }); 
+		});
+	
+		function playSound(soundSrl){
+		   var strAudio = '<audio id="audioPlay" src='+soundSrl+' hidden="true">';
+		   if ( $( "body" ).find( "audio" ).length <= 0 )
+			 $( "body" ).append(strAudio );
+		   var audio = document.getElementById( "audioPlay" );
+		   audio.play();			 
+		}
+		function init(){
+			$.ajax({
+				type : 'POST',
+				url : BASE_URL + LOGIN_ACTION.NEWORDER,
+				data : {
+					companyId : companyId
+				},
+				success : function(data) {
+					$(".deliciousFoodOrderNum").html(data.length);
+					if(data.length>0){
+						var soundSrl="../../common/new.mp3";
+						playSound(soundSrl);
+					}
+				},
+				error : function(error) {
+					console.log(error);
+				}
+			});
+		}
+	
+		function getTable(seat, status) { //桌子加载
+			$.ajax({
+				type : 'POST',
+				url : BASE_URL + LOGIN_ACTION.RESERVEVIEWTABLE,
+				data : {
+					companyId : companyId,
+					status : status,
+					seat : seat
+				},
+				success : function(data) {
+					var list = data.list;
+					var html = '';
+					if (seat == 'dt') {
+						$(".hall_choose li").eq(status).addClass("click");
+						$(".hall_choose li").eq(status).siblings().removeClass("click");
+						if (status == 0) {
+							for (var i = 0; i < list.length; i++) {
+	
+								var meals = list[i].meals;
+								meals = meals.replace(/\s+/g, "");
+	
+								html = html + '<li onclick = load(\'' + list[i].tableNo + '\',\'' + list[i].name + '\',\'' + meals + '\',\'' + seat + '\',\'' + list[i].reserveid + '\') class="oneTable oneNullTable">' +
+									'<div class="icon_div"><i></i></div>' +
+									'<div class="peopleNum">' + list[i].meals + '人</div>' +
+									'<div class="tableName" name=' + list[i].reserveid + '>' + list[i].name + '</div>' +
+									'</li>';
+							}
+						} else if (status == 1) {
+							for (var i = 0; i < list.length; i++) {
+	
+								var meals = list[i].meals;
+								meals = meals.replace(/\s+/g, "");
+	
+								html = html + '<li class="oneTable oneReserve" onclick = view(\'' + list[i].tableNo + '\',\'' + list[i].name + '\',\'' + meals + '\',\'' + seat + '\',\'' + list[i].reserveid + '\')>' +
+									'<div class="icon_div"><i></i></div>' +
+									'<div class="peopleNum">' + list[i].meals + '人</div>' +
+									'<div class="tableName">' + list[i].name + '</div>' +
+									'</li>';
+							}
+						} else if (status == 2) {
+							for (var i = 0; i < list.length; i++) {
+	
+								var meals = list[i].meals;
+								meals = meals.replace(/\s+/g, "");
+	
+								html = html + '<li class="oneTable oneEatting" onclick=addFood(\'' + list[i].id + '\',\'' + list[i].tableNo + '\',\'' + meals + '\',\'dt\',\'\')>' +
+									'<div class="icon_div"><i></i></div>' +
+									'<div class="peopleNum">' + list[i].meals + '人</div>' +
+									'<div class="tableName">' + list[i].name + '</div>' +
+									'</li>';
+							}
+						}
+						$("#no_hall").html(html);
+					} else {
+						$(".box_choose li").eq(status).addClass("click");
+						$(".box_choose li").eq(status).siblings().removeClass("click");
+						if (status == 0) {
+							for (var i = 0; i < list.length; i++) {
+	
+								var meals = list[i].meals;
+								meals = meals.replace(/\s+/g, "");
+	
+								html = html + '<li onclick = load(\'' + list[i].tableNo + '\',\'' + list[i].name + '\',\'' + meals + '\',\'' + seat + '\',\'' + list[i].reserveid + '\') class="oneTable oneNullTable">' +
+									'<div class="icon_div"><i></i></div>' +
+									'<div class="peopleNum">' + list[i].meals + '人</div>' +
+									'<div class="tableName">' + list[i].tableNo + '号桌(' + list[i].name + ')' + '</div>' +
+									'</li>';
+							}
+						} else if (status == 1) {
+							for (var i = 0; i < list.length; i++) {
+	
+								var meals = list[i].meals;
+								meals = meals.replace(/\s+/g, "");
+	
+								html = html + '<li class="oneTable oneReserve" onclick = view(\'' + list[i].tableNo + '\',\'' + list[i].name + '\',\'' + meals + '\',\'' + seat + '\',\'' + list[i].reserveid + '\')>' +
+									'<div class="icon_div"><i></i></div>' +
+									'<div class="peopleNum">' + list[i].meals + '人</div>' +
+									'<div class="tableName">' + list[i].tableNo + '号桌(' + list[i].name + ')' + '</div>' +
+									'</li>';
+							}
+						} else if (status == 2) {
+							for (var i = 0; i < list.length; i++) {
+	
+								var meals = list[i].meals;
+								meals = meals.replace(/\s+/g, "");
+	
+								html = html + '<li class="oneTable oneEatting" onclick=addFood(\'' + list[i].id + '\',\'' + list[i].tableNo + '\',\'' + meals + '\',\'bx\',\'' + list[i].name + '\')>' +
+									'<div class="icon_div"><i></i></div>' +
+									'<div class="peopleNum">' + list[i].meals + '人</div>' +
+									'<div class="tableName">' + list[i].tableNo + '号桌(' + list[i].name + ')' + '</div>' +
+									'</li>';
+							}
+						}
+						$("#no_box").html(html);
+					}
+				},
+				error : function(error) {
+					console.log(error);
+				}
+			});
+		}
+	
+		function addFood(reservId, tableNo, meals, seat, tablename) { //就餐桌点击开启加菜
+	
+			$.ajax({
+				type : 'POST',
+				url : BASE_URL + LOGIN_ACTION.RELATING_INSIDEDOING,
+				data : {
+					companyId : companyId, //未改
+					reservId : reservId //未改
+				},
+				success : function(data) {
+					if (data.success) {
+						insideOrderId = data.insideOrderId;
+						window.location.href = '../addMenus/addMenus.html?companyId=' + companyId + '&tableNo=' + tableNo + '&meals=' + data.doingMeals + '&insideorderId=' + insideOrderId + '&seat=' + seat + '&mealFee=' + data.mealFee + '&tablename=' + escape(tablename);
+					} else {
+						alert('开台失败,请检查网络.');
+					}
+				},
+				error : function(error) {
+					console.log(error);
+				}
+			});
+		}
+	
+		function view(tableno, tablename, meals, seat, reserveid) {
+			$.ajax({
+				type : 'POST',
+				url : BASE_URL + LOGIN_ACTION.BOOKTIMEVIEW,
+				data : {
+					reservesId : reserveid
+				},
+				success : function(data) {
+					if (data.success) {
+						//alert((data.list)[0].reserveTime);
+						var list = data.list;
+						var htmlTime = "";
+						for (var i = 0; i < list.length; i++) {
+							htmlTime = htmlTime + "<li>" + list[i].reserveTime + "</li>"; //2018-10-15 @Tyy
+						}
+						$(".important_hear b").html(data.totalCount);
+						$(".otherList").html(htmlTime);
+						$(".backgroundImportant").show();
+						$(".importantButton .ok").html("确认开桌");
+						$(".importantButton .ok").click(function() {
+							load(tableno, tablename, meals, seat, reserveid);
+							$(".backgroundImportant").hide();
+						})
+						$(".importantButton .cancel").click(function() { //ynw
+							$(".backgroundImportant").hide();
+						})
+					}
+				},
+				error : function(error) {
+					console.log(error);
+				}
+			});
+		}
+	
+		function load(tableno, tablename, meals, seat, reserveid) {
+			$("#OpenTableBox").attr("style", "display: block;");
+			if (seat == 'dt') {
+				$("#TableNo").text(tableno + "号桌(大厅)");
+				$("#TableName").text("大厅");
+	
+			} else if (seat == 'bx') {
+				$("#TableNo").text(tableno + "号桌(包厢)");
+				$("#TableName").text(tablename);
+			}
+			$("#sub").click(function() {
+				var meals = $("#InputMeals").val();
+				openTable(tableno, meals, reserveid, seat, tablename);
+			});
+		}
+	
+		function peopleNum(num) { //按钮
+			var InputMealsLength = $("#InputMeals").val().length;
+			if(InputMealsLength >= 2){
+				onlyOKPrompt("只能输入两位数","2");
+				return;
+			}
+			document.getElementById("InputMeals").value += num;
+		}
+		function onInputF(){
+			var InputMealsLength = $("#InputMeals").val().length;
+			if(InputMealsLength >= 2){
+				onlyOKPrompt("只能输入两位数","2");
+				return;
+			}
+		}
+	
+		function reduceNum() { //删除数字
+			var num = document.getElementById("InputMeals").value;
+			document.getElementById("InputMeals").value = num.substr(0, num.length - 1);
+		}
+	
+		function openTable(tableno, meals, reserveid, seat, tablename) { //按确定键开桌
+			var doingMeals = $("#InputMeals").val(); //就餐人数
+			if (doingMeals == 0 || doingMeals == '') {
+				onlyOKPrompt("请输入就餐人数", "2");
+				return;
+			}
+			$.ajax({
+				type : 'POST',
+				url : BASE_URL + LOGIN_ACTION.INSIDEORDER_OPENTABLE,
+				data : {
+					companyId : companyId, //未改
+					token : token, //未改
+					reserveId : reserveid, //餐桌ID
+					meals : doingMeals //就餐人数
+				},
+				success : function(data) {
+					if (data.success) {
+						window.location.href = '../addMenus/addMenus.html?companyId=' + companyId + '&tableNo=' + tableno + '&meals=' + data.doingMeals + '&insideorderId=' + data.insideOrderId + '&seat=' + seat + '&mealFee=' + data.mealFee + '&tablename=' + escape(tablename);
+					} else {
+						alert('开台失败,请检查网络.');
+					}
+				},
+				error : function(error) {
+					console.log(error);
+				}
+			});
+		}
+	
+		function exit() { //点击退出系统
+	
+			var msg = "确定要退出系统吗？";
+	
+			$(".promptContent").text(msg);
+			$(".backgroundPrompt").show();
+			$("#PromptCancel").click(function() {
+				$(".backgroundPrompt").hide();
+			});
+			$("#PromptOk").click(function() {
+				$(".backgroundPrompt").hide();
+				window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html"; //跳转到登录页面
+			});
+		}
+	
+		function gotoInventory() { //点击沽清
+			window.location.href = BASE_URL + "/DzClient/serviceUser/inventory/inventory.html";
+		}
+	
+		function gotoNetReserve() { //点击网络订单	
+			window.location.href = BASE_URL + "/DzClient/serviceUser/netWorkReservation/netWorkReservation.html?";
+		}
+	
+		function gotoMSreceive() { //点击美食接单
+			//window.location.href = BASE_URL + "/DzClient/serviceUser/computer_order/computer_order.html?companyId="+companyId+"&token="+token;
+			window.location.href = BASE_URL + "/DzClient/serviceUser/computer_order/computer_order.html";
+	
+		}
+	
+		function gotoIndex() { //回到首页
+			if (companyId == null || token == null) {
+				window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";
+			} else {
+				//window.location.href=BASE_URL+"/DzClient/serviceUser/index/index.html?companyId="+companyId+"&token="+token;
+				window.location.href = BASE_URL + "/DzClient/serviceUser/index/index.html";
+			}
+		}
+	
+		function gotoData() { //点击经营数据
+			window.location.href = BASE_URL + "/DzClient/serviceUser/data/data.html";
+		}
+	
+	
+		function isLogin() { //Token失效登录跳转
+			if (companyId == "null" || token == "null" || companyId == '' || token == '' || token == null || companyId == null) {
+				window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";
+			}
+		}
+	
+		function getLoginOfCookie() { //判断用户是否有Cookie信息并检测登录
+			var loginCookie = new String(document.cookie);
+			if (loginCookie.length == 0 || loginCookie.replace(/(^s*)|(s*$)/g, "").length == 0 || loginCookie == null || loginCookie == undefined || loginCookie == '') {
+				alert("请您登录后再进行操作!!!");
+				window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";
+			}
+		}
+	
+		function onlyOKPrompt(msg, status) { //弹出确认框	刷新当前页面
+			$(".onlyOKPrompt_content").text(msg);
+			$(".background_onlyOKPrompt").show();
+			$(".onlyOKPrompt_button p").click(function() { //确认框的确认事件
+				$(".background_onlyOKPrompt").hide();
+				switch (status) {
+				case '0': //跳转到登录页面
+					window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";
+					break
+				case '1': //当前页面刷新
+					window.location.reload();
+					break
+				case '2': //不做反应
+					break
+				}
+			});
+		}
+	</script>
+
+	<div id="body">
+		<div id="left_div">
+			<ul class="left_ul">
+				<li class="click" onclick="gotoIndex()">首页</li>
+				<li onclick="gotoInventory()">沽清</li>
+				<li onclick="gotoNetReserve()">网络订单</li>
+				<li onclick="gotoMSreceive()" style="position: relative">今日网络接单<span
+					class="deliciousFoodOrderNum">0</span></li>
+				<li onclick="gotoData()">经营数据</li>
+			</ul>
+			<div class="exit" onclick="exit()">
+				<i></i>
+			</div>
+		</div>
+
+
+		<div id="right_div">
+			<div class="right">
+				<div class="choose_div clear">
+					<p style="margin-right: 15px;" class="action hall_p">大厅</p>
+					<p class="box_p">包厢</p>
+				</div>
+				<div class="hall_div table_div ">
+					<div class="hall_choose tableType_choose clear">
+						<ul>
+							<li class="nullTable">空桌</li>
+							<li class="reserve">预定</li>
+							<li class="eatting">就餐中</li>
+						</ul>
+					</div>
+
+					<div class="hall clear allTable">
+						<ul id="no_hall">
+
+						</ul>
+
+
+					</div>
+				</div>
+
+				<div class="box_div table_div">
+					<div class="box_choose tableType_choose clear">
+						<ul>
+							<li class="nullTable">空桌</li>
+							<li class="reserve">预定</li>
+							<li class="eatting">就餐中</li>
+						</ul>
+					</div>
+
+					<div class="box clear allTable">
+						<ul id="no_box">
+						</ul>
+					</div>
+
+				</div>
+
+
+				<div class="upAndDown">
+					<p class="up"></p>
+					<p class="down"></p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 弹窗 -->
+	<div class="backgroundPrompt" style="display: none;">
+		<div class="promptBox">
+			<div class="promptContent">提示内容</div>
+			<div class="promptButton">
+				<p class="cancel" id="PromptCancel">取消</p>
+				<p class="ok" id="PromptOk">确认</p>
+			</div>
+		</div>
+	</div>
+
+	<!-- 重要提示 -->
+	<!-- 弹窗 -->
+	<div class="backgroundImportant" style="display: none;">
+		<div class="importantBox">
+			<div class="importantContent">
+				<div class="important_hear">
+					重要提示:当前桌已有<b style="font-size: 22px;">5</b>人预订，还接受预订吗？
+				</div>
+				<div class="other_div">
+					<div class="clear">
+						<!-- <p style="line-height: 50px;">当前客人预订时间:<b style="margin-left: 10px;">2018-9-4 18:00</b></p> -->
+						<p>其他客人预订时间:</p>
+						<ul class="otherList">
+							<li>2018-9-4 17:00</li>
+							<li>2018-9-4 17:00</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+
+			<div class="importantButton">
+				<p class="cancel">取消</p>
+				<p class="ok">确认</p>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- 开台 -->
+	<div class="backgroundOpenTable" id="OpenTableBox"
+		style="display: none;">
+		<div class="openTableBox">
+			<p class="openTableTitle">开台 - 点餐</p>
+			<ul>
+				<li class="clear"><span>台 号：</span>
+					<p id="TableNo"></p></li>
+				<li class="clear"><span>名 称：</span>
+					<p id="TableName"></p></li>
+				<li class="clear"><span>人 数：</span>
+					<p id="TableMeals">
+						<input id="InputMeals" class="peopleNum" type="text"
+							onkeyup="(this.v=function(){this.value=this.value.replace(/[^0-9-]+/,'');}).call(this)"
+							onblur="this.v();" maxlength="2" oninput="onInputF()"/>
+					</p></li>
+			</ul>
+			<div class="num_div clear">
+				<div class="numLeft">
+					<span onclick="peopleNum(7)">7</span> <span onclick="peopleNum(8)">8</span>
+					<span onclick="peopleNum(9)">9</span> <span onclick="peopleNum(4)">4</span>
+					<span onclick="peopleNum(5)">5</span> <span onclick="peopleNum(6)">6</span>
+					<span onclick="peopleNum(1)">1</span> <span onclick="peopleNum(2)">2</span>
+					<span onclick="peopleNum(3)">3</span> <span style="width: 199px"
+						onclick="peopleNum(0)">0</span> <span onclick="reduceNum()">←</span>
+				</div>
+				<div class="numRight">
+					<p class="return" onclick={$("#InputMeals").val('');$("#OpenTableBox").hide();}>返回</p>
+					<p class="okOpenTable" id="sub">确定</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 提示 -->
+	<div class="background_onlyOKPrompt" style="display: none;">
+		<div class="onlyOKPrompt">
+			<div class="onlyOKPrompt_content">提示内容</div>
+			<div class="onlyOKPrompt_button">
+				<p>确认</p>
+			</div>
+		</div>
+	</div>
+
+</body>
+
+<script type="text/javascript">
+	var oneTable_height = $(".oneTable").outerHeight();
+	var oneTable_margin = $(".oneTable").css("margin-bottom");
+	var oneTable = parseFloat(oneTable_height) + parseFloat(oneTable_margin);
+	$(".allTable").height(5 * oneTable);
+
+
+
+
+	var right_div_height = $("#right_div").outerHeight();
+	var right_padding = $(".right").css("padding");
+	var right_padding_F = parseFloat(right_padding);
+	$(".right").height(right_div_height - (right_padding_F * 2));
+
+	var h = 0;
+	var allTable_ul_Height = $(".allTable ul").outerHeight();
+	var allTable_Height = $(".allTable").outerHeight();
+	$(".up").click(function() {
+		if (parseFloat($(".allTable ul").css("top")) < 0) {
+			h++;
+		}
+		$(".allTable ul").css("top", (allTable_Height * h) + 1 + "px");
+	});
+
+	$(".down").click(function() {
+		var differ = parseFloat(allTable_ul_Height) + parseFloat($(".allTable ul").css("top"));
+		if (parseFloat(differ) > parseFloat(allTable_Height)) {
+			h--;
+		}
+		$(".allTable ul").css("top", (allTable_Height * h) + 1 + "px");
+	})
+</script>
+</html>
+

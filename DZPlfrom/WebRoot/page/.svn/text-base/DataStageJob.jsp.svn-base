@@ -1,0 +1,283 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <title></title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <style>
+        .demo-ct .x-panel-btns-ct {
+            border-left: 1px solid #99BBE8;
+            border-bottom: 1px solid #99BBE8;
+            border-right: 1px solid #99BBE8;
+            background: #DFE8F6;
+        }
+    </style>
+  <script type='text/javascript'>
+			Ext.onReady(function() {
+    Ext.QuickTips.init();
+	//setTimeout(function(){ Ext.get('loading').remove(); }, 250 );
+    var number = 0;
+    var job = new Ext.data.Store( {
+        proxy : new Ext.data.HttpProxy( {	
+            url : '/GXDS/selectJob'
+        }),
+        reader : new Ext.data.JsonReader({
+            root : 'list',
+        	totalProperty : 'totalCount',
+            id: 'uuid',
+            successProperty : '@success',
+            fields: ['name','discription','depatment','ywcs','cs1','cs2','status','runTime','type']
+        })
+    });
+    
+	var jobcbsm=new Ext.grid.CheckboxSelectionModel();
+    
+    //格式化数据，如颜色
+    job.Renderers={
+		showCommentTitle:function(value, p, record){//操作
+            return '<a href=# onclick=createTabForReplyFn("'+record.data.id+'","'+record.data.title+'")>'+record.data.title+'</a>';
+		},
+		showCommentOperate:function(value, p, record){//操作
+			//replyCommentFn in (replyComment.js)
+            return '<a href=# onclick=replyCommentFn("'+record.data.id+'","'+record.data.title+'","'+record.data.replyCount+'")>回复</a>';
+		}
+	}
+    
+    var jobcm = new Ext.grid.ColumnModel([
+    	{
+        header : "JOB名称",
+        dataIndex : 'name',
+        width : 10
+    },{
+        header : "JOB描述",
+        sortable: true,
+        dataIndex : 'discription',
+        width : 10
+    },{
+        header : "所属部门",
+        dataIndex : 'depatment',
+        width : 10
+    },{
+        header : "有无参数",
+        dataIndex : 'ywcs',
+        width : 10
+    },{
+        header : "参数1",
+        sortable: true,
+        dataIndex : 'cs1',
+        width : 10,
+        hidden:true
+    },{
+        header : "参数2",
+        sortable: true,
+        dataIndex : 'cs2',
+        width : 10,
+        hidden:true
+    },{
+        header : "JOB状态",
+        sortable: true,
+        dataIndex : 'status',
+        width : 10
+     },{
+        header : "上次运行时间",
+        sortable: true,
+        dataIndex : 'runTime',
+        width : 10
+     },{
+        header : "JOB类型",
+        sortable: true,
+        dataIndex : 'type',
+        width : 10,
+        hidden:true
+    }
+    ]);
+
+    jobcm.defaultSortable = true;
+
+    var  jobgrid = new Ext.grid.GridPanel({
+      	height:document.body.clientHeight-124,
+		width:document.body.clientWidth-193,
+    	layout:"fit",
+        collapsible : false,// 是否可以展开
+        animCollapse : false,// 展开时是否有动画效果
+        store : job,
+        cm : jobcm,
+        renderTo : 'gird',
+        stripeRows:true,//行奇偶颜色
+        loadMask : true,// 载入遮罩动画
+        frame : false,
+        autoShow : true,
+        viewConfig : {
+            forceFit : true
+        },
+        // 添加内陷的工具条
+        listeners: {'cellclick': function(jobgrid,col,row) {
+		    	number = col;
+		   }
+		},
+       tbar:[{
+				text:'开始',
+				iconCls:'add-fredd',
+				handler:function(){
+				 var record = jobgrid.getSelectionModel().getSelected();
+				 if(record.data.type=='2'){
+					 Ext.Ajax.request({         
+			            url:'/GXDS/callDatastageJob',
+	   		           	success:function(response, options){
+	   		           	    job.reload();
+			             },
+			            failure: function(form,action){
+			        	  	Ext.Msg.alert('温馨提示','后台异常');
+			           }
+				 	});
+				 	return;
+				 }
+						
+							if(jobWin){
+									jobWin.destroy();
+								}
+		
+								var startDate = new Ext.form.DateField({
+										 width:200,
+									 	 fieldLabel:'开始日期',
+									     readOnly:true,
+									     showToday:true,
+									     allowBlank: true,
+									     format:'Y-m-d'
+								});
+								
+								var endDate = new Ext.form.DateField({
+										 width:200,
+									 	 fieldLabel:'结束日期',
+									     readOnly:true,
+									     showToday:true,
+									     allowBlank: true,
+									     format:'Y-m-d'
+								});
+								
+							  var jobWin = new Ext.Window({
+							        title: '调度JOB',
+							        width: 420,
+							        height:450,
+							        layout: 'fit',
+							        resizable:false,
+							        bodyStyle:'padding:5px;',
+							        closable :false,
+							        buttonAlign:'center',
+							        items: addJobForm = new Ext.form.FormPanel({
+										    baseCls: 'x-plain',
+									        labelWidth: 140,
+									        defaultType: 'textfield',
+									       	items:[startDate,endDate]
+									}),
+							        modal: true,
+								    buttons: [{
+							            text: '确定',
+							            handler:function(){
+									 	if(addJobForm.getForm().isValid()){
+									 	   if(startDate.getValue()==''){
+									 	   Ext.Msg.alert('温馨提示','开始时间不能为空');
+									 	     return;
+									 	   }
+									 	   if(startDate.getValue()==''){
+									 	     Ext.Msg.alert('温馨提示','结束时间不能为空');
+									 	     return;
+									 	   }
+									 	  
+									 	   var Adate1 = new Array();
+									 	   var Adate2 = new Array();
+									 	   Adate1=startDate.value.split('-');
+									 	   Adate2=endDate.value.split('-');
+									 	   var date1 = new Date(Adate1[0],Adate1[1],Adate1[2]);
+		                                   var date2 = new Date(Adate2[0],Adate2[1],Adate2[2]);
+		                                   var sct = (date2-date1)/(24*60*60*1000);
+		                                   if(sct>10){
+		                                      Ext.Msg.alert('温馨提示','时间跨度不能超过10天');
+		                                      return;
+		                                   }
+		                                    jobgrid.store.getAt(number).set('status','<span style="color: #009900">正在运行</span>');
+		                                  // var record = jobgrid.getSelectionModel().getSelected();
+
+									 	    Ext.Ajax.request({         
+								       		    url:'/GXDS/callDatastageJob',
+								       		    timeout:30000000,
+								       		    params:{jobname:record.data.name,paramStart:record.data.cs1,paramEnd:record.data.cs2,startDate:startDate.value,endDate:endDate.value},
+								        		success :function(form,action)
+								        		{    addJobForm.getForm().reset();
+								        			 job.reload();
+								        		},
+								        		failure :function(form,action)
+								        		{    
+								        		//alert('????');
+			        			                    Ext.Msg.alert('温馨提示','后台异常');
+								        		}
+								        	});
+								        	     jobWin.destroy();
+								        		
+									       	} else {
+									       		Ext.MessageBox.alert("错误","不允许为空!" );
+									       	}
+							         	 }
+							        },{
+							            text: '取消',
+							            handler: function(){
+							            addJobForm.getForm().reset();
+							           		jobWin.destroy();
+							            }
+							        }]
+		       			 })
+			    			jobWin.show();
+					}
+		},{
+			text:'停止',
+			iconCls:'add-fredd',
+			handler:function(){
+			 var record = jobgrid.getSelectionModel().getSelected();
+				Ext.Ajax.request({         
+		            waitMsg : '处理中，请稍等...',
+					waitTitle:'请稍等',
+	       		    url:'/GXDS/stopJob',
+	       		    params:{jobname:record.data.name},
+   		           	success:function(response, options){
+   		           	    job.reload();
+		             },
+		            failure: function(form,action){
+		        	  //	Ext.Msg.alert('温馨提示','后台异常');
+		           }
+			 	});
+			}
+		},{
+			text:'重置',
+			iconCls:'add-fredd',
+			handler:function(){
+			 var record = jobgrid.getSelectionModel().getSelected();
+				Ext.Ajax.request({         
+		            waitMsg : '处理中，请稍等...',
+					waitTitle:'请稍等',
+	       		    url:'/GXDS/resetJob',
+	       		    params:{jobname:record.data.name},
+   		           	success:function(response, options){
+   		           	    job.reload();
+		          		
+		            },
+		            failure: function(form,action){
+		        	    //Ext.Msg.alert('温馨提示','后台异常');
+		           }
+			 	});
+			}
+		}]
+	  					
+    });
+   
+    job.load( { params : { start : 0, limit : 10 } });
+    
+    });
+    
+		
+	   
+</script>
+</head>
+<body>
+	<div id="gird"></div>
+</body>
+</html>

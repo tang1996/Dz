@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>上传图片</title>
+<link rel="stylesheet" href="./upload.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/ajaxfileupload.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+
+
+</head>
+
+<body>
+<script type="text/javascript">
+   
+	function add(){		
+			var img=$('#doc').val();
+			
+			var size = 1024 * 1000 * 1;
+			var files = document.getElementById('doc').files;  
+		    var fileSize = 0;
+		    if(files.length!=0){
+		        fileSize = files[0].size;
+		    }
+		    if(fileSize > size){
+		        valLink("alert","文件不能大于 1MB");
+		        return false;
+		    }
+
+			if(img.length==0){
+				valLink("alert","请上传图片!");
+				return false;
+			}
+			$('#bao').attr("disabled","true");
+						$.ajaxFileUpload({
+								secureuri: false, //是否需要安全协议，一般设置为false
+								type: 'post', 
+								url: BASE_URL + LOGIN_ACTION.EXAMINELOGOUPLOAD, //用于文件上传的服务器端请求地址
+								fileElementId: 'doc', //文件上传域的ID
+								data:{
+									id : GetQueryString("id"),
+			            			type : GetQueryString("type"),
+			            			file : img
+								},
+								dataType: 'json', //返回值类型 一般设置为json
+								success: function (data, status){
+								   $('#bao').attr("disabled","false");
+										var url="../request_shop/request_shop_2.html?id="+GetQueryString("id");
+										window.location.href=url;
+								},
+								error: function (data, status, e){
+								    $('#bao').attr("disabled","false");
+									alert(e);
+								}
+							})
+	}	
+	
+function cancel(){
+		var url="../request_shop/request_shop_2.html?id="+GetQueryString("id");
+		window.location.href=url;
+}
+		</script>
+    <div class="head">
+        <div class="h-div">
+            <p>上传图片</p>
+        </div>
+    </div>
+    <div class="wrap sort_add">
+        <p>上传图片</p>
+        <button class="sc_img" type="button">选择图片</button>
+        <input  class="sc_i" type="file" name="file" id="doc" multiple="multiple" accept="image/*"  onchange="javascript:setImagePreview();" />
+        <p>图片预览</p>
+        <div class="sc_yl">
+			<div id="localImag">
+              <img id="preview" src="" />
+          </div>
+		</div>
+    </div>
+    <div class="foot_xg">
+    	<p>温馨提示：上传图片大小最大不能超过300KB</p>
+       	<button type="button" onclick="cancel();">取消</button>
+		<button type="button" id="bao" onclick="add();">保存</button>
+    </div>
+</body>
+<script type="text/javascript">
+        //下面用于图片上传预览功能
+        function setImagePreview(avalue) {
+            //input
+            var docObj = document.getElementById("doc");
+            //img
+            var imgObjPreview = document.getElementById("preview");
+            //div
+            var divs = document.getElementById("localImag");
+            if (docObj.files && docObj.files[0]) {
+                //火狐下，直接设img属性
+                imgObjPreview.style.display = 'block';
+                imgObjPreview.style.width = '100%';
+                imgObjPreview.style.height = 'auto';
+                //imgObjPreview.src = docObj.files[0].getAsDataURL();
+                //火狐7以上版本不能用上面的getAsDataURL()方式获取，需要一下方式
+                imgObjPreview.src = window.URL.createObjectURL(docObj.files[0]);
+            } else {
+                //IE下，使用滤镜
+                docObj.select();
+                var imgSrc = document.selection.createRange().text;
+                var localImagId = document.getElementById("localImag");
+                //必须设置初始大小
+                localImagId.style.width = "100%";
+                localImagId.style.height = "auto";
+                //图片异常的捕捉，防止用户修改后缀来伪造图片
+                try {
+                    localImagId.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod=scale)";
+                    localImagId.filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = imgSrc;
+                } catch (e) {
+                valLink("alert","您上传的图片格式不正确，请重新选择!");
+                    return false;
+                }
+                imgObjPreview.style.display = 'none';
+                document.selection.empty();
+            }
+            return true;
+        }
+</script>
+
+</html>

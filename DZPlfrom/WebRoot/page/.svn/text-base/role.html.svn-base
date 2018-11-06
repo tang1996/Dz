@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>角色管理</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<link rel="stylesheet" type="text/css" href="../resources/css/ext-all.css">
+	<link rel="stylesheet" type="text/css" href="../resources/css/ext-patch.css" /><!-- FF字体美化 -->
+	<script type="text/javascript" src="../ext-core/ext-base.js"></script>
+	<script type="text/javascript" src="../ext-core/ext-all.js"></script>
+	<script type="text/javascript" src="../ext-core/ext-lang-zh_CN.js"></script>
+	<script type="text/javascript" src="../js/system/role/addRole.js"></script>
+	<script type="text/javascript" src="../js/system/role/delete.js"></script>
+	<script type="text/javascript" src="../js/system/role/select.js"></script>
+	<script type="text/javascript" src="../js/system/role/update.js"></script>
+	<script type="text/javascript" src="../js/system/role/roleAdd.js"></script>
+   <style type="text/css">
+		html, body {
+        font:normal 12px verdana;
+        margin:0;
+        padding:0;
+        border:0 none;
+        overflow:hidden;
+        height:100%;
+    }
+	p {
+	    margin:5px;
+	}
+    .settings {
+        background-image:url(../impg/widget.png);
+    }
+    .nav {
+        background-image:url(../impg/folder_go.png);
+    }
+    .add-feed {
+    background-image: url(../impg/startT.png) !important;
+	}
+	.delete-icon {
+    background-image:url(../impg/yield-1.png) !important;
+	}
+	.delete-db {
+    background-image:url(../impg/errorReport.png) !important;
+	}
+	 .add-db {
+    background-image: url(../impg/dbtable.png) !important;
+	}
+	.edit-db {
+    background-image: url(../impg/scriptEditor.png) !important;
+	}
+	.select-db{
+	background-image: url(../impg/systemInformationReport.png) !important;
+	}
+	 .fen-db {
+    background-image: url(../impg/widget.png) !important;
+	}
+	.data{
+		background-image:url(../impg/monitor.png);
+	}
+	.about{
+		background-image:url(../impg/png-1071.png);
+	}
+	.system{
+		background-image:url(../impg/png-1897.png);
+	}
+	.help{
+		background-image:url(../impg/scriptEditor.png);
+	}
+	.db{
+		background-image:url(../impg/start.png);
+	}
+	.tools{
+		background-image:url(../impg/tools.png);
+	}
+		</style>
+	</head>
+	<body>
+		<div id="grid-role"></div> 
+  </body>
+</html>

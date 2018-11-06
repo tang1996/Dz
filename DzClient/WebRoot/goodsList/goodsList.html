@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>商家</title>
+    <link rel="stylesheet" href="./goodsList.css">
+    <link rel="stylesheet" href="../common/css/common.css">
+     <link rel="stylesheet" href="../common/css/style1.css">
+	<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../common/js/common.js"></script>
+	<script type="text/javascript" src="../common/js/jquery.fly.min.js"></script>
+		<script type="text/javascript" src="../common/js/jquery.lazyload.min.js" ></script>
+			<script type="text/javascript" src="../common/js/jquery.cookie.js" ></script>
+		 <script type="text/javascript" src="../common/js/add.js"></script>
+<script type="text/javascript" src="../common/js/vue.min.js"></script>
+	<style type="text/css">
+		.footer{display:block;position:fixed;height:50px;filter:alpha(opacity:90); opacity:0.9;width:100%;z-index:3;bottom:0px;color:#f03c03;background:#818181;line-height:35px;font-size:15px;border-top:1px solid #e2e2e2;}
+		.footer .left{float:left;margin:5px 10px;}
+		.footer .right{float:right; }
+		.footer .right .disable{background:#818181;font-size:16px}
+		.footer .xhlbtn{display:block;text-align:center;line-height:50px;padding:0 15px;color:#fff;}
+		.shop{position: relative; top: -19px;height: 50px;left: 16px;}	
+		.pay{ position: relative; top: -58px;left: 77px;color: #fff;}	
+		.u-flyer {display: block;width: 50px;height: 50px;border-radius: 50px;position: fixed;z-index: 9999;}
+		.nav-show{border-bottom: none;}
+		.nav-show ul{display: block;}
+	</style>
+</head>
+<body>
+
+    <script type="text/javascript">
+			$(document).ready(function(){  
+				$.cookie('cid',GetQueryString("companyId"));
+				
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.CTOGOODS,
+				 	data: { 
+            			id: '1'//GetQueryString("companyId")
+        			},
+					success:function(data) {
+						var list = data.list;
+						for(var i = 0;i <list.length;i++){
+						var line = '';
+						if(list[i].recommend == true){
+						line = '<div class="hot">'+
+										'<span>老板推荐</span>'+
+									'</div>';
+						}else{
+							line = '';
+						}
+						var html = list[i].ificationName+'<li>'+
+										'<div class="avatar-wrap">'+
+													'<img src="../common/img/defual.jpg" data-original='+list[i].zoom_url+' alt="">'+
+												'</div>'+
+												'<div class="content">'+
+													'<h4>'+
+														list[i].name+
+													'</h4>'+
+													'<p class="desc">'+
+														list[i].brief+
+													'</p>'+
+													'<p class="sales">'+
+														'月售'+list[i].mon_sales+'份'+
+													'</p>'+
+													line+
+													'<p class="price">'+
+														'¥'+ list[i].price + 
+												'</p><button class="plus1" id="jian'+i+'" ><strong onclick="apa();">-</strong></button><span style="display:none;position: absolute;margin-top: -22px;left: 110px;" id="shu'+i+'">1</span>'+
+												'<button class="plus" onclick="addCart(\''+list[i].name+'\','+list[i].price+',\''+list[i].zoom_url+'\','+i+',\''+list[i].natureContent+'\',\''+list[i].id+'\');"><strong>+</strong></button>'+
+										'</div>'+
+									'</li>';
+									$.cookie('cumId', 1);   
+									$("#goodslist").append(html);
+						}
+						
+						$("img").lazyload({ 
+						 	placeholder : "../common/img/defual.jpg",
+				            threshold : 200
+				        });
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+				
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.GETFICATION,
+				 	data: { 
+            			id: '1'//GetQueryString("companyId")
+            		  },
+					success:function(data) {
+						var list = data.list;
+						for(var i = 0;i < list.length;i++){
+							if(i==0){
+								var html = '<a href="#"><li class="active" id="tang" onclick="bb(this);">'+list[i].name+'</li></a>';
+								$("#classes").append(html);
+								$.cookie('goodsTypeActive',list[i].id);  
+							}else{
+								var html = '<li onclick="aa(this);"  >'+list[i].name+'</li>';
+								$("#classes").append(html);
+								$.cookie('goodsType',list[i].id);   
+							}
+						
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+				
+				
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.FIND,
+				 	data: { 
+            			id: '1',//GetQueryString("companyId"),
+            			location:'22.6733000000,114.0651500000'//'25.2560978214,110.2188938856'
+        			},
+					success:function(data) {
+							var list=data.list;
+							var count=data.count;
+							for(var i=0;i<list.length;i++){
+							  var isOpen1=list[i].isOpen1;
+							  var isOpen2=list[i].isOpen2;
+							  var isOpen3=list[i].isOpen3;
+							  var isOpen4=list[i].isOpen4;
+							  var html='';
+								if(isOpen1==true){
+									var html='<span class="icon">满减</span><span class="coupon-desc">'+list[i].subtraction+'</span><span class="coupon-num">'+count+'个优惠</span><img src="../common/img/c_down.png""  width="10px" height="10px" style="float: right;margin-top: 10px;" />';
+									$("#shop-coupon").html(html);
+								}
+
+								if(isOpen2==true){
+									  html='<li class="shop-coupon"><span class="icon">新</span><span class="coupon-desc">'+list[i].newUser+'</span></li>';
+									$("#aaa").append(html);
+								}
+								if(isOpen3==true){
+									  html='<li class="shop-coupon"><span class="icon">折扣</span><span class="coupon-desc">'+list[i].svg+'</span></li>';
+									$("#aaa").append(html);
+								}
+								if(isOpen4==true){
+									  html='<li class="shop-coupon"><span class="icon">卷</span><span class="coupon-desc">'+list[i].coupon+'</span></li>';
+									$("#aaa").append(html);
+								}
+						  
+							}
+							
+						$("#shop-info").html(data.name+"<span>查看后厨</span>");
+						$("#ping").html("评分"+data.assess);
+						$("#yue").html("月售"+data.monSales);
+						$("#pei").html("配送约"+data.time+"分钟");
+						$("#ju").html("距离"+data.range);
+						$("#shop-tips").html('<img src="../common/img/tips.png" alt="">'+data.notice);
+						$.cookie('distributionPrice',data.DistributionPrice); 
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+				
+				$('#pingjia').click(function(){
+					var cumId=$.cookie('cumId');
+					var url="http://118.190.149.109:8081/DzClient/comment/comment.html";
+					window.location.href=url+"?"+"cumId="+cumId; 
+				});
+				
+				$('#shop-coupon').click(function(){
+
+					     if ($(this).next().css('display') == "none") {
+					   
+			                // $('#shop-coupon').children('ul').slideUp(300);
+			              
+			                // $(this).next('ul').slideDown(300);
+			             
+			                // $(this).parent('li').addClass('nav-show').siblings('li').removeClass('nav-show');
+			            }else{
+			                //收缩已展开
+			                $(this).next('ul').slideUp(300);
+			                $('.nav-item.nav-show').removeClass('nav-show');
+			            }
+									
+				});
+				
+
+				
+		});
+function aa(id){
+	$('#tang').removeClass('active');
+    $(id).addClass('active');
+    $("#goodslist").html('');
+    var ifiId=$.cookie('goodsType');
+     common(ifiId);	
+}
+
+function bb(id){
+	$('.active').removeClass('active');
+	 $(id).addClass('active');
+	  $("#goodslist").html('');
+    var ifiId=$.cookie('goodsTypeActive');
+    common(ifiId);
+}
+
+function common(ifiId){
+		$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.GETGOODSLIST,
+				 	data: { 
+            			id: '1',//GetQueryString("companyId"),
+            			ifiId:ifiId
+        			},
+					success:function(data) {
+					var list = data.list;
+					for(var i = 0;i < list.length;i++){
+					
+						var line = '';
+						if(list[i].recommend == true){
+						line = '<div class="hot">'+
+										'<span>老板推荐</span>'+
+									'</div>';
+						}else{
+							line = '';
+						}
+						var html = '<li>'+
+										'<div class="avatar-wrap">'+
+													'<img src="../common/img/defual.jpg" data-original='+list[i].zoom_url+' alt="">'+
+												'</div>'+
+												'<div class="content">'+
+													'<h4>'+
+														list[i].name+
+													'</h4>'+
+													'<p class="desc">'+
+														list[i].brief+
+													'</p>'+
+													'<p class="sales">'+
+														'月售'+list[i].mon_sales+'份'+
+													'</p>'+
+													line+
+													'<p class="price">'+
+														'¥'+ list[i].price + 
+												'</p><button class="plus1" id="jian'+i+'" ><strong onclick="apa();">-</strong></button><span style="display:none;position: absolute;margin-top: -22px;left: 110px;" id="shu'+i+'">1</span>'+
+												'<button class="plus" onclick="addCart(\''+list[i].name+'\','+list[i].price+',\''+list[i].zoom_url+'\','+i+',\''+list[i].natureContent+'\',\''+list[i].id+'\');"><strong>+</strong></button>'+
+										'</div>'+
+									'</li>';
+									$("#goodslist").append(html);
+										$("img").lazyload({ 
+						 			placeholder : "../common/img/defual.jpg",
+						            threshold : 200
+						        });  
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}
+
+$(function(){
+  				$(".xhlbtn disable").click(function(){
+   				 $.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RESERVEORDER,
+				 	data: {
+            			token: 'cOZ6cjmF9NF',
+            			cid: '2',
+            			Remarks: '加儿童坐',
+            			tableNo: '2',
+            			endTime: '2018-05-20 2018:00:00',
+            			seat: '包厢',
+            			meals: '12'
+        			},
+					success:function(data) {
+						alert(data.message);
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+   				})
+			})
+</script>
+  
+    <header>
+     	<div class="shop-desc" id="shop_desc">
+            <p class="shop-info" id="shop-info"></p>
+            <p class="shop-service"><span id="ping"></span><span id="yue"></span><span id="pei"></span><span id="ju"></span></p>
+            <p class="shop-tips" id="shop-tips"><img src="../common/img/tips.png" alt=""></p>
+            <ul>
+             <li class="shop-coupon" id="shop-coupon" > 
+	            <ul id="aaa" style="display:none;">
+	            </ul>
+             </li>
+            </ul>
+        </div>
+        <ul>
+            <li class="active"><span>点餐</span></li>
+            <li id="pingjia"><span>评价</span></li>
+            <li><span>商家</span></li>
+        </ul>
+    </header>
+    <div class="filter-container clearfix">
+        <div class="left">
+            <ul id="classes">
+            </ul>
+        </div>
+        <div class="right">
+           <ul id="goodslist">
+           
+ 			</ul>
+        </div>
+    </div>
+
+    <div class="subFly">
+	<div class="up"></div>
+	<div class="down">
+		<a class="close" href="javascript:">
+			<img src="../common/img/close.png" alt="" >
+		</a>
+		<dl class="subName">
+			<dt>
+				<img class="imgPhoto" src="../common/img/pic.png" alt="">
+			</dt>
+			<dd>
+				<p data-icon=""></p>
+				<p><span>¥ </span><span class="pce" style="font-size: 16px;font-weight: bold"></span></p>
+				<p>
+					<span>已选："</span>
+					<span class="choseValue"></span>
+					<span>”</span>
+				</p>
+			</dd>
+		</dl>
+		<div id="subChose">
+		
+		</div>
+		<dl class="subCount">
+			<dt>购买数量</dt>
+			<dd>
+				<div class="btn">
+					<button class="ms" style="display: inline-block;">
+						<strong></strong>
+					</button>
+					<i style="display: inline-block;" id="su">1</i>
+					<button class="ad">
+						<strong></strong>
+					</button>
+					<i id="price" class="price">25</i>
+				</div>
+			</dd>
+		</dl>
+		<div class="foot" onclick="fei_add(event);">
+			<span >加入购物车</span>
+		</div>
+	</div>
+
+</div>
+    <div class="up1"></div>
+	<div class="shopcart-list fold-transition" style="">
+		<div class="list-header">
+			<h1 class="title">购物车</h1>
+			<span class="empty">清空</span>
+		</div>
+		<div class="list-content">
+			<ul></ul>
+		</div>
+	</div>
+    
+    <div class="footer">  
+		<div class="left" id="left">
+		<span id="cartN" style="color:#ffffff;" >
+			<img class="shop" id="end" src="../common/img/defual.jpg" data-original="../common/img/shop-car-defualt.png"> <p class="pay" id="pay">加入该购物车 </p>
+		</div>  
+		<div class="right" id="jiesuan">  
+			<a id="btnselect" class="xhlbtn disable" >去结算</a>  
+		</div>   
+	</div>
+</body>
+</html>

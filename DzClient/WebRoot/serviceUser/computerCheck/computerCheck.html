@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>结算</title>
+
+    <link href="./computerCheck.css" type="text/css"  rel="stylesheet">
+    <script type="text/javascript" src="../../common/js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="../../common/js/jquery.lazyload.min.js"></script>
+	<script type="text/javascript" src="../../common/js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="../../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../../common/js/common.js"></script>
+	<!-- 增加浏览器小图标 -->
+<link rel="icon" href="../../common/images/logo.jpg" type="image/x-icon">
+</head>
+
+<script>
+
+    var num = GetQueryString("meals"); //原有人数
+    var netOrder=GetQueryString("netOrder");
+    var adjustmentPeople_num = GetQueryString("meals"); //调整人数
+    var teaMoney = GetQueryString("tea");; //茶位费单价
+    var teaSumMoney = parseFloat(num) * parseFloat(teaMoney); //总茶位费
+    var foodmoney = 0; //菜品价格
+    var tableNo=GetQueryString("tableNo"); //桌台号
+    var companyId = GetQueryString("companyid");
+    var token = "";
+    var insideOrderId=GetQueryString("insideOrderId"); //线下订单id
+    var orderId=GetQueryString("orderId");	//线上订单id
+    
+    var nPay = '';
+    var tprice = 0;
+
+    var completeMoney = 0; //已收金额
+
+    var underLine_foodMoney = 0;//未结算
+
+    var inputIndex = "discount";
+
+    $(document).ready(function() {
+   		 loginCookie();
+
+		$(".table").html(tableNo);
+		$(".person").html(num);
+		$(".people_num input").val(num);
+		$(".oldPeople_num span").html(num);
+		$(".teaMoney span").html(teaMoney); //茶位费单价
+		$(".teaSumMoney span").html(teaSumMoney.toFixed(2)); //总茶位费
+		
+		
+		$.ajax({
+			type:"POST",
+			url: BASE_URL + LOGIN_ACTION.RELATING_GETINSIDE,
+			dataType:"json",
+		 	data: { 
+		 	 	companyid:companyId,		
+                tableNo: tableNo,
+				insideOrderId:insideOrderId
+          	},
+          	success: function(data){
+          		if(data.success){
+					var list = data.list;
+					var html ='';
+					var totalCount=0;
+					if(data.totalCount=='.00'){
+						totalCount=0;
+					}
+					var lenght=list.length;
+					if(lenght>0){
+							for(var i = 0;i < list.length;i++){
+								if(list[i].svg_price > 0){
+						 			princeTo = list[i].svg_price;
+						 		}else{
+						 			princeTo = list[i].price;
+						 		}
+								html = html + '<tr><td>' + (i+1) + '.</td><td style="text-align: left">' + list[i].name + '</td><td>' + list[i].numb + '</td><td>￥ ' + princeTo + '</td></tr>';
+								totalCount += (list[i].numb*princeTo);
+							}	
+						
+							$("#menus").html(html + '<tr><td colspan="3">共' + list.length + '项<span class="noSettlement">（未结算）</span></td><td>￥' + totalCount.toFixed(2) + '</td></tr>');
+							$(".underLine-foodMoney span").html(totalCount.toFixed(2));  //未结算菜品价格
+							
+					}else{
+						 tprice=data.tprice;
+						 $('#wei').hide();
+						 $('#tui').show();
+						 $('#tui').html("退菜金额：￥<span>"+tprice.toFixed(2)+"</span>");
+						 /*
+						 $(".result").css("color","#333");
+           				 $(".result").html("待退： ￥" + tprice.toFixed(2));*/
+           				 //subFunction();
+					}
+					
+					
+					if(data.nPay != null && totalCount == 0){
+						var tpay = data.nPay;
+						nPay =  data.nPay;
+						$("#result").show();
+						$("#result").css("color","#f40");
+            			$("#result").html("需退款： ￥" +tprice );
+            			$("#discount").attr("disabled","disabled");
+          				$("#sub").attr("disabled","disabled");
+					}else{
+						subFunction('count',totalCount.toFixed(2));
+					}
+					
+				}
+          	},
+          	error: function(){
+          		alert("ajax 错误！");
+          	}
+		});
+		
+
+		//外设键盘禁用
+		/*
+		document.onkeydown=keydown;
+        function keydown(){
+            return false;
+        }
+		*/
+
+        //减人数
+        $(".pL").click(function () {
+            if(adjustmentPeople_num > 1){
+                adjustmentPeople_num--;
+            }
+            teaSumMoney = parseFloat(adjustmentPeople_num) * parseFloat(teaMoney);
+            $(".people_num input").val(adjustmentPeople_num);
+            $(".teaSumMoney span").html(teaSumMoney.toFixed(2));
+            subFunction('subp');
+        })
+        //加人数
+
+        $(".pR").click(function () {
+            adjustmentPeople_num++;
+            teaSumMoney = parseFloat(adjustmentPeople_num) * parseFloat(teaMoney);
+            console.log(teaMoney)
+            $(".people_num input").val(adjustmentPeople_num);
+            $(".teaSumMoney span").html(teaSumMoney.toFixed(2));
+            subFunction('add');
+        });
+        
+        //调整人数按钮
+        $(".adjustmentPeople_num").click(function () {
+            $(".people").show();
+        })
+
+
+        $("input").click(function() {
+            inputIndex = $(this).attr("class");
+        });
+        
+        /*
+        // css 调整     //
+        */
+        var window_height = $(window).height();
+        var left_head_height = $(".left_head").outerHeight();
+        $(".left_body").height(window_height-left_head_height);
+        /*
+        // css 调整     //
+        */
+    })
+
+    function subFunction(type, sale){    
+    	if(type=='count')underLine_foodMoney = sale; 
+     	
+     	var teaDifference = (adjustmentPeople_num - num) * teaMoney;
+    	if(type =='add'){
+   			$("#discount").removeAttr("disabled");
+         	$("#sub").removeAttr("disabled");
+	    	var temp = parseFloat(tprice) -  parseFloat(teaDifference) - parseFloat(underLine_foodMoney);
+	    	if(temp  > 0){
+   				$("#result").show();
+				$("#result").css("color","#f40");
+          		$("#result").html("需退款： ￥" +temp );
+          		$("#discount").attr("disabled","disabled");
+          		$("#sub").attr("disabled","disabled");
+	    	}else{
+	    		var tem = parseFloat(teaDifference) + parseFloat(tprice) + parseFloat(underLine_foodMoney);
+	    		$("#result").show();
+				$("#result").css("color","#f40");
+          		$("#result").html("需收款： ￥" + tem.toFixed(2));
+	    	}
+	    }else{
+	    	var teaDifference = parseFloat((adjustmentPeople_num - num)) * parseFloat(teaMoney);
+	    	var temp = parseFloat(tprice) -  parseFloat(teaDifference) - parseFloat(underLine_foodMoney);
+	    	if(temp  > 0){
+   				$("#result").show();
+				$("#result").css("color","#f40");
+          		$("#result").html("需退款： ￥" +temp );
+          		$("#discount").attr("disabled","disabled");
+          		$("#sub").attr("disabled","disabled");
+	    	}else{
+	    		var ntemp = parseFloat(teaDifference) + parseFloat(tprice) + parseFloat(underLine_foodMoney);
+	    		$("#result").show();
+				$("#result").css("color","#f40");
+          		$("#result").html("需收款： ￥" +  ntemp.toFixed(2));
+	    	}
+	    }
+    
+    	if(type=='discount' && $("#discount").val() != ''){
+    		var temp = $("#result").html();
+    		var sale  = temp.substr(6, temp.length);
+    		var discount = $("#discount").val()/10;
+    		if($("#discount").val().length > 3){
+				alert("折扣有问题,只能例如8.8不能超过两位数字");    			
+    			$("#discount").val('');
+    			return;
+    		}
+    		
+    		if($("#discount").val().length > 1){
+    			if($("#discount").val().indexOf('.')==-1){
+    				alert("折扣有问题,只能例如8.8不能超过两位数字");  
+    				$("#discount").val('');
+    				return;
+    			}
+    		}
+    		
+    		var temsale  = sale * discount;
+   			$("#result").show();
+			$("#result").css("color","#f40");
+         	$("#result").html("需收款： ￥" + temsale.toFixed(2) );
+    	}
+  	
+  		if(type=='sub'){
+    		var temp = $("#result").html();
+    		var sale  = parseFloat(temp.substr(6, temp.length));
+    		var sub = parseFloat($("#sub").val());
+    		
+    		if(sale > sub){
+    			var salecount = sale - sub;
+	    		$("#result").show();
+				$("#result").css("color","#f40");
+	         	$("#result").html("需收款： ￥" + salecount.toFixed(2) );
+    		}else{
+    			$("#sub").val('');
+    			alert("再减就没了.");
+    			return;
+    		}
+    	}
+    }
+
+
+	
+   	//结算 - 押金 - 线上  - 线下 总体结算
+   	function subCount(){
+   			var cashierCode = $(".cashierCode").val();
+	    	if(cashierCode.length == 0){
+	    		$(".cashierCodeMessage").html("* 请向网络预约用户获取收银码")
+	    		return;
+	    	}
+			
+			var subFee =$(".sub").val();  //减免
+			if(subFee.length!=0){
+				subFee =parseFloat($(".sub").val()).toFixed(2);
+			}
+			var disacount = $(".discount").val();
+			if(disacount.length!=0){
+				disacount =parseFloat($(".discount").val()).toFixed(2); //折扣
+			}
+			var total = parseFloat($(".sumMoney").html()).toFixed(2); //总计
+			var pay = parseFloat($(".result span").html()).toFixed(2); //总计
+   	
+   			var temp = $("#result").html();
+   			var sale  = temp.substr(6, temp.length);
+   		
+	    	$.ajax({
+				type:"POST",
+				url: BASE_URL + LOGIN_ACTION.SUM_CHECK_MONEY,
+				dataType:"json",
+			 	data: { 
+			 	 	companyid:companyId,		
+	                orderId: insideOrderId,
+					personNum:adjustmentPeople_num, //?
+					subFee:subFee,
+					disacount:disacount,
+					total:sale,
+					pay:sale,
+					recode:cashierCode
+	          	},
+	          	success: function(data){
+	          		if(data.success){
+						window.location.href=BASE_URL+"/DzClient/serviceUser/index/index.html?companyId="+companyId+"&token="+$.cookie('token');
+						//调用打印机   新增 2018-10-06  @Tyy
+						$.ajax({
+							type: 'POST',
+							url: BASE_URL + LOGIN_ACTION.JOB_SAVEINSIDE,
+							data: {
+								insideOrderId:insideOrderId,
+							},
+							success: function (data){
+								onlyOKPrompt(data.message,"1");
+							},
+							error: function (error){
+								onlyOKPrompt(data.message,"1");
+							}
+						});
+						//调用打印机   新增 2018-10-06  @Tyy
+						$.ajax({
+							type: 'POST',
+							url: BASE_URL + LOGIN_ACTION.JOB_DESTINE,
+							data: {
+								orderId :orderId,
+							},
+							success: function (data){
+								onlyOKPrompt(data.message,"1");
+							},
+							error: function (error){
+								onlyOKPrompt(data.message,"1");
+							}
+						});
+					}else{
+						alert(data.message);
+					}
+	          	},
+	          	error: function(){
+	          		alert("ajax 错误！");
+	          	}
+			});
+   	}
+
+    var str = "";
+    function keyboard(num){
+        str = $("."+inputIndex).val();
+        if(typeof(num) != "undefined"){
+            str += num;
+        }else{
+            str = str.substring(0, str.length-1);
+        }
+        $("."+inputIndex).focus();
+        $("."+inputIndex).val(str);
+        subFunction(inputIndex);
+    };
+    
+    function windowBack(){
+    	window.location.href = '../netWorkReservation/insideOrderaddMenus/insideOrderaddMenus.html?netOrder='+ netOrder +'&companyId='+companyId+'&tableNo=' + 
+    					escape(tableNo) + '&meals=' + num + '&orderId=' + orderId + '&insideOrderId='+insideOrderId;
+    }
+</script>
+
+
+<body>
+    <div id="body">
+        <div class="left">
+            <div class="left_head">
+                <a href="javascript:windowBack()" class="return"></a>
+                <p class="left_head_p"><span class="table">7</span></p>
+            </div>
+            <div class="left_body">
+                <table cellpadding="0" cellspacing="0" border="0" id="menus">
+                   
+                </table>
+            </div>
+        </div>
+        <div class="right">
+            <div class="right_div">
+
+                <div class="right_title"><i></i>计算金额</div>
+				<!-- 
+                <div class="teaMoney prive_div">茶位费：<span>1</span>元/位</div>
+                <div class="oldPeople_num prive_div">人数：<span>10</span>人<i class="adjustmentPeople_num">调整人数</i></div>
+                <div class="people clear">
+                    调整人数：
+                    <div class="people_num">
+                        <span class="pL">-</span>
+                        <input type="text" id="person" readonly value="10">
+                        <span class="pR">+</span>
+                    </div>
+                </div>
+                <div class="teaSumMoney prive_div">茶位费总额：￥<span id="subFee">10.00</span></div>
+                -->
+               
+                <!-- <div class="foodMoney prive_div">总菜品价格：￥<span>12.00</span></div>
+                -->
+                <div class="underLine-foodMoney prive_div" id="wei"></span></div>
+                <div class="input_div">折扣：<input type="text" id="discount" class="discount" oninput="subFunction()"/>折<i class="discountMessage message"></i></div>
+                <div class="input_div">减免：<input type="text" id="sub" class="sub" oninput="subFunction()"/>元</div>
+                 <div class="onLine-foodMoney prive_div" style="display:none;" id="tui">退菜金额：￥<span></span></div>
+                <div class="result" id="result"></div>
+                <div class="input_div">收银码：<input type="text" class="cashierCode"/><i class="cashierCodeMessage message"></i></div>
+            </div>
+
+            <div class="button" onclick="subCount()">确认结算</div>
+
+           
+
+            <div class="keyboard_div clear">
+
+                <span onclick="keyboard(7)">7</span>
+                <span onclick="keyboard(8)">8</span>
+                <span onclick="keyboard(9)">9</span>
+                <span onclick="keyboard(4)">4</span>
+                <span onclick="keyboard(5)">5</span>
+                <span onclick="keyboard(6)">6</span>
+                <span onclick="keyboard(1)">1</span>
+                <span onclick="keyboard(2)">2</span>
+                <span onclick="keyboard(3)">3</span>
+                <span onclick="keyboard('.')">.</span>
+                <span onclick="keyboard(0)">0</span>
+                <span onclick="keyboard()">←</span>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

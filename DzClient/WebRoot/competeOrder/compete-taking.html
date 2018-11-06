@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>取餐</title>
+         <link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+         <link rel="stylesheet" href="./compete-order.css">
+        <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+			
+		$(document).ready(function(){ 
+				load();
+		});
+		
+		
+		function load(){
+			$.ajax({
+				type:'POST',
+				url: BASE_URL + LOGIN_ACTION.DISTRIVIEW,
+			 	data: { 
+           			location: getCookie('lng'),
+           			status : 'takeMeal',
+           			token :getCookie('token')
+       			},
+				success:function(data) {
+					var html = '';
+					for(var i = 0;i < data.length;i++){
+							var menusLine = '';
+					 		var children=data[i].children;
+					 			if(children != null){
+					 				menusLine +='<div class="date dot">';
+									 for(var y=0;y < children.length;y++){
+									 	menusLine +='<div class="lb">'+
+										   '<p>商品:&nbsp;&nbsp;&nbsp;'+children[y].name+'</p>'+
+										   '<p>x'+children[y].number+'</p>'+
+									       '</div>';
+									 }
+									 menusLine +='</div>';
+								 }
+				 		html = html + '<div class="oneOrder"><div class="title"><img src="'+data[i].logo+'" alt=""><span>'+data[i].companyName+'</span></div>'+
+      					 	   '<div class="detail-box">'+
+           				   '<div class="address dot">'+
+               			   '<span>'+data[i].companyPosition+'</span>'+
+               			  '<span class="distance"><img src="../common/img/addr.png" style="padding-bottom:8px;padding-right:4px;" alt="">'+data[i].distance+'米</span>'+
+           				  '</div>'+menusLine+
+           				   '<div class="date dot">订餐联系人：'+data[i].userName+'</div>'+
+           				    '<div class="date dot">联系电话：'+data[i].userPhone+'</div>'+
+           				     '<div class="date dot">送餐地址：'+data[i].userAddress+data[i].room+'</div>'+
+		           			'<div class="date dot">下单时间时间：'+data[i].addTime+'</div>'+
+           				  '<div class="date dot">预计送达时间：'+data[i].time+'前送达</div>'+
+       					  '</div>'+
+       					  '<div class="btn-box">'+
+           				  '<span class="code">取餐码：'+data[i].code+'</span>'+
+       					  '</div>'+
+       					  '<div class="btn-box waiting">'+
+           				  //'<a)><span onclick="privateChat(\''+data[i].companyPhone+'\')" class="btn f-left">在线用户</span></a>'+
+           				  '<span class="btn"><a href="tel:'+data[i].companyPhone+'">联系商家</a></span>'+
+           				  '<span class="btn f-right" onclick="distribution('+data[i].orderId+');">确认取餐</span>'+
+       					  '</div><div class="seeMap_div" onclick=javascript:orderCheck('+"'quhuo',"+data[i].companyCoordinates+","+'"'+data[i].logo+'"'+')><div class="circular_div"></div>'+
+            			  '<div class="headImg_div" ><img src="../common/img/rider_girl.png"></div>'+
+            			  '<div class="seeTitle_div">商家导航》</div></div></div></div>';
+					}
+					
+					$("#task-detail").html(html);
+					
+					var totalCount=data[0].totalCount;
+					$("#taking").html("待取货("+totalCount+")");
+				},
+				error:function(error) {
+					console.log(error);
+				}
+			});
+		}
+		
+		function privateChat(phone){
+			valLink('privateChat', phone);
+		}
+		
+		function distribution(orderId) {
+		
+			$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.DISTRIBUTION,
+				 	data: {
+            			token:  getCookie('token'),
+            			orderId: orderId
+        			},
+					success:function(data) {
+						valLink('alert',data.message);
+						window.location.href="./compete-finish.html";
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+        }
+		
+		</script>
+    <ul class="clearfix header">
+        <li class="f-left" onclick="window.location.href='./compete-order.html'">新任务</li>
+        <li class="f-left active"   id="taking">待取货</li>
+        <li class="f-left" onclick="window.location.href='./compete-finish.html'">待送达</li>
+    </ul>
+    <div class="task-detail" id="task-detail">
+       
+    </div>
+</body>
+</html>

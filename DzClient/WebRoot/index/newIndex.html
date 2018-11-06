@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>南山科技园</title>
+
+		<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+		<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript"
+			src="../common/js/jquery.lazyload.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+		<script type="text/javascript">
+			
+			$(document).ready(function(){ 
+			
+		 		$("img").lazyload({ 
+				 	placeholder : "../common/img/defual.png",
+		            threshold : 200
+		        });  
+			
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.COMMPANY_TOP,
+				 	data: { 
+            			location: '22.6733000000,114.0651500000',//'25.2560978214,110.2188938856',//GetQueryString("lng"),//获取来自手机端传递经纬度
+            			start: '0',
+            			limit: '15',
+            			sort: 'volume'
+        			},
+					success:function(data) {
+						var list = data.list;
+						for(var i = 0;i < list.length;i++){
+							var type = list[i].type;
+							var lineType = '';
+							switch(type){
+							case '外卖':
+								lineType = '<p class="lp lp1">'+list[i].mode+'</p>';break;
+							case '美食':
+								lineType = '<p class="lp lp1">人均:'+list[i].GDP+'</p>';break;
+							case 'KTV':
+								lineType = '<p class="lp lp1">最低消费:'+list[i].miniConsume+'</p>';break;
+							case '酒店':
+								lineType = '<p class="lp lp1">最低消费:'+list[i].miniConsume+'</p>';break;
+							default :
+								lineType = '<p class="lp lp1"></p>';break;
+							}
+								var isOpen1=list[i].isOpen1;
+							var isOpen2=list[i].isOpen2;
+							var isOpen3=list[i].isOpen3;
+							var isOpen4=list[i].isOpen4;
+							var jian='';
+							var ze='';
+							var juan='';
+							if(isOpen1==true || isOpen2==true){
+								if(isOpen2==true && isOpen1==true){
+									jian= '<p class="lp"><span class="icon-minus">减</span><span>'+list[i].newUser+";"+list[i].subtraction+'</span></p>';
+								}else if(isOpen1==true){
+									jian= '<p class="lp"><span class="icon-minus">减</span><span>'+list[i].subtraction+'</span></p>';
+								}else if(isOpen2==true){
+									jian= '<p class="lp"><span class="icon-minus">减</span><span>'+list[i].newUser+'</span></p>';
+								}
+							}
+							if(isOpen3==true){
+								ze='<p><span class="icon-redpaper" style="color:#ffffff;">折</span><span style="color:#999;font-size: 8pt;line-height: 11pt;">'+list[i].svg+'</span></p>';
+							}
+							if(isOpen4==true){
+								juan='<p><span class="icon-coupon">券</span><span style="color:#999;font-size: 8pt;line-height: 11pt;">'+list[i].coupon+'</span></p>';
+							}
+						
+							var html = '<li>'+
+											'<a href="javascript:valLink(\'search\','+list[i].id+'">'+
+												'<img class="li-l"  src="../common/img/defual.png" data-original='+list[i].logo+' alt=""  />'+
+												'<div class="li-r">'+
+													'<h3>'+list[i].name+'<p>'+type+'</p></h3><span class="pr">'+list[i].distance+'</span>'+
+													lineType+jian+ze+juan+
+												'</div>'+
+											'</a>'+
+										'</li>';
+						
+							$("#mlist").append(html);
+						 }
+						
+						 $("img").lazyload({ 
+					 		 placeholder : "../common/img/defual.png",
+			                 effect: "fadeIn"
+			           });  
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+		});
+		
+		</script>
+	</head>
+
+	<body>
+		<div style="background: #FF7E00;height:81px">
+			<img alt="" src="../common/images/main_banner.png" style="width:100%">
+		</div>
+		<div class="wrap">
+			<div class="mtop">
+				<ul>
+					<li>
+						<a href="#"><img class="icon1" src="../common/img/defual.png"
+								data-original="../common/images/icon1.png" alt="" />曾氏菜馆</a>
+					</li>
+					<li>
+						<a href="#"><img class="icon2" src="../common/img/defual.png"
+								data-original="../common/images/icon2.png" alt="" />美食</a>
+					</li>
+					<li>
+						<a href="#"><img class="icon3" src="../common/img/defual.png"
+								data-original="../common/images/icon3.png" alt="" />住宿</a>
+					</li>
+					<li>
+						<a href="#"><img class="icon4" src="../common/img/defual.png"
+								data-original="../common/images/icon4.png" alt="" />KTV</a>
+					</li>
+					<li>
+						<a href="#"><img class="icon5" src="../common/img/defual.png"
+								data-original="../common/images/icon5.png" alt="" />外卖</a>
+					</li>
+					<li>
+						<a href="#"><img class="icon6" src="../common/img/defual.png"
+								data-original="../common/images/icon6.png" alt="" />西餐</a>
+					</li>
+					<li>
+						<a href="#"><img class="icon7" src="../common/img/defual.png"
+								data-original="../common/images/icon7.png" alt="" />火锅</a>
+					</li>
+					<li>
+						<a href="#"><img class="icon8" src="../common/img/defual.png"
+								data-original="../common/images/icon8.png" alt="" />客服</a>
+					</li>
+				</ul>
+			</div>
+			<div style="background: #f5f5f5;height:8px"></div>
+			<div class="main">
+			<div style="border-bottom: solid #eaeaea 1px;width:100%;height:251px">
+				<div style="height:250px;width: 34%;float: left;border-right: solid #eaeaea 1px;">
+					<p style="padding-top: 6px;text-align: left;margin-left: 14px;">新人礼包</p>
+					<p style="color:#a4a4a4;padding-top: 6px;text-align: left;margin-left: 14px;">买100送30</p><br>
+					<img src="../common/img/defual.png"
+								data-original="../common/images/main_left.png" width="75%" style="margin-left: 15px;">
+				</div>
+				<div style="height:125px;width:33%;float: left;border-bottom: solid #eaeaea 1px;border-right: solid #eaeaea 1px;">
+					<p style="padding-top: 6px;text-align: left;margin-left: 14px;">立抢红包</p>
+					<p style="color:#a4a4a4;padding-top: 6px;text-align: left;margin-left: 14px;">商家红包抢不停</p>
+					<img src="../common/img/defual.png"
+								data-original="../common/images/main_red_pack.png" width="50%" style="margin-left: 15px;float: right;">
+				</div>
+				<div style="height:125px;width:30.5%;float: left;border-bottom: solid #eaeaea 1px;">
+					<p style="padding-top: 6px;text-align: left;margin-left: 14px;">立抢红包</p>
+					<p style="color:#a4a4a4;padding-top: 6px;text-align: left;margin-left: 14px;">官方红包发</p>
+					<img src="../common/img/defual.png"
+								data-original="../common/images/main_red_right.png" width="50%" style="margin-top: 10px;float: right;">
+				</div>
+				<div style="height:125px;width:32.5%;float: right">
+					<p style="padding-top: 6px;text-align: left;margin-left: 14px;">立抢红包</p>
+					<p style="color:#a4a4a4;padding-top: 6px;text-align: left;margin-left: 14px;">全景查房</p>
+					<img src="../common/img/defual.png"
+								data-original="../common/images/main_house_right.png" width="45%" style="margin-right: 15px;margin-top: 12px;float: right;">
+				</div>
+				<div style="height:125px;width:32.5%;float: right;border-right: solid #eaeaea 1px;">
+					<p style="padding-top: 6px;text-align: left;margin-left: 14px;">立抢红包</p>
+					<p style="color:#a4a4a4;padding-top: 6px;text-align: left;margin-left: 14px;">VR视觉察看</p>
+					<img src="../common/img/defual.png"
+								data-original="../common/images/main_house.png" width="50%" style="margin-top: 10px;float: right;">
+				</div>
+				</div>
+				<div style="background: #f5f5f5;height:8px"></div>
+
+				<h2 class="mh2"><i class="mx mx1"></i>为您订制<i class="mx mx2"></i></h2>
+
+				<ul class="mlist">
+				</ul>
+			</div>
+		</div>
+	</body>
+
+</html>

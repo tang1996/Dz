@@ -1,0 +1,477 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<html>
+  <head>
+   <title>国税代征</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	
+  </head>
+  <body>
+  	<script type="text/javascript">
+var valueColl = null;
+var selectColl;
+var addCollForm;
+var Collgrid;
+var Colldss;
+var Editdeptny ;
+var Editnesd;
+var idsno;
+Colldss = new Ext.data.GroupingStore({
+	  proxy: new Ext.data.HttpProxy({url:'/GXDS/selectTreasury'}),
+	  reader: new Ext.data.JsonReader({totalProperty:'totalCount', root:'list',id:'id',
+	  successProperty :'@success',
+	  fields:['yyId','mmId' ,'itmLev2' ,'mmRev','idSno','ITM']
+	  })
+});
+
+var Collcbsm=new Ext.grid.CheckboxSelectionModel();
+var Collcm=new Ext.grid.ColumnModel(
+				[new Ext.grid.RowNumberer(),
+			     Collcbsm,
+				 {header: '年份', dataIndex: 'yyId', width:100,sortable: true},
+				 {header: '月份', dataIndex: 'mmId', width:100,sortable: true},
+				 {header: '税种', dataIndex: 'itmLev2', width:100,sortable: true},
+				 {header: '月累计', dataIndex: 'mmRev', width:100,sortable: true},
+				 {header: '序列号', dataIndex: 'idSno', width:100,sortable: true,hidden:true},
+				 {header: '税种代码', dataIndex: 'ITM', width:100,sortable: true,hidden:true}
+]);
+
+Ext.onReady(function(){
+ Collgrid =new Ext.grid.GridPanel({
+			   ds:Colldss,
+			   cm:Collcm,
+			   sm:Collcbsm,
+			   height:document.body.clientHeight-124,
+			   width:document.body.clientWidth-193,
+			    tbar:[{
+				text:'增加',
+				iconCls:'add-fredd',
+				handler:function(){
+						if(collWin){
+							collWin.destroy();
+						}
+                      
+						var date = new Date();
+						var year = date.getYear();
+						var yearStore = new Ext.data.SimpleStore({   
+                           fields:['yearN','yearD'],   
+                           data:[[(year)+'年',year],[(year-1)+'年',year-1],[(year-2)+'年',year-2],[(year-3)+'年',year-3],[(year-4)+'年',year-4],[(year-5)+'年',year-5]]   
+                        }); 
+                        var mmStore = new Ext.data.SimpleStore({   
+                           fields:['mmN','mmD'],   
+                           data:[['1月','1'],
+                                 ['2月','2'],
+                                 ['3月','3'],
+                                 ['4月','4'],
+                                 ['5月','5'],
+                                 ['6月','6'],
+                                 ['7月','7'],
+                                 ['8月','8'],
+                                 ['9月','9'],
+                                 ['10月','10'],
+                                 ['11月','11'],
+                                 ['12月','12']
+                                 
+                           ]   
+                        });   
+					var	comboyear = new Ext.form.ComboBox({  
+                           id:'yy',
+                           fieldLabel: '年份',
+                           store: yearStore,  
+                           displayField:'yearN',  
+                           valueField:'yearD', 
+                           editable :false, 
+                           typeAhead: true,  
+                           mode: 'local',  
+                           triggerAction: 'all',  
+                           emptyText:'',
+                           width:250,  
+                           selectOnFocus:true,  
+                           resizable:true  
+                        }); 
+                     var combomm = new Ext.form.ComboBox({  
+                           id:'mm',
+                           fieldLabel: '月份',
+                           store: mmStore,  
+                           displayField:'mmN',  
+                           valueField:'mmD',  
+                           typeAhead: true,  
+                           mode: 'local',  
+                           triggerAction: 'all',  
+                           editable :false,
+                           emptyText:'',
+                           width:250,  
+                           selectOnFocus:true,  
+                           resizable:true  
+                        }); 
+						var itmLev2 = new Ext.form.ComboBox({
+								 fieldLabel: '税种',
+								 store:new Ext.data.SimpleStore({fields:[],data:[[]]}),
+								 shadow:false,
+								 mode: 'local',
+								 editable :false,
+								 width:250,
+								 triggerAction:'all',
+								 maxHeight: 250,
+								 tpl: '<tpl for="."><div style="height:200px"><div id="coll"></div></div></tpl>',
+								 allowBlank:false
+							});
+								var itmLev2Tree = new Ext.tree.TreePanel({
+									  loader: new Ext.tree.TreeLoader({dataUrl:'/GXDS/taxTree'}),
+									  border:false,
+									  rootVisible:false,
+									  root:new Ext.tree.AsyncTreeNode({text: '请选择税种',id:'coll'})
+								 });
+								itmLev2Tree.on('click',function(node){
+									deptny = node.text;
+									nesd = node.id
+							  		itmLev2.setValue(node.text);
+							  		itmLev2.collapse();
+							  	});
+								 itmLev2.on('expand',function(){
+								 	itmLev2Tree.render('coll');
+								 });
+							itmLev2Tree.on('checkchange', function(node, checked) {
+								 node.expand();
+								 node.attributes.checked = checked;
+								 node.eachChild(function(child) {
+								 child.ui.toggleCheck(checked);
+								 child.attributes.checked = checked;
+								 child.fireEvent('checkchange', child, checked);
+							 });
+							},itmLev2Tree);
+						
+						var yueleij = new Ext.form.NumberField({
+								fieldLabel: '月累计',
+								width:250,
+								name:'mmRev'
+						});
+						
+					  var collWin = new Ext.Window({
+					        title: '国税代征',
+					        width: 420,
+					        height:450,
+					        layout: 'fit',
+					        resizable:false,
+					        bodyStyle:'padding:5px;',
+					        closable :false,
+					        buttonAlign:'center',
+					        items: addCollForm = new Ext.form.FormPanel({
+								    baseCls: 'x-plain',
+							        labelWidth: 70,
+							        defaultType: 'textfield',
+							       	items:[comboyear,combomm,itmLev2,yueleij]
+							}),
+					        modal: true,
+						    buttons: [{
+					            text: '确定',
+					            handler:function(){
+							 	if(addCollForm.getForm().isValid()){
+							 		 if(yueleij.getValue().length>19){
+							 		   Ext.Msg.alert('错误','月累计数值长度超长'); 
+							 		   return;
+							 		 }
+							 		  Ext.Ajax.request({         
+								           url: '/GXDS/addTreasury',  
+								           waitMsg : '正在处理......', 
+								           params:{itmLev2:nesd,yyId:comboyear.value,mmId:combomm.value,mmRev:yueleij.getValue()},
+								           success:function(form,action)
+								           {
+						        			  Colldss.reload();
+								           },failure: function(form,action){
+								           		Ext.Msg.alert('错误','后端异常');
+								           } 
+									});
+									
+						        	     collWin.destroy();
+						        		
+							       	} else {
+							       		Ext.MessageBox.alert("错误","不允许为空!" );
+							       	}
+					         	 }
+					        },{
+					            text: '取消',
+					            handler: function(){
+					            addCollForm.getForm().reset();
+					           	collWin.destroy();
+					            }
+					        }]
+					});
+						collWin.show();
+		    }},{
+			text:'删除',
+			iconCls:'delete-fredd',
+			handler:function(){
+					Ext.MessageBox.confirm('消息', '确定删除吗?', dodelteColl);
+			}},
+			{
+			text:'修改',
+			iconCls:'delete-fredd',
+			handler:function(){
+				var Editdate = new Date();
+						var Edityear = Editdate.getYear();
+						var EdityearStore = new Ext.data.SimpleStore({   
+                           fields:['yearN','yearD'],   
+                           data:[[(Edityear)+'年',Edityear],[(Edityear-1)+'年',Edityear-1],[(Edityear-2)+'年',Edityear-2],[(Edityear-3)+'年',Edityear-3],[(Edityear-4)+'年',Edityear-4],[(Edityear-5)+'年',Edityear-5]]   
+                        }); 
+                        var EditmmStore = new Ext.data.SimpleStore({   
+                           fields:['mmN','mmD'],   
+                           data:[['1月','1'],
+                                 ['2月','2'],
+                                 ['3月','3'],
+                                 ['4月','4'],
+                                 ['5月','5'],
+                                 ['6月','6'],
+                                 ['7月','7'],
+                                 ['8月','8'],
+                                 ['9月','9'],
+                                 ['10月','10'],
+                                 ['11月','11'],
+                                 ['12月','12']
+                                 
+                           ]   
+                        });   
+					var	Editcomboyear = new Ext.form.ComboBox({  
+                           id:'Edityy',
+                           fieldLabel: '年份',
+                           store: EdityearStore,  
+                           displayField:'yearN',  
+                           valueField:'yearD', 
+                           editable :false, 
+                           typeAhead: true,  
+                           mode: 'local',  
+                           triggerAction: 'all',  
+                           emptyText:'',
+                           width:250,  
+                           selectOnFocus:true,  
+                           resizable:true  
+                        }); 
+                     var Editcombomm = new Ext.form.ComboBox({  
+                           id:'Editmm',
+                           fieldLabel: '月份',
+                           store: EditmmStore,  
+                           displayField:'mmN',  
+                           valueField:'mmD',  
+                           typeAhead: true,  
+                           mode: 'local',  
+                           triggerAction: 'all',  
+                           editable :false,
+                           emptyText:'',
+                           width:250,  
+                           selectOnFocus:true,  
+                           resizable:true  
+                        }); 
+						var EdititmLev2 = new Ext.form.ComboBox({
+								 fieldLabel: '税种',
+								 store:new Ext.data.SimpleStore({fields:[],data:[[]]}),
+								 shadow:false,
+								 mode: 'local',
+								 editable :false,
+								 width:250,
+								 triggerAction:'all',
+								 maxHeight: 250,
+								 tpl: '<tpl for="."><div style="height:200px"><div id="Editcoll"></div></div></tpl>',
+								 allowBlank:false
+							});
+								var EdititmLev2Tree = new Ext.tree.TreePanel({
+									  loader: new Ext.tree.TreeLoader({dataUrl:'/GXDS/taxTree'}),
+									  border:false,
+									  rootVisible:false,
+									  root:new Ext.tree.AsyncTreeNode({text: '请选择税种',id:'Editcoll'})
+								 });
+								EdititmLev2Tree.on('click',function(node){
+									Editdeptny = node.text;
+									Editnesd = node.id
+							  		EdititmLev2.setValue(node.text);
+							  		EdititmLev2.collapse();
+							  	});
+								 EdititmLev2.on('expand',function(){
+								 	EdititmLev2Tree.render('Editcoll');
+								 });
+							EdititmLev2Tree.on('checkchange', function(node, checked) {
+								 node.expand();
+								 node.attributes.checked = checked;
+								 node.eachChild(function(child) {
+								 child.ui.toggleCheck(checked);
+								 child.attributes.checked = checked;
+								 child.fireEvent('checkchange', child, checked);
+							 });
+							},EdititmLev2Tree);
+						
+						var Edityueleij = new Ext.form.TextField({
+								fieldLabel: '月累计',
+								width:250,
+								name:'EditmmRev'
+						});
+						
+					  var EditcollWin = new Ext.Window({
+					        title: '国税代征',
+					        width: 420,
+					        height:450,
+					        layout: 'fit',
+					        resizable:false,
+					        bodyStyle:'padding:5px;',
+					        closable :false,
+					        buttonAlign:'center',
+					        items: EditCollForm = new Ext.form.FormPanel({
+								    baseCls: 'x-plain',
+							        labelWidth: 70,
+							        defaultType: 'textfield',
+							       	items:[Editcomboyear,Editcombomm,EdititmLev2,Edityueleij]
+							}),
+					        modal: true,
+						    buttons: [{
+					            text: '确定',
+					            handler:function(){
+							 	if(EditCollForm.getForm().isValid()){
+							 		 if(Edityueleij.getValue().length>19){
+							 		   Ext.Msg.alert('错误','月累计数值长度超长'); 
+							 		   return;
+							 		 }
+							 		  Ext.Ajax.request({         
+								           url: '/GXDS/editTreasury',  
+								           waitMsg : '正在处理......', 
+								           params:{itmLev2:Editnesd,yyId:Editcomboyear.value,mmId:Editcombomm.value,mmRev:Edityueleij.getValue(),idSno:idsno},
+								           success:function(form,action)
+								           {
+								             Colldss.reload();
+								           },failure: function(form,action){
+								           		Ext.Msg.alert('错误','后端异常');
+								           } 
+									});
+						        	     EditcollWin.destroy();
+						        		
+							       	} else {
+							       		Ext.MessageBox.alert("错误","不允许为空!" );
+							       	}
+					         	 }
+					        },{
+					            text: '取消',
+					            handler: function(){
+					            EditCollForm.getForm().reset();
+					           	EditcollWin.destroy();
+					            }
+					        }]
+					});
+				   var rends = Collgrid.getSelections();
+					if(rends.length<=1&&rends.length!=0){
+						for(var i = 0 ; i < rends.length ; i++){
+						  var leng = rends[i];
+					  	  Editcomboyear.setValue(leng.get("yyId"));
+					   	  Editcombomm.setValue(leng.get("mmId"));
+					   	  Edityueleij.setValue(leng.get("mmRev"));
+					   	  EdititmLev2.setValue(leng.get("itmLev2"));
+					   	  Editnesd=leng.get("ITM");
+					   	  idsno=leng.get("idSno");
+					   	  EditcollWin.show();
+					 }
+					 }else{
+					 	Ext.Msg.alert('错误','不能多选或不选');
+				     }
+		    }	
+		},"-",{
+				text:'查询',
+				iconCls:'delete-fredd',
+				handler:function(){
+					 
+					var treasuryCollDatess = new Date();
+					var treasuryCollyear = treasuryCollDatess.getYear();	
+					var treasuryColldata = [[treasuryCollyear],[treasuryCollyear-1],[treasuryCollyear-2],[treasuryCollyear-3],[treasuryCollyear-4],[treasuryCollyear-5]];
+					var treasuryCollStore = new Ext.data.SimpleStore({fields:['text'],data:treasuryColldata});
+	
+					var treasuryCollComDate = new Ext.form.ComboBox({
+					 		store: treasuryCollStore,
+							fieldLabel: '选择年份',
+							displayField: ['text'],
+							mode: 'local',
+							emptyText:'选择...',
+							forceSelection: true,
+							allowBlank:true,
+							editable: false,
+							width:200,
+							triggerAction:'all'
+					});
+					
+					var treasuryCollForm = new Ext.form.FormPanel({
+					        labelWidth: 95,
+					        width: 500,
+					        height:342,
+					        defaultType: 'textfield',
+					        items:treasuryCollComDate
+					});
+	
+					var treasuryCollWindows = new Ext.Window({
+					        title: '条件查询',
+					        width: 513,
+					        height:410,
+					        resizable:false,
+					        closable :false, 
+					        buttonAlign:'center', 
+					        items: treasuryCollForm,
+					        buttons: [{
+					            text: '确定',
+					            handler:function(){
+							 		if(treasuryCollForm.getForm().isValid()){
+	
+					       			Colldss.load({
+						       			 params:{yyID:treasuryCollComDate.value}
+								    });
+					        		treasuryCollWindows.destroy();
+							       	} else {
+							       		Ext.MessageBox.alert( "错误","不允许为空!" );
+							       	}
+					         	 }
+					        },{
+					            text: '取消',
+					            handler: function(){
+					            	treasuryCollForm.getForm().reset();
+					           		treasuryCollWindows.destroy();
+					            }
+					        }]
+				     });
+								treasuryCollWindows.show();
+				  }
+				}
+	   ]
+	 });
+       function dodelteColl(btn){
+                   
+ 					if(btn=='yes'){
+  							var b = "";
+							var rends = Collgrid.getSelections();
+							if(rends.length>0){
+							for(var i = 0 ; i<rends.length ; i++)
+							{
+							  var rend = rends[i];
+							  if(i==rends.length-1)
+							  {
+							     b = b + rend.get("idSno");
+							  }else
+							  {
+							     b = b + rend.get("idSno")+",";
+							  }
+							}
+
+					      Ext.Ajax.request({         
+					           url: '/GXDS/deleteTreasury',  
+					           waitMsg : '正在处理......', 
+					           params: { idSno: b },
+					           success:function(form,action)
+					           {
+					        	 Colldss.reload();
+					           },failure: function(form,action){
+					           			Ext.Msg.alert('错误','后端异常');
+					           } 
+						});
+					}else{
+						Ext.Msg.alert('错误','请选择需要删除的数据!');
+					}
+		}
+   }   
+	Colldss.load({params:{start:0,limit:10}});
+	Collgrid.render('grid-coll');
+});
+
+  	</script>
+	<div id="grid-coll" ></div>
+  </body>
+</html>

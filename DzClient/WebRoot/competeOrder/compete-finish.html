@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>送达</title>
+		<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+		<link rel="stylesheet" href="./compete-order.css">
+		<link rel="stylesheet" href="./chuang.css">
+		<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+	</head>
+	<body>
+		<script type="text/javascript">
+			
+		$(document).ready(function(){ 
+				load();
+		});
+		
+		function load(){
+			$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.DISTRIVIEW,
+				 	data: { 
+            			location: getCookie('lng'),
+            			status : 'taking',
+            			token : getCookie('token')
+        			},
+					success:function(data) {
+							var html = '';
+							for(var i = 0;i < data.length;i++){
+									var menusLine = '';
+							 		var children=data[i].children;
+							 			if(children != null){
+							 				menusLine +='<div class="date dot">';
+											 for(var y=0;y < children.length;y++){
+											 	menusLine +='<div class="lb">'+
+												   '<p>商品:&nbsp;&nbsp;&nbsp;'+children[y].name+'</p>'+
+												   '<p>x'+children[y].number+'</p>'+
+											       '</div>';
+											 }
+											 menusLine +='</div>';
+										 }
+						 		html = html + '<div class="oneOrder"><div class="title"><img src="'+data[i].logo+'" alt=""><span>'+data[i].companyName+'</span><span class="abnormal" onClick=abnormal('+data[i].orderId+')>异常配送</span></div>'+
+		      					 	   '<div class="detail-box">'+
+		           				   '<div class="address dot">'+
+		               			   '<span>'+data[i].companyPosition+'</span>'+
+		               			  '<span class="distance"><img src="../common/img/addr.png" onclick=javascript:orderCheck('+"'quhuo',"+data[i].coordinates+","+'"'+data[i].logo+'"'+') style="padding-bottom:8px;padding-right:4px;" alt="">'+data[i].distance+'米</span>'+
+		           				  '</div>'+menusLine+
+		           				   '<div class="date dot">订餐联系人：'+data[i].userName+'</div>'+
+		           				    '<a href="tel:'+data[i].userPhone+'"><div class="date dot">联系电话：'+data[i].userPhone+'</div></a>'+
+		           				     '<div class="date dot">送餐地址：'+data[i].userAddress+data[i].room+'</div>'+
+		           				     '<div class="date dot">下单时间时间：'+data[i].addTime+'</div>'+
+		           				  '<div class="date dot">预计送达时间：'+data[i].time+'前送达</div>'+
+		       					  '</div>'+
+		       					  '<div class="btn-box waiting">'+
+		           				  '<a onclick="privateChat(\''+data[i].userPhone+'\')" style="display:inline-block;float: left;"><span class="btn f-left">在线用户</span></a>'+
+		           				  '<span class="btn"><a href="tel:'+data[i].userPhone+'">联系用户</a></span>'+
+		           				  '<span class="btn f-right" onclick="finish('+data[i].orderId+');">确认送达</span>'+
+		       					  '</div><div class="seeMap_div" onclick=javascript:orderCheck('+"'songcan',"+data[i].coordinates+","+'"'+data[i].logo+'"'+')><div class="circular_div"></div>'+
+            			  '<div class="headImg_div" ><img src="../common/img/rider_girl.png"></div>'+
+            			  '<div class="seeTitle_div">用户导航 》</div></div></div></div>';
+						}
+							
+						$("#task-detail").html(html);
+						var totalCount=data.length;
+						$("#finish").html("待送达("+totalCount+")");
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+		}
+		
+		function privateChat(phone){
+			//alert("点击")
+			valLink('privateChat', phone);
+		}
+		
+		function finish(orderId) {
+			$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.FINISH,
+				 	data: {
+            			token:  getCookie('token'),
+            			orderId: orderId
+        			},
+					success:function(data) {
+						valLink('alert',data.message);
+						load();
+					},
+					error:function(error) {
+						valLink('alert',error.message);
+					}
+				});
+        }
+		//异常  订单id
+		function abnormal(oId){
+			//alert(obj);
+			$("#footer-box").html('<span onclick="javascript:set('+oId+');" style="float: none;display: block;width: auto;">提交</span>');
+			$("#mask").show();
+		}
+		function set(oId) {
+			
+			$.ajax({
+				type:'POST',
+				url: BASE_URL + LOGIN_ACTION.OUNUSUAL,
+			 	data: {
+           			orderId: oId
+       			},
+				success:function(data) {
+					valLink('alert',data.message);
+				},
+				error:function(error) {
+					valLink('alert',error.message);
+				}
+			});
+			
+		}
+		function cancel(){
+			$("#foot-nav").css("display", "block");
+			  $("#mask").css("display", "none");
+			
+		}
+		
+		</script>
+		<div class="mask" id="mask" style="display:none;">
+			<div class="container">
+				<div class="info" id="info">
+					
+				</div>
+				<div class="tel-box" id="tel-box">
+					<p class="title">是否提交配送异常？</p>
+				</div>
+				<div class="footer-box clearfix" id="footer-box">
+					
+				</div>
+				<span onclick="cancel();">
+				<img class="close-btn" src="../common/img/close.png" alt="">
+				</span>
+			</div>
+		</div>
+		<ul class="clearfix header">
+			<li class="f-left" onclick="window.location.href='./compete-order.html'">
+				新任务
+			</li>
+			<li class="f-left" onclick="window.location.href='./compete-taking.html'">
+				待取货
+			</li>
+			<li class="f-left active" id="finish">待送达</li>
+		</ul>
+		<div class="task-detail" id="task-detail">
+		</div>
+	</body>
+</html>

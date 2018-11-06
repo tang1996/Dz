@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>添加外卖菜品</title>
+<link rel="stylesheet" href="./add_sp.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/ajaxfileupload.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+		<link rel="stylesheet" type="text/css" href="../common/css/mobileSelect.css">
+		<script src="../common/js/mobileSelect.min.js" type="text/javascript"></script>
+
+		 
+</head>
+
+<body>
+<script type="text/javascript">	
+	var mobileSelect1;
+	var mobileSelect3;
+		$(document).ready(function(){ 
+			var weekdayArr=[];
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.GETTYPE,
+				 	data: { 
+            			id:getCookie('cid')
+        			},
+					success:function(data) {
+							if(data.list.length==0){
+								var url="../sort_add/sort_add.html";
+								window.location.href=url;
+								return false;
+							}
+						 var list = data.list;
+							  mobileSelect1 = new MobileSelect({
+								trigger: '#ification', 
+								title: '请选择菜品分类',  
+								wheels: [
+									 {data:list}
+								],
+								position:[0]
+							});
+
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+
+				  mobileSelect3 = new MobileSelect({
+								trigger: '#recommend', 
+								title: '请选择是否推荐 ',  
+								wheels: [
+									 {data:['推荐','不推荐']}
+								],
+								position:[0]
+							});
+		});
+
+		
+		function save(hang){
+		
+				var size = 1024 * 500;
+				var files = document.getElementById('img').files;  
+			    var fileSize = 0;
+			    if(files.length!=0){
+			        fileSize = files[0].size;
+			    }
+			    if(fileSize > size){
+			        valLink("alert","文件不能大于 500KB ");
+			        return;
+			    }
+		    
+				var name= $('#name').val();
+				var ific= mobileSelect1.getValue();
+				var recommendNew=mobileSelect3.getValue();
+				var img=$('#img').val();
+				var price=$('#price').val();
+				var stock=$('#stock').val();
+				var unit=$('#unit').val();
+				var promotion_price=$('#promotion_price').val();
+				var printName=$('#printName').val();
+				var code=$('#code').val();
+
+				if(name.length==0){
+						valLink("alert","请填写菜品名称");
+						return false;
+				}else{
+					if(getStrLength(trim(name)) >16){
+						valLink("alert","菜品名称不能超过8个汉字,16个英文字符");
+						return false;
+					}
+				}
+				
+				var boxPrice=$('#boxPrice').val();
+				if(boxPrice.length==0){
+					valLink("alert","外卖包装费不能为空,如果菜品无包装费请填写0");
+						return false;	
+				}
+					
+				if(ific==null){
+						valLink("alert","请选择菜品分类!");
+						return false;	
+				}else{
+						var ification=ific[0].id;
+				}
+				
+				if(printName.length==0){
+						valLink("alert","请填写打印机名称!");
+						return false;
+				}
+				if(img.length==0){
+						valLink("alert","请选择菜品图片!");
+						return false;
+				}
+				 if(price.length==0){
+						valLink("alert","请填写菜品价格!");
+						return false;
+				}else{
+					if(parseFloat(price)==0){
+							valLink("alert","菜品价格不能为0");
+						      return false;
+					}
+					if(promotion_price.length==0){
+						valLink("alert","如果不想促销,促销价格请填0");
+							return false;
+					}
+					if(parseFloat(promotion_price) >= parseFloat(price)){
+						valLink("alert","促销价格不能大于等于菜品价格");
+						return false;
+					}
+
+				}
+
+				if(recommendNew==null){
+					
+						
+				}else{
+						var recommend=recommendNew[0];
+						if(recommend=="推荐"){
+							var pan=1;
+						  }else{
+							var pan=0; 
+						  }
+
+				}
+				 if(stock.length==0){
+						valLink("alert","请填写菜品库存!");
+						return false;
+				}
+				
+				
+				
+				$("#loading").show();
+				$.ajaxFileUpload({
+						secureuri: false, //是否需要安全协议，一般设置为false
+						type:'POST',
+						url: BASE_URL + LOGIN_ACTION.UPLOADSAVE, //用于文件上传的服务器端请求地址
+						fileElementId: 'img', //文件上传域的ID
+						data:{
+							name : name,
+							companyId:getCookie('cid'),
+							classIf:"外卖",
+							ificationId :ification,
+							printName:printName,
+							img :img,
+							price:parseFloat(price),
+							stock:stock,
+							unit:unit,
+							brief:'',
+							type :'GOODS',
+							promotion_price:parseFloat(promotion_price),
+							code:code,
+							ksy_word:'',
+							recommend:pan,
+							details:'',
+							boxPrice:boxPrice
+						},
+						dataType: 'json', //返回值类型 一般设置为json
+						success: function (data, status){
+						$("#loading").hide();
+							  	if(hang==1){
+									var url="../add_sp/add_sp.html";
+								}else if(hang==2){
+									var url="../sort/sort.html";
+								}
+								window.location.href=url;
+						},
+						error: function (data, status, e){
+						$("#loading").hide();
+								valLink("alert",e);
+								return false;
+						}
+					});
+
+		}
+
+
+		
+	function preview(){
+		$("#img").click();
+	};
+	         
+	$(function() {
+       $('#img').change(function() {
+           file = this.files[0];
+           var r = new FileReader();
+           r.readAsDataURL(file);
+           $(r).load(function() {
+               $('#photo').html('<img class="sp-img" src="' + this.result + '" alt="" />');
+           })
+       })
+   });
+function onlyNumber(obj){  
+			    var t = obj.value.charAt(0);    
+			    var reg = new RegExp("([0]*)([1-9]+[0-9]+)", "g");
+			     obj.value = obj.value.replace(/[^\d\.]/g,'');     
+			     obj.value = obj.value.replace(/^\./g,'');      
+			     obj.value = obj.value.replace(/\.{2,}/g,'.');     
+			     obj.value = obj.value.replace('.','$#$').replace(/\./g,'').replace('$#$','.');
+			     obj.value = obj.value.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3');
+				 obj.value=obj.value.replace(reg, "$2");
+
+			     if(t == '-'){  
+			        
+			       return;
+			     }else if(t==0){
+			     	$("#time1").val('');
+			     	$("#time2").val('');
+			     }   
+ 
+}
+ function setFocus(id) { 
+	var t=$("#"+id).val(); 
+	$("#"+id).val("").focus().val(t); 
+} 
+function trim(str){ 
+  return str.replace(/(^\s*)|(\s*$)/g, "");
+}
+
+function getStrLength(str) {  
+    var cArr = str.match(/[^\x00-\xff]/ig);  
+    return str.length + (cArr == null ? 0 : cArr.length);  
+}  
+function onlyNumberNew(obj){
+	  var t = obj.value.charAt(0);    
+			    obj.value = obj.value.replace(/[^\d\.]/g,'');     
+			     obj.value = obj.value.replace(/^\./g,'');      
+			     obj.value = obj.value.replace(/\.{2,}/g,'.');     
+			     obj.value = obj.value.replace('.','$#$').replace(/\./g,'').replace('$#$','.');
+			     obj.value = obj.value.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3');
+			     if(t == '-'){  
+			        
+			       return;
+			     }
+
+}
+ 
+</script>
+<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="../sort/sort.html"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>添加外卖菜品</p>
+			
+		</div>
+	</div>
+    <div class="wrap" id="wrap" style="display:;">
+        <ul class="md x-sp">
+            <li>
+                <a>
+                    <p><font style="color:red;">*</font>&nbsp;菜品名称</p>
+                    <span><input type="text" placeholder="限8字以内"  id="name"  /></span>
+                
+                </a>
+            </li>
+
+            <li>
+                <a >
+                    <p><font style="color:red;">*</font>&nbsp;菜品分类</p>
+                    <span>
+                    	
+						<div id="ification" style="float: right;border: 1px solid #ff7e00;height: 33px;width: 100%;border-radius: 6px;position: relative;margin-top: 10px;text-align: center;line-height: 35px;color: #ff7e00;">请选择菜品分类</div>
+                    </span>
+              
+                </a>
+            </li>
+			  
+			 <li>
+                <a>
+                    <p><font style="color:red;">*</font>&nbsp;打印机名称</p>
+                    <span><input type="text" placeholder="例如后厨1,后厨2,前台3"  id="printName" /></span>
+                </a>
+            </li>
+           
+        </ul>
+
+        <ul class="md">
+            <li>
+                <a>
+                    <div class="sp-d">
+                        <p class="nofloat"><font style="color:red;">*</font>&nbsp;菜品图片</p>
+                        <p class="nofloat sp-p">图片需要大于600x450像素 ,不能超过500KB</p><!--  -->
+				        <input id="img" name="file" type="file" accept="image/*" style="display:none"/>
+                    </div>
+                    <div id="photo" onclick="preview();">
+                    	<img class="sp-img" src="../common/img/s.jpg">
+                    </div>
+                </a>
+            </li>
+          <!--  <li>
+                <a>
+                    <p class="nofloat">上传至美图美拍</p>
+                    <p class="nofloat sp-p">视频不能超过5分钟</p>
+                </a>
+            </li>-->
+        </ul>
+
+        <ul class="md">
+            <li>
+                <a>
+                    <p><font style="color:red;">*</font>&nbsp;价格</p>
+                    <input type="text" placeholder="请填写价格"  id="price" onkeyup="onlyNumber(this)"/>
+                </a>
+            </li>
+			  <li>
+                <a>
+                    <p>促销价格</p>
+                    <input type="text" placeholder="不做活动,促销价格默认为0" name="promotion_price" id="promotion_price" value="0" onkeyup="onlyNumber(this)" />
+                </a>
+            </li>
+              <li>
+                <a >
+                    <p>外卖包装费</p>
+                    <span>
+						<input type="text"   id="boxPrice" value="0" onkeyup="onlyNumberNew(this)"  onclick="setFocus('boxPrice')"/>
+                    </span>
+               
+                </a>
+            </li>
+			
+             <li>
+                <a>
+                    <p>菜品编号</p>
+                    <span><input type="text" placeholder="非必填项"  id="code" /></span>
+                </a>
+            </li>
+			<li>
+                <a>
+                    <p>是否推荐</p>
+					 <span>
+						<div id="recommend" style="float: right;border: 1px solid #ff7e00;height: 33px;width: 100%;border-radius: 6px;position: relative;margin-top: 10px;text-align: center;line-height: 35px;color: #ff7e00;">请选择是否推荐</div>
+                    </span>
+                </a>
+            </li>
+			
+       
+            <li>
+                <a>
+                    <p>库存</p>
+					<input type="text"  name="stock"  id="stock" value="99" onclick="setFocus('stock')"/>
+                </a>
+            </li>
+        
+        </ul>
+
+  
+		
+		<ul class="md">
+			<li>
+				<a>
+					<p>菜品单位</p>
+					<input type="text"  name="" id="unit" placeholder="非必填项"  />
+				</a>
+			</li>		
+		</ul>
+		 <div id="loading" style="display:none;width:100%;position: absolute;top: 0px;height:100%;z-index: 100000;background-color: #000;opacity: 0.5;">
+    <span style="text-align: center;color: #fff;left: 30%;top: 50%;position: absolute;">菜品添加中..请稍等</span>
+    </div>
+		<div class="btn-z">
+			<a href="javascript:void(0);" onclick = "save(1);">保存并继续添加</a>
+			<a href="javascript:void(0);" onclick = "save(2);">保存并返回</a>
+		</div>
+	
+    </div>
+ 
+	  
+</body>
+</html>

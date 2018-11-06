@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>订单明细</title>
+    <link rel="stylesheet" type="text/css" href="./detailed.css">
+    <link rel="stylesheet" type="text/css" href="./mobiscroll.custom.min.css">
+	<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="../common/js/jquery.lazyload.min.js" ></script>
+	<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../common/js/common.js"></script>
+	<script type="text/javascript" src="../common/js/mobiscroll.custom.min.js"></script>
+</head>
+
+<body>
+<script type="text/javascript">
+var startTime;
+var endTime;
+var type; 		
+var status; 
+var dType;
+var oID;
+var oType;
+var startNum;
+var endNum;
+var cid = 22;
+$(document).ready(function(){ 
+	cid = 22;
+	var dates = new Date();
+	var year = dates.getFullYear();
+	var month = dates.getMonth();
+	var day = dates.getDate();
+	var monthAddOne = month + 1;
+	if (day >= 1 && day <= 9) {
+	   day = "0" + day;
+	 }
+	if (monthAddOne >= 1 && monthAddOne <= 9) {
+		monthAddOne = "0" + monthAddOne;
+	}
+	
+	
+	$("#startTime").val(year+"-"+monthAddOne+"-"+day);
+	$("#endTime").val(year+"-"+monthAddOne+"-"+day);
+	 
+	$("#head p").click(function () {
+		if($(this).html() == "已结算订单"){
+			$(this).addClass("click");
+			$(this).siblings().removeClass("click");
+			$("#yiJieZhang").removeClass("hidden");
+			$("#weiJieZhang").addClass("hidden");
+			
+			getCount();
+			click_div_each();
+
+		}else {
+			$(this).addClass("click");
+			$(this).siblings().removeClass("click");
+			$("#weiJieZhang").removeClass("hidden");
+			$("#yiJieZhang").addClass("hidden");
+
+			getDoingCount();
+			weiDingDan_div_each();
+			}
+		})
+
+	//已结算按钮
+	$(".click_div").click(function () {
+		$(this).addClass("clicking");
+		$(".dan_div .click_div").not(this).removeClass("clicking");
+		type = $(this).attr("type");
+		status = $(this).attr("status");
+		getList();
+		
+	})
+
+		//未结算按钮
+		$(".weiDingDan_div").click(function () {
+			$(this).addClass("clicking");
+			$(this).siblings().removeClass("clicking");
+			dType = $(this).attr("dType");
+			getDoingList()
+		})
+
+			//时间筛选
+		$("#startTime").change(function() {
+			startNum = parseInt($("#startTime").val().replace(/-/g, ''), 10);
+			endNum = parseInt($("#endTime").val().replace(/-/g, ''), 10);
+			if($(this).val() <= $("#endTime").val()){
+				if(endNum - startNum <= 100){
+					getCount();
+				}else {
+					valLink("alert","只能查询一个月以内的信息");
+				}
+			}else {
+				valLink("alert","开始时间不可以大于结束时间");
+			   
+			}
+		})
+
+		$("#endTime").change(function() {
+			startNum = parseInt($("#startTime").val().replace(/-/g, ''), 10);
+			endNum = parseInt($("#endTime").val().replace(/-/g, ''), 10);
+			if($(this).val() >= $("#startTime").val()){
+				if(endNum - startNum <= 100){
+					getCount();
+				}else {
+					
+					valLink("alert","只能查询一个月以内的信息");
+				}
+			}else {
+				valLink("alert","结束时间不可以小于开始时间");
+			
+			}
+			
+		})
+
+		//时间插件
+		var theme = "ios";
+		var mode = "scroller";
+		var display = "bottom";
+		var lang="zh";
+
+		// Date & Time demo initialization
+		$("#startTime").mobiscroll().date({
+		   theme: 'mobiscroll',
+        		display: 'bottom',
+                lang: lang,
+                dateFormat:"yyyy-mm-dd",
+                minDate: new Date(year,month-1,day),
+                maxDate: new Date(year,month,day)
+		});
+		$("#endTime").mobiscroll().date({
+			   theme: 'mobiscroll',
+        		display: 'bottom',
+                lang: lang,
+                dateFormat:"yyyy-mm-dd",
+                minDate: new Date(year,month,day),
+                maxDate: new Date(year,month,day)
+		});
+
+	getCount();
+	click_div_each();
+	 
+});
+
+
+function getCount() {
+    startTime = $("#startTime").val();
+    endTime = $("#endTime").val();
+	$.ajax({
+		url: BASE_URL + LOGIN_ACTION.GETCOUNT,
+		type: "POST",
+		data:{
+        	"companyId": getCookie('cid'),
+        	"startTime":startTime,
+        	"endTime":endTime
+        },
+		dataType:"json",
+		success:function(data){
+			$("#dianNei .yiJieZhang .manyOrder i").html(data.MSfinish);
+			$("#dianNei .yiTuiDan .manyOrder i").html(data.MScancel);
+			$("#dianNei .weiWanCheng .manyOrder i").html(data.MSdoing);
+			$("#dianNei .shiShou i").html(data.MSpay);
+			$("#waiMai .yiWanCheng .manyOrder i").html(data.WMfinish);
+			
+			$("#waiMai .yiTuiDan .manyOrder i").html(data.WMcancel);
+			$("#waiMai .shiShou i").html(data.WMpay);
+		},
+		error:function(){
+			valLink("alert","getCount 错误！！！");
+			
+		}
+	})
+			//getList()
+}
+
+function click_div_each() {
+	
+	$(".click_div").each(function() {
+		
+		if($(this).hasClass("clicking")){
+			type = $(this).attr("type");
+	    	status = $(this).attr("status");
+			getList();
+		}
+	})
+}
+
+
+
+//已结算的订单明细 展示 
+function getList() {
+	
+	$.ajax({
+		url: BASE_URL + LOGIN_ACTION.GETLIST,
+		type:"POST",
+		dataType: "json",
+		data:{
+			"companyId":getCookie('cid'),
+           	"startTime":startTime,
+           	"endTime":endTime,
+           	"type":type,
+           	"status":status
+		},
+		success:function (data){
+			$("#yiJieZhang #dingDanMingXi_div ul").html("");
+			var dList = data.list;
+			var length=dList.length;
+			if(length> 0){
+			
+				$("#yiJieZhang #dingDanMingXi_div ul").append("<li class='clear'><p style='width: 35%'>订单号</p><p style='width: 35%'>订单时间</p><p style='width: 30%'>总计</p></li>");
+				if(type == "2"){
+					for ( var i = 0 ; i < dList.length ; i++) {
+						$("#yiJieZhang #dingDanMingXi_div ul").append("<li class='clear' onclick='getOrder(this)' oID='" + dList[i].id + "' oType='" + type + "'><p style='width: 35%'>" + dList[i].orderNo + "</p><p style='width: 35%'>" + dList[i].addTime + "</p><p style='width: 30%'>" + dList[i].total + "</p></li>");
+					};
+				}else {
+					for ( var i = 0 ; i < dList.length ; i++) {
+						$("#yiJieZhang #dingDanMingXi_div ul").append("<li class='clear' onclick='getOrder(this)' oID='" + dList[i].id + "' oType='" + type + "'><p style='width: 35%'>" + dList[i].orderNo + "</p><p style='width: 35%'>" + dList[i].addTime + "</p><p style='width: 30%'>" + dList[i].total + "</p></li>");
+					};
+				}
+			
+			}else{
+				$("#yiJieZhang #dingDanMingXi_div ul").append("<li class='noData'>没有数据</li>")
+			}
+			
+		},
+		error:function(){
+			//valLink("alert","getList 错误！");
+			alert("getList 错误！");
+		}
+	})
+}
+
+
+//未结算
+function getDoingCount() {
+	$.ajax({
+		url:BASE_URL + LOGIN_ACTION.GETDOINGCOUNT,
+		type:"POST",
+		dataType:"json",
+		data:{"companyId":getCookie('cid')
+		},
+		success:function(data) {
+			$(".MS .manyOrder i").html(data.MSorder);
+			$(".MS .shiShou i").html(data.MSpay);
+			$(".WM .manyOrder i").html(data.MSorder);
+			$(".WM .shiShou i").html(data.WMpay);
+		},
+		error:function(){
+			valLink("alert","getDoingCount 错误！");
+		}
+	});
+}
+function weiDingDan_div_each() {
+	$(".weiDingDan_div").each(function() {
+		if($(this).hasClass("clicking")){
+			dType = $(this).attr("dType");
+			getDoingList();
+		}
+	})
+}
+
+//获得未结算列
+function getDoingList() {
+	
+	$.ajax({
+		url:BASE_URL + LOGIN_ACTION.GETDOINGLIST,
+		type:"POST",
+		dataType:"JSON",
+		data:{
+			"companyId": getCookie('cid'),
+           	"type":dType
+		},
+		success:function(data){
+			$("#weiJieZhang #dingDanMingXi_div ul").html("");
+			var dlist = data.list;
+			if(dlist.length != 0){
+				$("#weiJieZhang #dingDanMingXi_div ul").append("<li class='clear'><p style='width: 35%'>订单号</p><p style='width: 35%'>订单时间</p><p style='width: 30%'>总计</p></li>");
+				if(dType == "2"){
+					for(var i = 0; i<dlist.length; i++){
+						$("#weiJieZhang #dingDanMingXi_div ul").append("<li class='clear' onclick='getOrder(this)' oID='" + dlist[i].id + "' oType='" + dType + "'><p style='width: 35%'>" + dlist[i].orderNo + "</p><p style='width: 35%'>" + dlist[i].addTime + "</p><p style='width: 30%'>" + dlist[i].total + "</p></li>");
+					}
+				}else {
+					for ( var i = 0; i<dlist.length ; i++) {
+						$("#weiJieZhang #dingDanMingXi_div ul").append("<li class='clear' onclick='getOrder(this)' oID='" + dlist[i].id + "' oType='" + dType + "'><p style='width: 35%'>" + dlist[i].orderNo + "</p><p style='width: 35%'>" + dlist[i].addTime + "</p><p style='width: 30%'>" + dlist[i].total + "</p></li>");
+					};
+				}
+			}else if (dlist.length == 0) {
+				$("#weiJieZhang #dingDanMingXi_div ul").append("<li class='noData'>没有数据</li>")
+			}
+			
+		},
+		error:function(){
+		valLink("alert","getDoingList 错误");
+		}
+	})
+}
+
+
+//订单详细 查看
+function getOrder(obj) {
+	var findId = $(obj);
+	oID = findId.attr("oID");
+	oType = findId.attr("oType");
+	
+	$.ajax({
+		url:BASE_URL + LOGIN_ACTION.GETORDER,
+		type:"POST",
+		dataType:"JSON",
+		data:{"orderId":oID},
+		success:function(data){
+			successGetOrder(data)
+		},
+		error:function(){
+			valLink("alert","getOrder 错误！");
+		}
+	});
+}
+
+function successGetOrder(data) {
+	$("#main").addClass("hidden");
+	$("#dingDanXiangPing").removeClass("hidden");
+	var htmlValue = "";
+	var dList = data.list;
+	//外卖
+	if(oType == 1){
+		htmlValue += "<p class='clear'><span class='left'><i></i>订单号：</span><span class='right'>" + data.orderNo + "</span></p>";
+		htmlValue += "<p class='clear'><span class='left'><i></i>订单时间：</span><span class='right'>" + data.addTime + "</span></p>";
+		htmlValue += "<p class='clear'><span class='left'><i></i>配送方式：</span><span class='right'>" + data.way + "</span></p>";
+		htmlValue += "<div class='clear moneyList'><ul class='calList'>";
+		htmlValue += "<li><span class='caiName'>菜名</span><span class='oneMoney'>单价</span><span class='howMany'>数量</span><span class='andMoney'>小计</span></li>";
+		for ( var i = 0;i< dList.length ; i++) {
+			htmlValue += "<li><span class='caiName'>" + dList[i].name + "</span><span class='oneMoney'>￥" + dList[i].price + "</span><span class='howMany'>" + dList[i].number + "</span><span class='andMoney'>￥" + dList[i].subtotal + "</span></li>";
+		}
+		htmlValue += "<li><span class='caiName'>餐盒</span><span class='oneMoney'></span><span class='howMany'></span><span class='andMoney'>￥" + data.boxPrice + "</span></li>";
+		var distributionPrice = 0;
+		if(typeof(data.distributionPrice) != "undefined"){
+			htmlValue += "<li><span class='caiName'>配送费</span><span class='oneMoney'></span><span class='howMany'></span><span class='andMoney'>￥" + data.distributionPrice + "</span></li>";
+			distributionPrice = data.distributionPrice;
+		}
+		
+		htmlValue += "</ul><ul class='youHuiList'>";
+		htmlValue += "</ul></div>";
+		htmlValue += "<p class='clear total'><span class='left'>合计：</span><span class='right'><em>￥</em>" + data.total + "</span></p>"
+		if(data.discount != 0){
+			htmlValue += "<p class='clear total'><span class='left' style='color:#ff0000;'>优惠金额：</span><span class='right'><em>￥</em>" + data.discount + "</span></p>";
+		}
+		htmlValue += "<p class='clear total'><span class='left'>实付金额：</span><span class='right'><em>￥</em>" + data.pay + "</span></p>"
+	}else if (oType == 2) {//美食
+		htmlValue += "<p class='clear'><span class='left'><i></i>订单号：</span><span class='right'>" + data.orderNo + "</span></p>";
+		htmlValue += "<p class='clear'><span class='left'><i></i>订单时间：</span><span class='right'>" + data.addTime + "</span></p>";
+		htmlValue += "<p class='clear'><span class='left'><i></i>桌台号：</span><span class='right'>" + data.tableNo + "</span></p>";
+		htmlValue += "<div class='clear moneyList'><ul class='calList'>";
+		htmlValue += "<li><span class='caiName'>菜名</span><span class='oneMoney'>单价</span><span class='howMany'>数量</span><span class='andMoney'>小计</span></li>";
+		for (  var i = 0;i< dList.length ; i++) {
+			htmlValue += "<li><span class='caiName'>" + dList[i].name + "</span><span class='oneMoney'>￥" + dList[i].price + "</span><span class='howMany'>" + dList[i].number + "</span><span class='andMoney'>￥" + dList[i].subtotal + "</span></li>";
+		}
+		if(data.mealFee != null){
+			htmlValue += "<li><span class='caiName'>餐位费</span><span class='oneMoney'></span><span class='howMany'></span><span class='andMoney'>￥" + data.mealFee + "</span></li>";
+			htmlValue += "</ul><ul class='youHuiList'>";
+		}
+		
+		
+		htmlValue += "</ul></div>";
+		htmlValue += "<p class='clear total'><span class='left'>合计：</span><span class='right balck'><em>￥</em>" + data.total + "</span></p>"
+		if(data.discount != 0){
+			htmlValue += "<p class='clear total'><span class='left' style='color:#ff0000;'>优惠金额</span><span class='right balck'><em>￥</em>" + data.discount + "</span></p>";
+		}
+		htmlValue += "<p class='clear total'><span class='left'>实付金额：</span><span class='right'><em>￥</em>" + data.pay + "</span></p>"
+		
+	}
+	htmlValue += "<div class='completeFoot'>完成</div>";
+	$("#dingDanXiangPing").html(htmlValue);
+	
+	//订单详细 完成
+	$(".completeFoot").click(function () {
+	    $("#main").removeClass("hidden");
+	    $("#dingDanXiangPing").addClass("hidden"); 
+	})
+}
+</script>
+    <div id="bigDiv">
+
+        <div id="main" class="">
+			<div class="h-div clear">
+				<a class="h-l" href="../management/management.html"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+				<p>订单明细</p>
+			
+			</div>
+            <div id="head" class="clear">
+                <p class="click">已结算订单</p>
+                <p>未结算订单</p>
+            </div>
+
+            <div id="body">
+            
+                <!--已结账订单-->
+                <div id="yiJieZhang">
+                    <!--时间筛选-->
+                    <div id="data_div">
+                        <div id="data" class="clear">
+                            <p class="data_p"><input id="startTime" type="text" value="2018-7-15 00:00"></p>
+                            <p class="data_l">-</p>
+                            <p class="data_p"><input id="endTime" type="text"  value="2018-8-15 00:00"></p>
+                        </div>
+                    </div>
+                    
+                    <!--店内订单-->
+                    
+                    
+                    
+                    <div id="dingDan_div">
+                       
+
+                        <div id="dianNei" class="dan_div">
+                            <div class="yiJieZhang click_div clicking" status="finish" type="2">
+                                <div class="zhangDan_div">
+                                    <p>美食已结账订单</p>
+                                    <p class="manyOrder"><i>0</i>单</p>
+                                </div>
+                                <p class="shiShou">实收金额：<i>0</i>元</p>
+                            </div>
+
+                        </div>
+
+
+                        <div id="waiMai" class="dan_div">
+                            <div class="yiWanCheng click_div" style="margin-right: 0px" status="finish" type="1">
+                                <div class="zhangDan_div">
+                                    <p>外卖已完成订单</p>
+                                    <p class="manyOrder"><i>0</i>单</p>
+                                </div>
+                                <p class="shiShou">实收金额：<i>0</i>元</p>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    
+                    
+                    
+                    
+                    <!--外卖订单-->
+                    
+                    
+                    <div id="dingDanMingXi_div" class="">
+		                <h1>订单明细</h1>
+		                <ul>
+		                    <li class="noData">没有数据</li>
+		                </ul>
+		            </div>
+                </div>
+
+                <!--未结账订单-->
+                <div id="weiJieZhang" class="hidden">
+
+                    <div id="weiJieZhang_div">
+
+                        <div class="weiDingDan_div marginRight clicking MS" dType="2">
+                            <p>美食当前未结账订单</p>
+                            <p class="manyOrder"><i>0</i>单</p>
+                            <p class="shiShou">未收金额：<i>0</i>元</p>
+                        </div>
+                       <!--  <div class="weiDingDan_div WM" dType="1">
+                            <p>外卖当前未完成订单</p>
+                            <p class="manyOrder"><i>0</i>单</p>
+                            <p class="shiShou">未收金额：<i>0</i>元</p>
+                        </div> -->
+                    </div>
+
+
+					<div id="dingDanMingXi_div" class="">
+		                <h1>订单明细</h1>
+		                <ul>
+		                     
+		                </ul>
+		            </div>
+
+                </div>
+                
+                
+            </div>
+
+            
+
+        </div>
+
+
+        <!--订单详情-->
+        <div id="dingDanXiangPing" class="hidden">
+            
+        </div>
+        
+        <div class="tiShi_Div hidden">
+        	<p></p>
+        </div>
+        
+    </div>
+    
+    
+</body>
+

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>我的</title>
+<link rel="stylesheet" href="./user.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+<script type="text/javascript">
+	$(function() {
+		
+		init();
+		init2();
+		
+		var _element = $('#bigDiv');
+	    var _refreshText = $('.refreshText');
+	    var _startPos = 0;
+	    var _transitionHeight = 0;
+	    _element.on('touchstart', function(e) {
+	        console.log('初始位置：', e.originalEvent.targetTouches[0].pageY);
+	        _startPos = e.originalEvent.targetTouches[0].pageY;
+	        _element.css("position","relative");
+	        _element.css("transition","transform 0s");
+	    });
+	
+	    _element.on('touchmove', function(e) {
+	        console.log('当前位置：', e.originalEvent.targetTouches[0].pageY);
+	        _transitionHeight = e.originalEvent.targetTouches[0].pageY - _startPos;
+	
+	        if (_transitionHeight > 0 && _transitionHeight < 80) {
+	            _refreshText.html('下拉刷新');
+	            _element.css('transform','translateY('+_transitionHeight+'px)');
+	            if (_transitionHeight > 55) {
+	                _refreshText.html('释放更新');
+	            }
+	        }
+	    });
+	
+	    _element.on('touchend', function(e) {
+	        _element.css('transition','transform 0.5s ease 1s');
+	        _element.css('transform','translateY(0px)');
+	        _refreshText.html('更新中...');
+	        // todo...
+	        init();
+	        init2();
+	    });
+	});
+	
+	
+	function init() {
+		$.ajax({
+			type : 'POST',
+			url : BASE_URL + LOGIN_ACTION.DAY_COUNT,
+			data : {
+				token : GetQueryString("token")
+			},
+			success : function(data) {
+				if (data.success) {
+					$("#count").html(data.num);
+
+					if (data.balance == null) {
+						$("#day").html(0);
+					} else {
+						$("#day").html(data.balance);
+					}
+
+				}
+			},
+			error : function(error) {
+				console.log(error);
+			}
+		});
+		
+	}
+	
+	function init2() {
+		$.ajax({
+			type : 'POST',
+			url : BASE_URL + LOGIN_ACTION.MON_COUNT,
+			data : {
+				token : GetQueryString("token")
+			},
+			success : function(data) {
+				if (data.success) {
+					$("#month").html(data.num);
+
+					if (data.balance == null) {
+						$("#monthSale").html(0);
+					} else {
+						$("#monthSale").html(data.balance);
+					}
+
+				}
+			},
+			error : function(error) {
+				console.log(error);
+			}
+		});
+	}
+	
+	
+	
+	
+	
+	
+</script>
+</head>
+<body>
+	<div class="refreshText"></div>
+	<div id="bigDiv">
+		<div class="user-income">
+			<ul class="clearfix">
+				<li class="f-left"><img src="../common/images/order-num.png"
+					style="width: 30px;" alt="">
+					<p id="count">0</p>
+					<p>今日订单数(单)</p></li>
+				<li class="f-left"><img src="../common/images/wallet.png"
+					style="width: 30px;" alt="">
+					<p id="day">0</p>
+					<p>今日收益(元)</p></li>
+				<li class="f-left"><img src="../common/images/order-num.png"
+					style="width: 30px;" alt="">
+					<p id="month">0</p>
+					<p>本月订单数(单)</p></li>
+				<li class="f-left"><img src="../common/images/wallet.png"
+					style="width: 30px;" alt="">
+					<p id="monthSale">0</p>
+					<p>本月收益(元)</p></li>
+			</ul>
+		</div>
+		<ul class="tools-list">
+			<li><a href="../agreement_rider/rules_management.html" id="rules">
+					<p>管理细则</p>
+			</a></li>
+			<li><a href="../agreement_rider/labor_management.html" id="labor">
+					<p>啄呗跑腿劳务协议</p>
+			</a></li>
+			<li><a href="../feedBack/feedback.html">
+					<p>意见与反馈</p>
+			</a></li>
+			<li><a href="../update_password/update_password.html?type=2">
+					<p>修改密码</p>
+			</a></li>
+		</ul>
+	</div>
+	
+</body>
+</html>

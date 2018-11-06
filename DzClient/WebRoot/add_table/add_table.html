@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>新建桌子</title>
+<link rel="stylesheet" href="./add_table.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+<link rel="stylesheet" type="text/css" href="../common/css/mobileSelect.css">
+<script src="../common/js/mobileSelect.min.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+<script type="text/javascript">
+var mobileSelect1;
+var mobileSelect2;
+$(document).ready(function(){ 
+	var weekdayArr=['大厅','包厢'];
+   mobileSelect1= new MobileSelect({
+								trigger: '#localSeat', 
+								title: '请选择桌子位置',  
+								wheels: [
+											{data:weekdayArr}
+								],
+								position:[0],
+								 callback:function(indexArr, data){
+										if(data=="大厅"){
+											$("#bao").hide();
+											$("#no").show();
+											$("#table_no").show();
+										}else if(data=="包厢"){
+											$("#bao").show();
+											$("#no").hide();
+											$("#table_no").hide();
+										}
+								}
+							});
+							
+	
+});
+	function add(n){		
+			var table=mobileSelect1.getValue();
+			if(table==null){
+				valLink("alert","请选择桌子位置!");
+				return false;
+			}else{
+				if(table[0]=="包厢"){
+					var seat='bx';
+					var name=$('#name').val();
+					
+					if(name.length==0){
+							valLink("alert","请填写包厢名称!");
+								return false;
+					 }
+					var table_no=1;
+				 }else{
+					 var seat='dt';
+					var table_no=$('#table_no').val();
+					var name='';
+					 if(table_no.length==0){
+							valLink("alert","请填写桌号!");
+								return false;
+						}
+				 }
+
+			}
+			
+			
+			var maxmeals=$('#maxmeals').val();
+			var lenmeals=$('#lenmeals').val();
+
+			if(maxmeals.length==0){
+				valLink("alert","请填写可坐人数!");
+				return false;
+			}
+			
+			if(lenmeals.length==0){
+				valLink("alert","请填写可坐人数!");
+				return false;
+			}
+			
+	//		var meals=$('#meals').val();
+			var deposit=$('#deposit').val();
+
+	/* 		if(meals.length==0){
+				valLink("alert","请填写可坐人数!");
+				return false;
+			} */
+			if(deposit.length==0){
+				valLink("alert","请填写预定桌子需要的定金!");
+				return false;
+			}else{
+				if(deposit<1){
+				valLink("alert","定金必须大于等于1元!");
+				return false;
+				}
+			}
+			
+			$("#loading").show();
+
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RESERVESAVE,
+				 	data: { 
+            			cid:getCookie('cid'),
+            			seat:seat,
+						name:name,
+						tableNo:table_no,
+						meals:maxmeals + ' 至 ' + lenmeals,
+            			deposit:deposit
+						
+        			},
+					success:function(data) {
+					$("#loading").hide();
+						if(data.success){
+						
+								if(n==1){
+									var url="../add_table/add_table.html";
+								}else if(n==2){
+									var url="../table_list/table_list.html";
+								}
+
+								window.location.href=url;
+						}
+						
+					},
+					error:function(error) {
+					$("#loading").hide();
+						console.log(error);
+					}
+				});
+
+	}	
+	
+
+
+function table(){
+	var table=mobileSelect1.getValue();
+		if(table==null){
+				valLink("alert","请选择桌子位置!");
+				$('#table_no').val('');
+				return false;
+			}else{
+				if(table[0]=="包厢"){
+					var seat='bx';
+					var table_no=1;
+					var name=$('#name').val();
+					 if(name.length==0){
+							valLink("alert","请填写包厢名!");
+							$('#table_no').val('');
+								return false;
+						}
+					
+				 }else{
+					 var seat='dt';
+					var table_no=$('#table_no').val();
+					var name='1';
+					 if(table_no.length==0){
+							valLink("alert","请填写桌号!");
+								return false;
+						}
+				 }
+
+			}
+
+	    $.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.GETTABLENO,
+				 	data: { 
+            			cid:getCookie('cid'),
+						tableNo:table_no,
+						seat:seat,
+						name:name
+        			},
+					success:function(data) {
+						if(data.status==1){
+							$('#table_no').val('');
+							valLink("alert",table[0]+table_no+"号桌已经存在，请填写其它桌号");
+							return false;
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+}
+function onlyNumber(obj){  
+			    var t = obj.value.charAt(0);    
+			    obj.value = obj.value.replace(/[^\d\.]/g,'');     
+			     obj.value = obj.value.replace(/^\./g,'');      
+			     obj.value = obj.value.replace(/\.{2,}/g,'.');     
+			     obj.value = obj.value.replace('.','$#$').replace(/\./g,'').replace('$#$','.');
+			     obj.value = obj.value.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3');
+			     if(t == '-'){  
+			        
+			       return;
+			     }else if(t<1){
+			     	$("#deposit").val(1);
+			     	
+			     }   
+ 
+}
+
+		</script>
+    <div class="head">
+        <div class="h-div">
+            <a class="h-l" href="../table_list/table_list.html">
+                <img class="jt" src="../common/img/iconjt.png" alt="">
+            </a>
+            <p>新建桌子</p>
+        </div>
+    </div>
+    <div class="wrap sort_add">
+	    <p><font style="color:red;">*</font>桌子位置</p>
+		<div style="width:90%;border: 1px solid #ff7e00;margin-left:16px;height: 33px;border-radius: 6px;position: relative;text-align: center;line-height: 35px;color: #ff7e00;" id="localSeat">请选择桌子位置</div>
+		<div id="bao" style="display:none;"> <p><font style="color:red;">*</font>包厢名</p><input  type="text"  placeholder="请填写包厢名"  id="name"/></div>
+        <p id="no"><font style="color:red;">*</font>桌号</p>
+        <input  type="text"  placeholder="请填写桌号,桌号是阿拉伯数字"  id="table_no"  onblur="table();"   onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}"  
+    onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'0')}else{this.value=this.value.replace(/\D/g,'')}" />
+        <p><font style="color:red;">*</font>可坐人数</p>
+        <!-- <input  type="text"   placeholder="请填写可坐人数,例8~10" id="meals" /> -->
+        
+        <input  type="text"   placeholder="请填写最少人数,例如 3 人" id="maxmeals" />
+        <p> 至 </p>
+        <input  type="text"   placeholder="请填写最大人数,例如 5 人" id="lenmeals" />
+       
+		 <p><font style="color:red;">*</font>预定定金</p>
+        <input  type="text" id="deposit" placeholder="请填写开桌需要交的押金,最小押金为1元" onkeyup="onlyNumber(this)"/>
+		
+
+    </div>
+    <div id="loading" style="display:none;width:100%;position: absolute;top: 0px;height:100%;z-index: 100000;background-color: #000;opacity: 0.5;">
+    <span style="text-align: center;color: #fff;left: 30%;top: 50%;position: absolute;">桌子添加中..请稍等</span>
+    </div>
+    <div class="btn-z" >
+     <!--  <button type="button" onclick="cancel();">保存并继续添加</button>
+		<button type="button" onclick="add();">保存并返回</button>-->
+		<a href="javascript:void(0);" onclick = "add(1);">保存并继续添加</a>
+			<a href="javascript:void(0);" onclick = "add(2);">保存并返回</a>
+    </div>
+ 
+
+
+</body>
+
+</html>

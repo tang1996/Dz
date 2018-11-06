@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>搜索跳转</title>
+     	<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+    	<link rel="stylesheet" href="./search.css">
+      	<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+<body>
+	<script type="text/javascript">
+		var token = getCookie('token');
+		
+			$(document).ready(function(){ 
+			//搜索历史			
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.USERSEARCH,
+				 	data: { 
+            			token : token,
+        			},
+					success:function(data) {
+						var list = data.list;
+						for(var i = 0;i < list.length;i++){
+						  var html='<span>'+list[i].keyword+'</span>';
+							$("#lisi").append(html);
+						}
+						
+						
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+				//热门搜索	
+				
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.SEARCHVIEW,
+					success:function(data) {
+						var list = data.list;
+						for(var i = 0;i < list.length;i++){
+						 var html=' <span>'+list[i].keyword+'</span>';
+										
+							$("#remen").append(html);
+						}
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+		});
+		
+		function del() {
+			$.ajax({
+				type:'POST',
+				url: BASE_URL + LOGIN_ACTION.USERDELETE,
+			 	data: { 
+           			token: token
+       			},
+				success:function(data) {
+					alert(data.message)
+					if(data.success){
+						$("#lisi").html('');
+					}else {
+						valLink("alert",data.message);
+					}
+				},
+				error:function(error) {
+					console.log(error);
+				}
+			});
+		}
+		
+		</script>
+
+    <div class="search-box">
+        <p class="title">搜索历史<img src="../common/img/empty.png" onclick="del()"></p>
+        <div class="item-box" id="lisi">
+          
+        </div>
+    </div>
+    <div class="search-box">
+        <p class="title">热门搜索</p>
+        <div class="item-box" id="remen">
+           
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>订单取消</title>
+<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+<link rel="stylesheet" href="./dingdan_list.css">
+<link rel="stylesheet" type="text/css" href="./chuang.css" />
+<script type="text/javascript" src="../common/js/common.js"></script>
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/jquery.timers.js"></script>
+</head>
+
+<body>
+<script type="text/javascript">
+
+			$(document).ready(function(){ 
+				init();
+				$('body').everyTime('30s','ds1',function (){
+	             	init();
+	        	});
+			});
+			
+			function init(status, id){
+					$.ajax({
+						type:'POST',
+						url: BASE_URL + LOGIN_ACTION.ALLORDER,
+					 	data: { 
+	            			start:0,
+	            			limit:1000,
+	            			companyId:getCookie('cid'),
+	            			status:'unreceiption'
+	        			},
+						success:function(data) {
+							if(data != null){
+								var numLine = '';
+								for(var i = 0; i < data.length; i++){
+									switch(data[i].type){
+									case '1':
+											var money = 0;
+											var childrenLine = '';
+											var children = data[i].children;
+											if(children != null){
+												for(var c = 0; c < children.length; c++){
+													 var sub = children[c].subtotal;
+												
+													 childrenLine = childrenLine + '<div class="lb">'+
+							                            '<p>'+children[c].name+'</p>'+
+							                            '<p>x'+children[c].number+'</p>'+
+							                            '<p>￥'+ sub.toFixed(2) +'元</p>'+
+							                            '</div>';
+
+						                             money = children[c].subtotal;												
+												}
+												
+												var runStatus=data[i].runStatus;
+												var statusStr = '';
+												switch(runStatus){
+											 	case 'untaking':
+													statusStr='匹配中';
+														break;
+												break;
+												case 'takeMeal':
+												 	statusStr='取餐中';
+												 		break;
+												break;
+												case 'taking':
+												 	statusStr='配送中';
+												 		break;
+												break;
+												case 'finish':
+													statusStr='已完成';
+														break;
+												}
+													var packing_fee=data[i].packing_fee;
+													var pack='';
+													if(packing_fee>0){
+														pack= '<div class="lb">'+
+															   '<p>包装费</p>'+
+															   '<p style="float:right;">￥'+packing_fee+'元</p>'+
+														       '</div>';
+													}
+													var activity=data[i].activity;
+													var acti='';
+													if(activity>0){
+														acti= '<div class="lb">'+
+															    '<p style="width:35px;text-align:center;height:20px;background-color:#f55b23;color:#ffffff;margin-right:90px;">优惠</p>'+
+															    '<p class="red" style="float:right;">-¥'+activity+'</p>'+
+														       '</div>';
+													}
+													var remarkes=data[i].remarks;
+													var reshtml='';
+													if(remarkes.length > 0){
+														reshtml='<div class="lb">'+
+													       	    '<p>备注</p>'+
+															    '<textarea disabled="disabled"  rows="5" cols="">'+remarkes+'</textarea>'+			 
+															    '</div>';
+													}
+												numLine = numLine+ '<div class="dd-li">'+
+		                							'<ul>'+							                  			
+							                   			 '<li>'+
+														   '<div class="n-li">'+
+														   '<p>'+data[i].userName+'</p>'+
+														   '<span> <a href="tel:'+data[i].UserPhone+'">'+
+									                       '<img src="../common/img/lx.jpg" style="width:90px">'+
+									                       '</a></span>'+  
+													       '</div>'+
+													       '<div class="n-li n-li1">'+
+														   '<p class="p-hs">配送地址：</p>'+
+														   '<span class="p-hs p-address">'+data[i].userAddress+'</span></br><span class="p-hs dd-r">'+data[i].distance+'<img class="dd-img" src="../common/img/dd.jpg" ></span>'+  
+													       '</div>'+
+														   '</li>'+
+							                    		'<li>'+childrenLine+
+									                    '</li>'+
+									                    '<li>'+pack+
+									                        '<div class="lb">'+
+									                            '<p>总计</p>'+
+									                            '<p class="red" style="float:right;">￥'+data[i].total_new+'元</p>'+
+									                        '</div>'+acti+
+									                        '<div class="lb">'+
+									                        '<p>实收</p><p class="lb-g"></p><p class="red" style="float:right;">￥'+data[i].pay+'元</p>'+								                        
+									                        '</div>'+
+									                        '<div class="lb">'+
+									                            '<p>用餐人数(餐具)</p>'+
+									                            '<p>'+data[i].quantity+'人</p>'+									                        
+									                        '</div>'+reshtml+
+									                    '</li>'+
+									                    '<li>'+
+									                        '<div class="lb-b">'+
+									                            '<span>下单：'+data[i].time+'</span>'+
+									                            '<span>单号：'+data[i].orderNo+'</span>'+									                           
+									                        '</div>'+
+									                    '</li>'+
+									                '</ul>'+
+									            '</div>';
+											}
+									break;
+									case '2':
+									var children = data[i].children;
+									childrenLine = '';
+									if(children != null){
+										for(var c = 0; c < children.length; c++){
+											 var sub = children[c].subtotal;
+										
+											 childrenLine = childrenLine + '<li><div class="lb">'+
+					                            '<p>'+children[c].name+'</p>'+
+					                            '<p>x'+children[c].number+'</p>'+
+					                            '<p>￥'+ sub.toFixed(2) +'元</p>'+
+					                            '</div></li>';
+
+				                             money = children[c].subtotal;												
+										}
+									}
+									
+									var seat = '大厅';
+									if(data[i].seat != null){
+									
+										switch(data[i].seat){
+										case 'dt':
+											seat = '大厅';
+										break;
+										case 'bx':
+											seat = '包厢';
+										break;
+										}
+									}
+									
+									var meals = '';
+									if(data[i].meals != 'null'){
+										meals = '预计：'+data[i].meals;
+									}
+									var position_fee=data[i].position_fee;
+									var posit='';
+									if(position_fee>0){
+									
+									var fee = data[i].fee;
+									
+									posit= '<div class="lb">'+
+										   '<p>茶位费</p><p>￥'+  fee.toFixed(2) +'元</p>'+
+										   '<p style="float:right;">￥'+position_fee+'元</p>'+
+									       '</div>';
+									}
+									var activity=data[i].activity;
+									var acti='';
+									if(activity>0){
+										acti= '<div class="lb">'+
+											    '<p style="width:35px;text-align:center;height:20px;background-color:#f55b23;color:#ffffff;margin-right:90px;">优惠</p>'+
+											    '<p class="red" style="float:right;">-¥'+activity+'</p>'+
+										       '</div>';
+									}
+								
+												var remarkes=data[i].remarks;
+													var reshtml='';
+													if(remarkes.length > 0){
+														reshtml='<div class="lb">'+
+													       	    '<p>备注</p>'+
+															    '<textarea disabled="disabled"  rows="5" cols="">'+remarkes+'</textarea>'+			 
+															    '</div>';
+													}
+										if(children != null){
+										numLine = numLine + '<div class="dd-li"><ul><li><p>商品</p><span>预订：'+ seat +' - '+data[i].tableNo+' 号桌</span></li>'+ childrenLine+
+											'<li><div class="lb"><p>用餐人数(餐具)</p><p>'+ meals +'人</p></div>'+posit+
+											'<div class="lb"><p>总计</p><p class="lb-g"></p><p class="red" style="float:right;">￥'+data[i].total_new+'元</p></div>'+acti+
+											'<div class="lb"><p>实收</p><p class="lb-g"></p><p class="red" style="float:right;">￥'+data[i].pay+'元</p></div>'+reshtml+
+											'</li>'+
+											'<li><p class="hs">状态：已取消</p><div class="lx">'+
+											'<a href="tel:'+data[i].userPhone+'"><img style="width:90px" src="../common/img/lx.jpg"></a></div></li>'+
+											'<li><p class="lb-g"></p><div class="lb-b"><span>预约时间：'+data[i].shipTime+'</span><br/>'+
+											'<span>单号：'+data[i].orderNo+'</span><br/>'+
+											'<span>下单时间：'+data[i].time+'</span></div>'+
+											'</li></ul></div>';
+										}else{
+											numLine = numLine + '<div class="dd-li"><ul><li><p>商品</p><span>预订：'+ seat +' - '+data[i].tableNo+' 号桌</span></li>'+ childrenLine+
+											'<li><div class="lb"><p>用餐人数(餐具)</p><p>'+ meals +'人</p></div>'+
+											'<div class="lb"><p>押金</p><p class="lb-g"></p><p class="red" style="float:right;">￥'+data[i].pay+'元</p></div></li>'+
+											'<li><p class="hs">状态：已取消</p><div class="lx">'+
+											'<a href="tel:'+data[i].userPhone+'"><img style="width:90px" src="../common/img/lx.jpg"></a></div></li>'+
+											'<li><p class="lb-g"></p><div class="lb-b"><span>预约时间：'+data[i].shipTime+'</span><br/>'+
+											'<span>单号：'+data[i].orderNo+'</span><br/>'+
+											'<span>下单时间：'+data[i].time+'</span></div>'+
+											'</li></ul></div>';
+										
+										}
+								
+										
+									break;
+									}
+									
+									$("#dd").html(numLine);
+								}
+							}						
+						
+						},error:function(error) {
+							console.log(error);
+						}
+				});
+				
+			}
+			
+		
+			  			
+		</script>
+		
+		<div class="head ">
+		<div class="h-div head-ss" style="height:30px">
+		</div>
+		<ul class="dd-hul">
+			<li>
+				<a href="../dingdan_list/dingdan_list.html">进行中</a>
+			</li>
+			<li>
+				<a href="../dingdan_list/dingdan_list_finish.html">已完成</a>
+			</li>
+			<li  class="active">
+				<a href="javascript:void(0);"><p>已取消</p></a>
+			</li>
+		</ul>
+	</div>
+   <div class="wrap top80">
+        <div class="dd" id="dd">
+
+        </div>
+    </div>
+				<ul class="foot-ul">
+			<li class="active">
+				<a href="javascript:void(0);">
+					<img src="../common/img/f4.png" >
+					待处理
+				</a>
+			</li>
+			<li>
+				<a href="../dingdan_new/dingdan_new.html">
+					<img src="../common/img/f6.png" >
+					订单管理
+				</a>
+			</li>
+			<li>
+				<a href="../admin_index/admin_index.html">
+					<img src="../common/img/f3.png" >
+					我的
+				</a>
+			</li>
+		</ul>
+</body>
+</html>

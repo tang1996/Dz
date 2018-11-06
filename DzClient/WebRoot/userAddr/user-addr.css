@@ -1,0 +1,35 @@
+body,div,h1,h4,html,li,p,ul{margin:0;padding:0}li{list-style:none}input{border:none}body{background-color:#f5f7fa}.clearfix{zoom:1;clear:both}.clearfix::after{visibility:hidden;display:block;font-size:0;content:" ";clear:both;height:0}.add-addr{height:44px;line-height:44px;font-size:15px;color:#ff7300;margin-top:15px;background-color:#fff;text-align:center}.add-addr img{width:20px;height:20px;vertical-align:middle}.addr-list{margin-top:15px}.addr-list .header{font-size:15px;margin-left:12px;margin-bottom:10px}.addr-list ul{background-color:#fff}
+.addr-list ul li{    
+	display: flex;
+    border-bottom: 1px solid #EEEEEE;
+}
+.addr-list ul li .name-tel{font-size:15px;color:#333}.addr-list ul li .name-tel span:last-child{margin-left:20px}
+.addr-list ul li .addr-detail{position:relative;margin-top:5px;font-size:14px;color:#999}.addr-list ul li .addr-detail img{width:17px;height:17px;position:absolute;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%);top:9px;right:-46px}
+.update{ position: relative;float: right;width: 19%;height: 78px; margin-right: -58px;  text-align: center;margin-top: -68px;color: #fff; background: #FF0000;}
+.updateh{ position: relative;float: right;width: 19%;height: 96px; margin-right: -58px;  text-align: center;margin-top: -87px;color: #fff; background: #FF0000;}
+.updatec{ margin-top: 26px;position: relative;top: 26px;}
+.selectAddr{
+    padding: 12px 10px;
+    flex: 4;
+}    
+.bottom_div{
+    flex: 2;
+    text-align: center;
+    color: #666;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+.bottom_div.del p{
+    background: #f00;
+}
+.bottom_div p{
+    flex: 1;
+    text-align: center;
+    color: #FFFFff;
+    height: 30px;
+    line-height: 30px;
+    background: #ff7e00;
+    border-radius: 5px;
+    margin-right: 5px;
+}

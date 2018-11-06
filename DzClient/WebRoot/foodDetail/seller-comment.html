@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>商家评价</title>
+		<link rel="stylesheet" href="./seller-comment.css">
+		<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+		<script type="text/javascript">
+		$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.EVALUATECOMVIEW,
+				 	data: { 
+            			customId: GetQueryString("cid")
+        			},
+					success:function(data) {
+						var list = data.list;
+						var img = '';
+						var quality = 0;
+						var attitude = 0;
+						for(var i = 0;i < list.length;i++){
+						if(typeof(list[i].images0) != 'undefined'){
+							img = img + '<img src="'+list[i].images0+'" alt="">'
+						}
+						if(typeof(list[i].images1) != 'undefined'){
+							img = img + '<img src="'+list[i].images1+'" alt="">'
+						}
+						if(typeof(list[i].images2) != 'undefined'){
+							img = img + '<img src="'+list[i].images2+'" alt="">'
+						}
+						if(typeof(list[i].images3) != 'undefined'){
+							img = img + '<img src="'+list[i].images3+'" alt="">'
+						}
+						if(typeof(list[i].images4) != 'undefined'){
+							img = img + '<img src="'+list[i].images4+'" alt="">'
+						}
+							quality = quality + parseFloat(list[i].quality);
+							attitude = attitude + parseFloat(list[i].attitude);
+							var html = '<li class="item">'+
+                '<div class="left"><img src="'+list[i].imgurl+'" alt=""></div>'+
+                '<div class="right">'+
+                    '<p class="nick-name">'+list[i].nickName+'</p>'+
+                    '<p class="level">'+
+                        '<span>评分</span>'+
+                        '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">'+
+                    '</p>'+
+                    '<p class="user-comment">'+list[i].content+'</p>'+
+                    '<p class="img-list">'+
+                        img+
+                    '</p>'+
+                    '<p class="seller-reply">'+
+                        '<span>商家回复：</span> '+list[i].reply+
+                    '</p>'+
+                    '<p class="date">'+list[i].createTime+'</p>'+
+                    '<p class="label-box">'+
+                        list[i].label+
+                    '</p>'+
+                '</div>'+
+            '</li>';
+									$(".list").append(html);
+									}
+									$("#attitude").html(attitude/parseFloat(data.totalCount));
+									$("#quality").html(quality/parseFloat(data.totalCount));
+									$("#total").html((attitude+quality)/2/parseFloat(data.totalCount));
+									$("#imgcount").html("全部 "+data.imgcount);
+									$("#totalcount").html("有图 "+data.totalCount);
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+	</script>
+	</head>
+	<body>
+		<header>
+		<div class="seller-comment">
+			<div class="level">
+				<p id="total">
+					<img src="./../common/img/up.png" alt="">
+				</p>
+				<p>
+					商家评分
+				</p>
+			</div>
+			<div class="desc">
+				<p>
+					<span>菜品口味</span>
+					<img src="../common/img/favourable.png" alt="">
+					<img src="../common/img/favourable.png" alt="">
+					<img src="../common/img/favourable.png" alt="">
+					<img src="../common/img/favourable.png" alt="">
+					<img src="../common/img/favourable.png" alt="">
+					<span class="num" id="attitude">4.7</span>
+				</p>
+				<p>
+					<span>服务质量</span>
+					<img src="../common/img/favourable.png" alt="">
+					<img src="../common/img/favourable.png" alt="">
+					<img src="../common/img/favourable.png" alt="">
+					<img src="../common/img/favourable.png" alt="">
+					<img src="../common/img/favourable.png" alt="">
+					<span class="num" id="quality">4.8</span>
+				</p>
+			</div>
+		</div>
+		</header>
+		<div class="comment-box">
+			<div class="title">
+				<span class="label active" id="totalcount">全部 312</span>
+				<span class="label" id="imgcount">有图 200</span>
+				<span class="label">好评 256</span>
+				<span class="label">差评 56</span>
+			</div>
+			<ul class="list">
+
+			</ul>
+		</div>
+	</body>
+</html>

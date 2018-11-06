@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>经营数据</title>
+		<link rel="stylesheet" href="./management.css">
+		<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+<body>
+<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="../admin_index/admin_index.html"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>经营数据</p>
+			
+		</div>
+	</div>
+    <div id="bigDiv">
+        <div id="innerFrame">
+            <div class="dataDiv">
+                <div class="img_div management">
+                    <p class="p_img"><img src="../common/img/manager.png"></p>
+                    <p class="p_zi">账单汇总</p>
+                </div>
+                <div class="img_div detailed">
+                    <p class="p_img"><img src="../common/img/mingxi.png"></p>
+                    <p class="p_zi">订单明细</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+
+    //账单汇总
+    $(".management").click(function () {
+        window.location.href = "../management_order/management_order.html";
+    })
+    //账单明细
+    $(".detailed").click(function () {
+        window.location.href = "../detailed/detailed.html";
+    })
+</script>

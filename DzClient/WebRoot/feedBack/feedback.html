@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>问题反馈</title>
+<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+<link rel="stylesheet" href="./feedback.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+<body>
+	<div class="textarea-box">
+		<textarea name="container" id="container" placeholder="这一刻的想法..."
+			cols="30" rows="10"></textarea>
+		<!-- <div class="upload-img">
+            <span class="btn">+</span><span>添加照片</span>
+        </div> -->
+	</div>
+	<div class="tel-box">
+		<p class="title">请留下您的电话号码，以便我们联系您</p>
+		<div class="input-box">
+			<input type="tel" id="phone" placeholder="请输入您的电话号码">
+		</div>
+	</div>
+	<div class="button_div">
+		<button type="button" onclick="cancel();">取消</button>
+		<button type="button" class="ok" onclick="add();">提交反馈</button>
+	</div>
+</body>
+<script type="text/javascript">
+	function add() {
+		var content = document.getElementById('container').value;
+		if (content.length == 0) {
+			valLink("alert", "请填写反馈内容!");
+			return false;
+		}
+
+		var phone = $('#phone').val();
+		if (phone.length == 0) {
+			valLink("alert", "请填写联系方式!");
+			return false;
+		} else if (!isNumber(phone)) {
+			valLink("alert", "电话格式不正确!");
+			return false;
+		}
+
+		if (phone.length != 11) {
+			valLink("alert", "请输入正确联系方式，固定电话加上区号");
+			return false;
+		}
+
+		$.ajax({
+			type : 'POST',
+			url : BASE_URL + LOGIN_ACTION.ADD_FEEDBACK,
+			data : {
+				phone : phone,
+				content : content
+			},
+			success : function(data) {
+				valLink("alert", data.message);
+				if (data.success) {
+					window.location.href = "javascript:history.back(-1)";
+				} else {
+
+				}
+			},
+			error : function(error) {
+				console.log(error);
+			}
+		});
+	}
+
+	function cancel() {
+		window.location.href = "javascript:history.back(-1)";
+	}
+
+	function isNumber(val) {
+		var regPos = /^\d+(\-\d+)?$/; //加区号
+		var regNeg = /^(-(([0-9]+\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\.[0-9]+)|([0-9]*[1-9][0-9]*)))$/; //负浮点数
+		if (regPos.test(val) || regNeg.test(val)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+</script>
+</html>

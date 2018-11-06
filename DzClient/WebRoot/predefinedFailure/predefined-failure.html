@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>预定失败</title>
+    <link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+    <link rel="stylesheet" href="./predefined-failure.css">
+     	<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+			
+			$(document).ready(function(){ 
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RESTULVIEW,
+				 	data: { 
+            			token: 'cOZ6cjmF9NF',
+            			orderId: 120
+        			},
+					success:function(data) {
+							var html = '<ul>'+
+            						   '<li >订单号：'+data.orderNo+'</li>'+
+          						       '<li>商家名称：'+data.companyName+'</li>'+
+            							'<li>商家电话：'+data.companyphone+'</li>'+
+            							'<li>支付金额：<span class="price">¥'+data.pay+'</span></li>'+
+        								'</ul>';
+						
+							$("#list-box").append(html);
+
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+		});
+		
+		</script>
+    <header>
+        <img src="../common/img/failure.png" alt="">
+        <span>订单预定失败！</span>
+    </header>
+    <div class="list-box" id="list-box">
+       
+    </div>
+    <div class="button-box clearfix">
+        <span>去其他店</span>
+        <span>申请退款</span>
+    </div>
+</body>
+</html>

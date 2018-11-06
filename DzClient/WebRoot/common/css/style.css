@@ -1,0 +1,32 @@
+html{height:100%}
+body{height:100%;background-color:#f4f4f4;position:relative;font-size:.555rem;line-height:1.428571429; font-family:微软雅黑; color:#444444;}
+.body{max-width:640px;margin:0 auto;min-height:100%;position:relative;overflow:hidden;}
+.topbg{ background:#ff7e00; width:100%; height:80px;border-radius:0px 0px 15px 15px;}
+.nav{ width:94%; height:158px; margin:auto; background:#ffffff;border-radius:7px; position: absolute; top:-0px;left:3%;box-shadow: 0 0 3px 1px #fcd6b1;}
+.nav a{ width:20%; height:60px; display:block;float:left; text-align:center; padding-top:15px;}
+.nav a img{ width:35px;}
+
+.hot{ width:100%;  height:285px; background:#fff; margin-top:5px;}
+.hot ul{ list-style-type:none;}
+.hot li{ width:44%; height:120px;float:left; overflow:hidden;
+background: -moz-linear-gradient(top, #eeeeee 0%, #ffffff 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#ffffff));
+    background: -webkit-linear-gradient(top, #000000 0%,#ffffff 100%);
+    background: -o-linear-gradient(top, #eeeeee 0%,#ffffff 100%);
+    background: -ms-linear-gradient(top, #eeeeee 0%,#ffffff 100%);
+    background: linear-gradient(to bottom, #eeeeee 0%,#ffffff 100%);
+	margin-left:4%;margin-top:4%;border-radius:5px;}
+.hot li h5{ margin-left:15px; width:100%; padding-top:15px;font-weight:bold; color:#000;}
+.hot li h5 img{position:relative; top:4px; width:15px;float:left; margin-right:6px;}
+.hot li img{ width:50px;float:right; margin-right:15px;position:relative; top:-20px;}
+.hot li h6{ margin-left:25px; width:90px; line-height:21px;  color:#999; font-size:12px;}
+.dingzhi{ width:100%; background:#fff;float:left;}
+.dingzhi ul{ list-style-type:none;}
+.dingzhi li{ width:92%; border-bottom:1px solid #eee; height: auto;padding:20px 0px;padding-bottom:10px; margin-left:4%;float:left;}
+.dingzhi img{ width:85px;float:left;border-radius:7px;}
+.dingzhi h3{ font-weight:bold;float:right; width:70%;}
+.dingzhi h3 b{ border:1px solid #ff7e00; font-size:12px; font-weight:normal; color:#ff7e00;border-radius:70px; padding:2px 8px; margin-left:10px;}
+.dingzhi h3 i{float:right; font-weight:normal; font-style:normal; font-size:12px; color:#999;}
+.dingzhi h4{ font-weight:bold;float:right; width:70%;font-weight:normal; font-style:normal; font-size:12px; color:#999;}
+.dingzhi h5{ font-weight:bold;float:right; width:70%;}
+.dingzhi h3 i img{position:relative; top:2px; width:15px;float:left; margin-right:6px;}

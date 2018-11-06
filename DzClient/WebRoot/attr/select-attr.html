@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>添加商品属性</title>
+<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+<link rel="stylesheet" href="./attr.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+
+<body>
+<script type="text/javascript">	
+	var time = 1;	
+	$(document).ready(function(){ 
+		var add='<li>'+
+		 		 '<input type="text" placeholder="请输入属性名称" name="" id="name" value="" />'+
+				 '<button type="button" style="width: 100px;" onclick="addHtml();">添加商品属性</button>'+
+				 '<button type="button" style="width: 50px;" onclick="dofinish();">完成</button>'+
+				 '</li>';
+		$("#add").html(add);
+	});
+	
+	function addHtml(){
+		var name =  $('#name').val();
+		var html='';
+			html = html + '<li id="'+time+'">'+
+				 '<p>'+name+'</p>'+
+				 '<button type="button">删除</button>'+
+				 '<button type="button">添加属性值</button>'+
+				 '<ul class="attr" id="arrtValue'+time+'">'+
+					
+				 '</ul>'+
+				 '<div>'+
+					 '<input type="text" placeholder="请输入属性值" name="" id="value'+time+'" value="" />'+
+					 '<button type="button" style="width: 50px;" onclick="addAttr('+time+');">添加</button>'+
+				 '</div>'+
+				 '</li>';
+		$("#attr").append(html);
+		$('#name').val("");
+		time = time + 1;
+		//window.location.href="http://118.190.149.109:8081/DzClient/attr/select-attr.html";
+	};
+	
+	function addAttr(id){
+		var value =  $('#value'+id).val();
+		var html='';
+			html = html + '<li>'+
+			 	'<p>'+value+'</p>'+
+			 	'<button type="button">删除</button>'+
+			 	'</li>';
+		$("#arrtValue" + id).append(html);
+		$('#value' + id).val("");
+		//window.location.href="http://118.190.149.109:8081/DzClient/attr/select-attr.html";
+	};
+	
+	function dofinish(){
+		$("#wrap").attr("style", "display:;");
+		$("#select-arrt").attr("style", "display:none;");
+	}
+</script>
+    <div class="wrap">
+        <ul class="attr" id="attr">
+			
+		</ul>
+    </div>
+    <div class="wrap">
+        <ul class="attr" id="add">
+			
+		</ul>
+    </div>
+</body>
+
+</html>

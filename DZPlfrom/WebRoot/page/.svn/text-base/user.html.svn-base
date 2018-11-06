@@ -1,0 +1,614 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>用户管理</title>
+  </head>
+  <body>
+  	<script type="text/javascript">
+var value = null;
+var selectPanl;
+var addUserForm;
+var usergrid;
+var dss;
+var deptny;
+var namer = null;
+
+Ext.onReady(function(){
+var userIds = new Ext.form.Hidden({
+	allowBlank: false,
+	name:'userId',
+	msgTarget: 'under'
+});
+
+ dss = new Ext.data.GroupingStore({
+	  proxy: new Ext.data.HttpProxy({url:'/GXDS/selctUser'}),
+	  reader: new Ext.data.JsonReader({totalProperty:'totalCount', root:'list',id:'userId',
+	  successProperty :'@success',
+	  fields:['userId'
+	  		  ,'password'
+	  		  ,'userName'
+	  		  ,'content'
+	  		  ,'depatment'
+	  		  ,'depatmentId'
+	  		  ]
+	  })
+});
+
+var cbsm=new Ext.grid.CheckboxSelectionModel();
+var cm=new Ext.grid.ColumnModel(
+				 [new Ext.grid.RowNumberer(),
+			     cbsm,
+				 {header: '用户名', dataIndex: 'userId', width:20, sortable: true},
+				 {header: '用户密码', dataIndex: 'password', width:10, sortable: true},
+				 {header: '真实名字', dataIndex: 'userName', width:30, sortable: true},
+				 {header: '备注', dataIndex: 'content', width:20, sortable: true},
+				 {header: '所属部门', dataIndex: 'depatment', width:20, sortable: true},
+				 {header: '所属部门ID', dataIndex: 'depatmentId', width:20, sortable: true,hidden:true}
+]);
+
+ usergrid =new Ext.grid.GridPanel({
+		ds:dss,
+		cm:cm,
+		sm:cbsm,
+		height:document.body.clientHeight-124,
+		width:document.body.clientWidth-193,
+        viewConfig : {
+            forceFit : true
+        },
+	    bbar: new Ext.PagingToolbar({
+			pageSize: 10,
+			store: dss,
+			displayInfo: true,
+			displayMsg: '显示第 {0} 条到 {1} 条记录，一共 {2} 条',
+			emptyMsg:'没有记录'
+		}),
+	    tbar:[{
+		text:'增加',
+		iconCls:'add-fredd',
+		handler:function(){
+				if(Win){
+					Win.destroy();
+				}
+
+				var userName = new Ext.form.TextField({
+						fieldLabel: '用户名',
+						allowBlank: false,
+						maxLength: 20,
+						minLength: 2,
+						width:200,
+						name:'userId',
+						msgTarget: 'under',
+						regexText: ' '
+				});
+				
+				var userPassword = new Ext.form.TextField({
+						fieldLabel: '密码',
+						allowBlank: false,
+						inputType:'password',
+						maxLength: 20,
+						minLength: 5,
+						width:200,
+						msgTarget: 'under',
+						regexText: ' '
+				});
+				
+				var userPasswordready = new Ext.form.TextField({
+						fieldLabel: '确认密码',
+						allowBlank: false,
+						inputType:'password',
+						maxLength: 20,
+						minLength: 5,
+						width:200,
+						name:'password',
+						msgTarget: 'under',
+						regexText: ' '
+				});
+				
+				var realName = new Ext.form.TextField({
+						fieldLabel: '真实姓名',
+						allowBlank: false,
+						maxLength: 20,
+						width:200,
+						name:'userName',
+			  		    msgTarget: 'under',
+					    regexText: ' '
+				});
+				
+				var content = new Ext.form.TextField({
+						fieldLabel: '备注',
+						allowBlank: true,
+						maxLength: 20,
+						width:200,
+						name:'userNote'
+				});
+				
+				var userDeperment = new Ext.form.ComboBox({
+					 fieldLabel: '所属部门',
+					 store:new Ext.data.SimpleStore({fields:[],data:[[]]}),
+					 shadow:false,
+					 mode: 'local',
+					 editable :false,
+					 width:200,
+					 triggerAction:'all',
+					 maxHeight: 200,
+					 tpl: '<tpl for="."><div style="height:200px"><div id="userCity"></div></div></tpl>',
+					 allowBlank:false,
+			  		 msgTarget: 'under',
+					 regexText: ' '
+				});
+					var userTax = new Ext.tree.TreePanel({
+						  loader: new Ext.tree.TreeLoader({dataUrl:'/GXDS/treeCity'}),
+						  border:false,
+						  root:new Ext.tree.AsyncTreeNode({text: '请选择税务部门',id:'098'})
+					});
+					userTax.on('click',function(node){
+						if(node.text == '请选择税务部门'){
+							return;
+						}
+						deptny = node.text+','+ node.id;
+				  		userDeperment.setValue(node.text);
+				  		userDeperment.collapse();
+				  	});
+					 userDeperment.on('expand',function(){
+					 	userTax.render('userCity');
+					 });
+				userTax.on('checkchange', function(node, checked) {
+					 node.expand();
+					 node.attributes.checked = checked;
+					 node.eachChild(function(child) {
+					 child.ui.toggleCheck(checked);
+					 child.attributes.checked = checked;
+					 child.fireEvent('checkchange', child, checked);
+				 });
+				},userTax);
+				
+			var Win = new Ext.Window({
+		        title: '增加用户',
+		        width: 320,
+		        height:280,
+		        minWidth: 300,
+		        minHeight: 200,
+		        layout: 'fit',
+		        resizable:false,
+		        bodyStyle:'padding:5px;',
+		        closable :false,
+		        buttonAlign:'center',
+		        items: addUserForm =new Ext.form.FormPanel({
+					    baseCls: 'x-plain',
+				        labelWidth: 55,
+				        defaultType: 'textfield',
+				       	items:[userName,userPassword,userPasswordready,realName,content,userDeperment]
+				}),
+		        modal: true,
+		        buttons: [{
+		            text: '确定',
+		            handler:function(){
+				 	if(addUserForm.getForm().isValid()){
+				 	var nam = userPasswordready.getValue();
+				 	var usr = userPassword.getValue();
+				 	if( nam == usr  ){
+			       		addUserForm.getForm().submit({
+			       			waitMsg : '处理中，请稍等...',
+							waitTitle:'请稍等',
+			       		    url:'/GXDS/addUser',
+			       		    method:'POST',
+			       		    params:{deparment:deptny},
+			        		success :function(form,action)
+			        		{
+			        			addUserForm.getForm().reset();
+			        				dss.reload();
+		     		           		Win.destroy();
+			        		},
+			        		failure :function(form,action)
+			        		{
+			        			var msg = Ext.util.JSON.decode(action.response.responseText);
+			        			Ext.Msg.alert('温馨提示',msg.message);
+			        		}	
+			        	});
+						Win.hide();
+			        	}else{
+			        	   Ext.MessageBox.alert("错误","密码输入不一致!" );
+			        	}	
+				       	} else {
+				       		Ext.MessageBox.alert("错误","不允许为空!" );
+				       	}
+		         	 }
+		        },{
+		            text: '取消',
+		            handler: function(){
+		                addUserForm.getForm().reset();
+		           		Win.destroy();
+		            }
+		        }]
+			});
+				Win.show();
+		}},'-',{
+			text:'删除',
+			iconCls:'delete-fredd',
+			handler:function(){
+					Ext.MessageBox.confirm('消息', '确定删除吗?', dodelteuser);
+			}},'-',{
+			text:'修改',
+			iconCls:'edit-fredd',
+			handler:function(){
+					  var userQuerys = new Ext.form.Hidden({
+								maxLength: 200,
+								minLength: 0,
+								allowBlank: false,
+								name:'userId',
+								msgTarget: 'under',
+								regexText: ' '
+						});
+							
+						var userNames = new Ext.form.TextField({
+								fieldLabel: '用户名',
+								allowBlank: false,
+								maxLength: 20,
+								minLength: 1,
+								width:200,
+								name:'userId'
+						});
+						
+						var userPasswords = new Ext.form.TextField({
+								fieldLabel: '密码',
+								allowBlank: false,
+								maxLength: 20,
+								minLength: 1,
+								width:200,
+								name:'password'
+						});
+						
+						var realNames = new Ext.form.TextField({
+								fieldLabel: '真实姓名',
+								allowBlank: false,
+								maxLength: 20,
+								width:200,
+								name:'userName'
+						});
+										
+						var contents = new Ext.form.TextField({
+								fieldLabel: '备注',
+								allowBlank: true,
+								maxLength: 20,
+								width:200,
+								name:'userNote'
+						});
+						
+						var updateDeperment = new Ext.form.ComboBox({
+								 fieldLabel: '所属部门',
+								 store:new Ext.data.SimpleStore({fields:[],data:[[]]}),
+								 shadow:false,
+								 mode: 'local',
+								 editable :false,
+								 width:200,
+								 triggerAction:'all',
+								 maxHeight: 200,
+								 tpl: '<tpl for="."><div style="height:200px"><div id="updateCity"></div></div></tpl>',
+								 allowBlank:false
+							});
+								var cityTax = new Ext.tree.TreePanel({
+									  loader: new Ext.tree.TreeLoader({dataUrl:'/GXDS/treeCity'}),
+									  border:false,
+									  root:new Ext.tree.AsyncTreeNode({text: '请选择税务部门',id:'098'})
+								});
+								cityTax.on('click',function(node){
+								if(node.text == '请选择税务部门'){
+									return;
+								}
+									namer = node.text+','+ node.id;
+							  		updateDeperment.setValue(node.text);
+							  		updateDeperment.collapse();
+							  	});
+								 updateDeperment.on('expand',function(){
+								 	cityTax.render('updateCity');
+								 });
+							cityTax.on('checkchange', function(node, checked) {
+								 node.expand();
+								 node.attributes.checked = checked;
+								 node.eachChild(function(child) {
+								 child.ui.toggleCheck(checked);
+								 child.attributes.checked = checked;
+								 child.fireEvent('checkchange', child, checked);
+							 });
+							},cityTax);
+						
+						var addUserUpdateForm = new Ext.form.FormPanel({
+							    id: 'company-forads',
+						        frame: true,
+						        labelAlign: 'left',
+							    baseCls: 'x-plain',
+						        labelWidth: 55,
+						        defaultType: 'textfield',
+						       	items:[userQuerys,userNames,userPasswords,realNames,contents,updateDeperment]
+						});
+				
+						var update= new Ext.Window({
+						        title: '修改用户',
+						        width: 420,
+						        height:300,
+						        minWidth: 300,
+						        minHeight: 200,
+						        layout: 'fit',
+						        resizable:false,
+						        bodyStyle:'padding:5px;',
+						        closable :false,
+						        buttonAlign:'center',
+						        items: addUserUpdateForm,
+						        modal: true,
+						        buttons: [{
+						            text: '确定',
+						            handler:function(){
+								 	if(addUserUpdateForm.getForm().isValid()){
+							       		addUserUpdateForm.getForm().submit({
+							       			waitMsg : '处理中，请稍等..',
+											waitTitle: '请稍等',
+							       		    url:'/GXDS/editUser',
+							       		    params :{ depatment : namer},
+											success :function(form,action){
+												  addUserUpdateForm.getForm().reset();
+							        			  dss.reload();
+							        			  update.destroy();
+							        		},failure :function(form,action){
+							        			Ext.Msg.alert('错误','后端异常');
+							        		}			        		
+							        	});
+								       	} else {
+								       		Ext.MessageBox.alert("错误","不允许为空!" );
+								       	}
+						         	 }
+						        },{
+						            text: '取消',
+						            handler: function(){
+						            addUserUpdateForm.getForm().reset();
+						           		update.destroy();
+						            }
+						        }]
+						});
+							
+					var rends = usergrid.getSelections();
+					if(rends.length<=1&&rends.length!=0){
+						for(var i = 0 ; i < rends.length ; i++){
+						  var leng = rends[i];
+					  	  userQuerys.setValue(leng.get("userId"));
+					   	  userNames.setValue(leng.get("userId"));
+					   	  userPasswords.setValue(leng.get("password"));
+					   	  realNames.setValue(leng.get("userName"));
+					   	  contents.setValue(leng.get("content"));
+					   	  updateDeperment.setValue( leng.get("depatment") );
+					   	  namer = leng.get("depatment")+","+leng.get("depatmentId");
+					   	  update.show();
+					   	  
+					 }
+					 }else{
+					 	Ext.Msg.alert('错误','不能多选或不选');
+				     }
+			}},'-',{
+			text:'分配权限',
+			iconCls:'comparison',
+			handler:function(){
+					var role = usergrid.getSelections();
+				if(role.length<=1&&role.length!=0){
+				     var leng = role[0]
+				     var roleid = leng.get("userId");
+					 var TreeTest = function(){
+					    return {
+					        init : function(){
+					        tree = new Ext.tree.TreePanel({
+				                animate:true, 
+				                buttonAlign :'left',
+				                height:200,
+				                width:195,
+				                autoScroll:true,
+				                dataUrl: '/GXDS/noOperation?userId='+roleid,
+				                enableDD:true,
+				                containerScroll: true,
+				                dropConfig: {appendOnly:true},
+				                root: {
+					            nodeType: 'async',
+					            text: '未分配操作',
+					            draggable:false,
+					            id:'source'
+					        }
+					            });
+					            
+					            root  = new Ext.tree.AsyncTreeNode ({
+						            nodeType: 'async',
+						            text: '已分配操作',
+						            draggable:false,
+						            id:'yui',
+						            loader:new Ext.tree.TreeLoader({ 
+						            	dataUrl: '/GXDS/roleToOperation?userId='+roleid
+							        })
+							    });
+				     
+				            new Ext.tree.TreeSorter(tree, {folderSort:true});
+				            tree2 = new Ext.tree.TreePanel({
+				                animate:true,
+				                buttonAlign :'right',
+				                autoScroll:true,
+				                height:200,
+				                width:198,
+				                containerScroll: true,
+				                enableDD:true,
+				                dropConfig: {appendOnly:true},
+				                root:root
+				            });
+				            new Ext.tree.TreeSorter(tree2, {folderSort:true});
+				        }
+				    };
+				}();
+				
+				Ext.EventManager.onDocumentReady(TreeTest.init, TreeTest, true);
+				
+				selectPanl = new Ext.Window({
+					title : '分配',
+					width: 436,
+					height:280,
+					resizable:false,
+					layout: 'form',
+					plain:true,
+					autoScroll:true,
+					bodyStyle:'padding:5px;',
+					buttonAlign:'center',
+					closeAction : 'hide',
+					modal:true,
+					items:[{xtype:"panel",layout:"column",border:false,items:[tree,tree2]}],
+					buttons:[{
+					text:'保存',
+					handler:function() {
+					var b = "";
+					 var nodes = tree2.getRootNode().childNodes;
+					if(nodes.length<0){
+					return;
+					}else{
+					 for(var i=0; i<nodes.length; i++){
+					   var rend = nodes[i];
+					   if(i==rend.length-1){
+					     b = b + rend.id;
+					  }else{
+					     b = b + rend.id+",";
+					}
+					 }
+					}
+				   Ext.Ajax.request({         
+				           url: '/GXDS/saveOperation',  
+				           waitMsg : '正在处理......', 
+				           params: { operateId: b ,userId:roleid },
+				           success:function(form,action){
+							sessce()
+				           },failure: function(form,action){
+				        	Ext.Msg.alert('温馨提示','后端异常');
+				           } 
+					});
+					}
+					}]
+					})
+					
+					selectPanl.show();
+					}
+					else{
+						Ext.Msg.alert('错误','不能多选或不选');
+					}
+					
+					}
+				},'-',{
+					text:'复制权限',
+					iconCls:'comparison',
+					handler:function(){
+					
+					
+						var rends = usergrid.getSelections();
+						if(rends.length<=1&&rends.length!=0){
+							for(var i = 0 ; i < rends.length ; i++){
+							  var leng = rends[i];
+							  	 Ext.Ajax.request({         
+							           url: '/GXDS/userOptCopy',  
+							           waitMsg : '正在处理......', 
+							           params: {userId:leng.get("userId") },
+							           success:function(form,action){
+									     Ext.Msg.alert('温馨提示','复制成功!请尽快粘贴给其他用户');
+							           },failure: function(form,action){
+							        	Ext.Msg.alert('温馨提示','后端异常');
+							           } 
+								});
+						 }
+						 }else{
+						 	Ext.Msg.alert('错误','不能多选或不选');
+					     }
+					}},'-',{
+					text:'粘贴权限',
+					iconCls:'comparison',
+					handler:function(){
+					var b = '';
+					var rends = usergrid.getSelections();
+						for(var i = 0 ; i<rends.length ; i++)
+						{
+						  var rend = rends[i];
+						  if(i==rends.length-1)
+						  {
+						     b = b + rend.get("userId");
+						  }else
+						  {
+						     b = b + rend.get("userId")+",";
+						  }
+						}
+						 
+						  Ext.Ajax.request({         
+					           url: '/GXDS/userOptPaste',  
+					           waitMsg : '正在处理......', 
+					           params: { userId:b },
+					           success:function(form,action){
+								  Ext.Msg.alert('温馨提示','粘贴成功!');
+					           },failure: function(form,action){
+					        	  Ext.Msg.alert('温馨提示','后端异常');
+					           } 
+						  });
+						}}]
+				});
+
+ function sessce()
+ {
+ 		Ext.Msg.alert('温馨提示','保存成功!');
+ 		//selectPanl.hide();
+ }
+
+ function someFn()
+  {
+     Ext.MessageBox.alert('温馨提示', '操作成功!');  
+	  dss.reload();      
+  }
+
+  function otherFn()
+  {
+      usergrid.getStore().commitChanges();
+       Ext.MessageBox.alert('温馨提示', '操作失败!');   
+  }
+  
+  		function dodelteuser(btn){
+ 					if(btn=='yes'){
+  							var b = "";
+							var rends = usergrid.getSelections();
+							if(rends.length>0){
+							for(var i = 0 ; i<rends.length ; i++)
+							{
+							  var rend = rends[i];
+							  if(i==rends.length-1)
+							  {
+							     b = b + rend.get("userId");
+							  }else
+							  {
+							     b = b + rend.get("userId")+",";
+							  }
+							}
+
+					      Ext.Ajax.request({         
+					           url: '/GXDS/deleteUser',  
+					           waitMsg : '正在处理......', 
+					           params: { userId: b },
+					           success:function(form,action)
+					           {
+					        	 dss.reload();
+					           },failure: function(form,action){
+					           			Ext.Msg.alert('错误','后端异常');
+					           } 
+						});
+					}else{
+						Ext.Msg.alert('错误','请选择需要删除的数据!');
+					}
+		}
+ }   
+
+ function opther(form,action)
+ {
+ 	Ext.Msg.alert('错误','后端异常');
+ }
+
+	dss.load({params:{start:0,limit:10}});
+	usergrid.render('grid-example');
+});
+  		
+  	</script>
+  
+  <div id="grid-example" />
+  </body>
+</html>

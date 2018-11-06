@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>评价订单</title>
+    <link rel="stylesheet" href="index.css">
+    <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../common/js/baseUrl.js"></script>
+    <script type="text/javascript" src="../common/js/common.js"></script>
+    <script type="text/javascript" src="../common/js/ajaxfileupload.js"></script>
+</head>
+<body>
+    <div id="evaluationOrder_DIV">
+        <!--
+        <div id="top_DIV">
+            <a class="return" href=""></a>
+            评价订单
+            <span class="submit">提交</span>
+        </div>
+        -->
+        <!--为骑手打分-->
+        <div id="Rider_DIV">
+            <div class="rider_head clear">
+                <div class="rider_img"><img src="rider_girl.png"></div>
+                为骑手打分
+            </div>
+            <div class="score_DIV clear">
+                <span>服务态度</span>
+                <p class="scoreNum riderService">
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                </p>
+                <em>非常满意</em>
+            </div>
+            
+            <div class="score_DIV clear">
+                <span>送餐速度</span>
+                <p class="scoreNum riderSpeed">
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                </p>
+                <em>非常满意</em>
+            </div>
+        </div>
+
+        <!--为此单打分-->
+        <div id="order_DIV">
+            <div class="order_head clear">
+                <img src="../common/img/food.png"  id="clogo" style="width: 27px;display: inline-block;margin-left: 17px;vertical-align: middle;"/>
+                为商家打分
+            </div>
+            <!--
+            <div class="score_DIV clear">
+                <span>商家评分</span>
+                <p class="scoreNum businessScore">
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                </p>
+                <em>非常满意</em>
+            </div>-->
+            <div class="score_DIV clear">
+                <span>服务质量</span>
+                <p class="scoreNum businessService">
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                </p>
+                <em>非常满意</em>
+            </div>
+            <div class="score_DIV clear">
+                <span>菜品口味</span>
+                <p class="scoreNum flavor">
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                    <i class="favourable"></i>
+                </p>
+                <em>非常满意</em>
+            </div>
+
+            <div class="content_DIV">
+                <textarea placeholder="菜品是否符合你的胃口呢，说说你这一刻的想法..." maxlength="255"></textarea>
+                <span class="wordsNum"><i>0</i>/255</span>
+            </div>
+
+             <div class="uploadImg clear">
+                <span class="addImg">
+                    <input type="file" name="file1" id="doc1" accept="image/*"  onchange="javascript:setImagePreview(1);" multiple="multiple"/>
+                    <img id="preview1" src="" />
+                </span>
+                <span class="addImg hidden">
+                    <input type="file" name="file2" id="doc2" accept="image/*"  onchange="javascript:setImagePreview(2);" multiple="multiple"/>
+                    <img id="preview2" src="" />
+                </span>
+                <span class="addImg hidden">
+                    <input type="file" name="file3" id="doc3" accept="image/*"  onchange="javascript:setImagePreview(3);" multiple="multiple"/>
+                    <img id="preview3" src="" />
+                </span>
+               <!--  <span class="addImg hidden">
+                    <input type="file" name="file4" id="doc4" accept="image/*"  onchange="javascript:setImagePreview(4);" multiple="multiple"/>
+                    <img id="preview4" src="" />
+                </span>
+                <span class="addImg hidden">
+                    <input type="file" name="file5" id="doc5" accept="image/*"  onchange="javascript:setImagePreview(5);" multiple="multiple"/>
+                    <img id="preview5" src="" />
+                </span>
+
+                <em>添加</em> -->
+            </div> 
+        </div>
+        <div id="submit" onclick="submitFunction()">提交</div>
+        <br/><br/>
+        <script>
+        
+            //下面用于图片上传预览功能
+             function setImagePreview(i) {
+                //input
+                var dovId = "doc"+i;
+                var docObj = document.getElementById(dovId);
+                //img
+                var imgId = "preview"+i;
+                var imgObjPreview = document.getElementById(imgId);
+
+                if (docObj.files && docObj.files[0]) {
+                
+                    //火狐下，直接设img属性
+                    imgObjPreview.style.display = 'block';
+                    imgObjPreview.style.width = '100%';
+                    imgObjPreview.style.height = 'auto';
+                    //imgObjPreview.src = docObj.files[0].getAsDataURL();
+                    //火狐7以上版本不能用上面的getAsDataURL()方式获取，需要一下方式
+                    imgObjPreview.src = window.URL.createObjectURL(docObj.files[0]);
+                } else {
+                    //IE下，使用滤镜
+                    docObj.select();
+                    var imgSrc = document.selection.createRange().text;
+         
+                    var localImagId = document.getElementById("localImag");
+                    //必须设置初始大小
+                    localImagId.style.width = "100%";
+                    localImagId.style.height = "auto";
+                    //图片异常的捕捉，防止用户修改后缀来伪造图片
+                    try {
+                        localImagId.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod=scale)";
+                        localImagId.filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = imgSrc;
+                    } catch (e) {
+                        valLink("alert","您上传的图片格式不正确，请重新选择!");
+                        return false;
+                    }
+                    imgObjPreview.style.display = 'none';
+                    document.selection.empty();
+                }
+                eachFile();
+                return true;
+            }
+            
+            function eachFile() {
+                var index = 0;
+                $(".uploadImg span").each(function () {
+                    if($(this).find("input").val().length != 0 ){
+                        index++;
+                        $(".uploadImg span").eq(index).removeClass("hidden");
+                    }
+
+                })
+            } 
+        
+            $(function () {
+           		var status = GetQueryString("status");  //判断是否是美食还是外卖
+				var orderId = GetQueryString("orderId"); //订单号
+				var cid = GetQueryString("cid");//商家ID
+				var token = GetQueryString("token");
+				
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.FINDNAME,
+				 	data: { 
+            			id: GetQueryString("cid")
+        			},
+					success:function(data) {
+						$("#clogo").attr("src",data.logo);
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+            
+            	switch(status){
+            	case '2':
+            	$("#Rider_DIV").hide();
+            	break;
+            	}
+            
+                $(".scoreNum i").click(function () {
+                    var num = $(this).index();
+                    var sParent = $(this).parent();
+                    sParent.find("i").removeClass("favourable");
+                    for (var i = 0; i <= $(this).index(); i++){
+                        sParent.find("i").eq(i).addClass("favourable");
+                    }
+
+                    var text = "";
+                    switch (num) {
+                        case 0:
+                            text = "非常不满意";
+                            break;
+                        case 1:
+                            text = "很不满意";
+                            break;
+                        case 2:
+                            text = "一般";
+                            break;
+                        case 3:
+                            text = "很满意";
+                            break;
+                        case 4:
+                            text = "非常满意";
+                            break;
+                    }
+
+                    $(this).parents(".score_DIV").find("em").html(text);
+
+                })
+
+                $("textarea").keyup(function () {
+                    var long = $(this).val();
+                    $(".wordsNum i").html(long.length);
+                    if(long.length > 500){
+                        $(".wordsNum i").css("color","#f00");
+                    }else {
+                        $(".wordsNum i").css("color","#ccc");
+                    }
+                })
+
+                $("#chooseLabel span").click(function () {
+                    if($(this).hasClass("choose")){
+                        $(this).removeClass("choose");
+                    }else {
+                        $(this).addClass("choose");
+                    }
+                })
+
+                
+
+                
+            })
+            var riderService;       //骑手服务态度
+            var riderSpeed;         //骑手送餐速度
+            //var businessScore;      //商家评分
+            var businessService;    //商家服务质量
+            var flavor;             // 菜品口味
+            
+            
+            function submitFunction(){
+            	$("#submit").removeAttr("onclick");
+            	var file1=$('#doc1').val();
+               	var file2=$('#doc2').val();
+               	var file3=$('#doc3').val();
+               	
+               	var size = 1024 * 500;
+				var files = document.getElementById('doc1').files;  
+			    var fileSize = 0;
+			    if(files.length!=0){
+			        fileSize = files[0].size;
+			    }
+			    if(fileSize > size){
+			        valLink("alert","文件不能大于 500KB ");
+			        return;
+			    }
+                   
+                   riderService = $(".riderService .favourable").length;
+                   riderSpeed = $(".riderSpeed .favourable").length;
+                   businessScore = $(".businessScore .favourable").length;
+                   businessService = $(".businessService .favourable").length;
+                   flavor = $(".flavor .favourable").length;
+                   
+                  	$.ajaxFileUpload({
+					secureuri: false, //是否需要安全协议，一般设置为false
+					type: 'POST', 
+					url: BASE_URL + LOGIN_ACTION.SEND_EVALUATE, //用于文件上传的服务器端请求地址
+					fileElementId: ['doc1','doc2','doc3'], //文件上传域的ID
+					data:{
+            			file1:file1,
+            			file2:file2,
+            			file3:file3,
+						cid: GetQueryString("cid"),
+            			orderId:GetQueryString("orderId"),
+            			token:GetQueryString("token"),
+            			content:$("textarea").val(),
+            			taste:flavor,
+            			quality:businessService,
+            			speen:riderSpeed,
+            			manner:riderService
+					},
+					dataType: 'json', //返回值类型 一般设置为json
+					success: function (data, status){
+					  	link('nfinish');
+						valLink('alert',data.message);
+					},
+					error: function (data, status, e){
+					   
+					}
+				})
+            }
+        </script>
+
+    </div>
+</body>
+</html>

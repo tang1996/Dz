@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>订单详情</title>
+   	<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+		<link rel="stylesheet" type="text/css" href="./orderDetail.css" />
+		<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function() {
+			
+						// 获取地址
+						$.ajax({type : 'POST',
+							url : BASE_URL + LOGIN_ACTION.GET_ADDRESS,
+							data : {
+								token : GetQueryString("token")
+							},
+							success:function(data) {
+								if(data.success){
+									$("#username").html(data.username+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+data.phone);
+									$("#address").html(data.address);
+								}
+							},
+							error:function(error) {
+								console.log(error);
+							}
+						});
+						
+						$.ajax( {
+								type : 'POST',
+								url : BASE_URL + LOGIN_ACTION.USER_VIEW,
+								data : {
+									token : GetQueryString("token"),
+									orderId: GetQueryString("orderId")
+								},
+								success:function(data) {
+									$("#companyname").html('<span><img src='+data.logo+' style="width:37px;height:37px;"  alt=""></span>'+data.companyName+'<img src="../common/img/arrow.png" alt="">');
+									$("#orderNo").html(data.orderNo+"&nbsp;|&nbsp;<b>复制</b>");
+									$("#addTime").html(data.addTime);
+									$("#remarks").html(data.remarks);
+									var goodslist = data.list;
+									var totalCount='';
+									
+									for(var i = 0;i < goodslist.length; i++){
+										totalCount = totalCount + goodslist[i].price;
+										$("#cart-list").append(
+											'<li>'+	goodslist[i].name+
+														'<span>¥'+goodslist[i].price+'</span>'+
+														'<span>x1</span>'+
+											'</li>'
+										);
+									}
+									
+									$("#total-money").html("¥"+totalCount);
+								},
+								error:function(error) {
+									console.log(error);
+								}
+							});
+			
+						
+				});
+</script>
+</head>
+<body>
+
+    <div class="product-info-box">
+        <ul>
+           <li class="title" id="companyname"></li>
+            <li id="cart-list"></li>
+            <li><p class="coupon">减</p>在线支付立减优惠<span class="coupon-money">-¥15</span></li>
+            <li class="contanct"><img src="../common/img/phone.png" alt="">联系商家<span class="price">¥60.5</span><span>实付</span></li>
+        </ul>
+    </div>
+    <div class="delivery-info-box">
+        <ul>
+            <li class="title">配送信息</li>
+            <li class="time">送达时间<span>尽快送达(12:30)</span></li>
+            <li class="addr">
+                <div class="left">收货地</div>
+                <div class="right">
+                    <p id="address"></p>
+                    <p id="username"></p>
+                </div>
+            </li>
+            <li class="way">配送方式<span>动致专送</span></li>
+        </ul>
+    </div>
+    <div class="social-box">
+        <h3>商家邀您入群</h3>
+        <div class="group">
+            <div class="avatar"></div>
+            <div class="group-info">
+                <p class="title">南山科技园1群</p>
+                <p class="info">群成员专享：进群抢红包，抢到红包换酒钱</p>
+            </div>
+        </div>
+        <div class="join-button"><span>立即加入</span></div>
+    </div>
+    <div class="order-info-box">
+        <ul>
+            <li class="title">订单信息</li>
+            <li>订单号<span id="orderNo"></span></li>
+            <li>支付方式<span>在线支付</span></li>
+            <li>下单时间<span id="addTime"></span></li>
+            <li>备注
+                <p id="remarks"></p>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

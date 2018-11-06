@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>商家</title>
+		<link rel="stylesheet" href="./info.css">
+		<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+		<script type="text/javascript">
+    $.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.FIND,
+				 	data: { 
+            			id: '1',//GetQueryString("companyId")
+            			location:'22.6733000000,114.0651500000'//'25.2560978214,110.2188938856'
+        			},
+					success:function(data) {
+							var list=data.list;
+							var count=data.count;
+							for(var i=0;i<list.length;i++){
+							  var isOpen1=list[i].isOpen1;
+							  var isOpen2=list[i].isOpen2;
+							  var isOpen3=list[i].isOpen3;
+							  var isOpen4=list[i].isOpen4;
+							  var html='';
+								if(isOpen1==true){
+									var html='<span class="icon">满减</span><span class="coupon-desc">'+list[i].subtraction+'</span><span class="coupon-num">'+count+'个优惠</span><img src="../common/img/c_down.png""  width="10px" height="10px" style="float: right;margin-top: 10px;" />';
+									$("#shop-coupon").html(html);
+								}
+
+								if(isOpen2==true){
+									  html='<li class="shop-coupon"><span class="icon">新</span><span class="coupon-desc">'+list[i].newUser+'</span></li>';
+									$("#aaa").append(html);
+								}
+								if(isOpen3==true){
+									  html='<li class="shop-coupon"><span class="icon">折扣</span><span class="coupon-desc">'+list[i].svg+'</span></li>';
+									$("#aaa").append(html);
+								}
+								if(isOpen4==true){
+									  html='<li class="shop-coupon"><span class="icon">卷</span><span class="coupon-desc">'+list[i].coupon+'</span></li>';
+									$("#aaa").append(html);
+								}
+						  
+							}
+							
+						$("#shop-info").html(data.name+"<span>查看后厨</span>");
+						$("#ping").html("评分"+data.assess);
+						$("#yue").html("月售"+data.monSales);
+						$("#logo").attr("src",data.logo);
+						$("#img").attr("src",data.img);
+						if(data.type == 1){
+							$("#pei").html("配送约"+data.time+"分钟");
+						}
+						$("#ju").html("距离"+data.range);
+						$("#shop-tips").html('<img src="../common/img/tips.png" alt="">'+data.notice);
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+				
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.FIND,
+				 	data: { 
+            			id: '1',//GetQueryString("companyId")
+            			location:'22.6733000000,114.0651500000'//'25.2560978214,110.2188938856'
+        			},
+					success:function(data) {
+						var html='<li>'+
+								'商家名称：'+data.name+
+							'</li>'+
+							'<li>'+
+								'商家电话：'+data.phone+
+							'</li>'+
+							'<li>'+
+								'营业时间：'+data.business_time+
+							'</li>'+
+							'<li>'+
+								'商家地址：'+data.address+
+							'</li>';
+					$("#info").html(html);
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+				</script>
+
+	</head>
+	<body>
+		<header>
+		<div class="shop-desc">
+			<p class="shop-info" id="shop-info">
+
+			</p>
+			<p class="shop-service">
+				<span id="ping"></span>
+				<span id="yue"></span>
+				<span id="pei"></span>
+				<span id="ju"></span>
+			</p>
+			<p class="shop-tips" id="shop-tips">
+			</p>
+			<ul>
+				<li class="shop-coupon" id="shop-coupon">
+					<ul id="aaa" style="display: none;">
+					</ul>
+				</li>
+			</ul>
+
+		</div>
+		<ul>
+			<li>
+				<span onclick="window.location.href='http://118.190.149.109:8081/DzClient/goodsList/shop.html'">点餐</span>
+			</li>
+			<li>
+				<span onclick="window.location.href='http://118.190.149.109:8081/DzClient/goodsList/seller-comment.html'">评价(2018)</span>
+			</li>
+			<li class="active">
+				<span>商家</span>
+			</li>
+		</ul>
+		</header>
+		<!-- 商家 -->
+		<div class="seller-box">
+			<ul id="info">
+			</ul>
+			<div class="button">
+				<a id="button">去点餐</a>
+			</div>
+		</div>
+	</body>
+</html>

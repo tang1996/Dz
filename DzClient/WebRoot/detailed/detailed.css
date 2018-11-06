@@ -1,0 +1,466 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+body{
+    background: #eeeeee;
+}
+i{
+    font-style: normal;
+}
+.hidden{
+    display: none;
+}
+#main{
+    background: #eeeeee;
+    /*height: 1000px;*/
+}
+
+.clear:after{
+    clear: both;
+    content: " ";
+    display: block;
+}
+#head{
+    height: 40px;
+    /*border: 1px solid red;*/
+    line-height: 40px;
+    background: white;
+    margin-bottom: 10px;
+    position: fixed;
+    width: 100%;
+    top:45px;
+}
+#head p{
+    border-bottom: 2px solid white;
+    width: 50%;
+    font-size: 14px;
+    float: left;
+    text-align: center;
+}
+.h-div {
+	position: fixed;
+	display: block;
+	padding: 12px 0;
+	overflow: hidden;
+	background: #ff7e00;
+	width: 100%;
+	top: 0;
+}
+.h-div a{
+	float: left;
+	width: 35px;
+	text-align: center;
+}
+.h-div a img{
+	vertical-align: -2.5px;
+}
+.h-div p{
+	float: left;
+	color: #fff;
+	text-align: center;
+}
+
+.jt{
+	width: 10px;
+	height: 16px;
+}
+#head p.click{
+    color: #ff7e00;
+    border-bottom-color: #ff7e00;
+}
+#body{
+    /*padding: 0 10px;*/
+    background: white;
+    margin-bottom: 10px;
+    margin-top: 88px;
+}
+#yiJieZhang{
+    background: white;
+    /*height: 500px;*/
+}
+#data_div{
+    /*height: 100px;*/
+    border: 1px solid white;
+}
+#data{
+    margin: auto;
+    width: 306px;
+    margin: 15px auto;
+}
+#data p{
+    float: left;
+    font-size: 12px;
+}
+#data p.data_p{
+    background: #eeeeee;
+    padding: 5px 30px 5px 15px;
+    border-radius: 5px;
+}
+#data p.data_p input{
+    width: 100px;
+    font-size: 12px;
+    border: none;
+    background: #eeeeee;
+}
+#data p.data_l{
+    padding: 5px ;
+}
+#dingDan_div{
+    display: flex;
+    flex-wrap: wrap;
+}
+.title{
+    line-height: 50px;
+    font-size: 15px;
+    /*border: 1px solid black;*/
+}
+.left{
+    float: left;
+}
+.right{
+    float: right;
+}
+.gengDuo{
+    font-size: 12px;
+    color: #666666;
+}
+.dingDan_em{
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    padding: 5px;
+    border-radius: 50%;
+    background: #ff7e00;
+    margin: 0 5px 0 10px;
+}
+.dan_div{
+    font-size: 12px;
+    flex: 1;
+}
+.click_div{
+    text-align: center;
+    border: 1px solid #dddddd;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    padding: 15px 10px;
+    line-height: 20px;
+    border-radius: 5px;
+    height: 67px;
+}
+.dan_div .zhangDan_div{
+    margin: auto;
+}
+.yiTuiDan,.yiCheDan{
+
+}
+
+.manyOrder{
+    color: #ff7e00;
+    line-height: 25px;
+}
+.manyOrder i{
+    font-size: 18px;
+}
+.shiShou {
+    color: #666666;
+}
+#weiJieZhang_div{
+    display: flex;
+    padding: 20px 10px 40px 10px;
+}
+.weiDingDan_div{
+    border: 1px solid #666666;
+    border-radius: 5px;
+    padding: 15px 20px;
+    font-size: 12px;
+    text-align: center;
+    line-height: 20px;
+    flex: 1;
+}
+.marginRight{
+    margin-right: 10px;
+}
+
+#dingDanMingXi_div{
+    background: white;
+}
+#dingDanMingXi_div h1{
+    line-height: 45px;
+    font-weight: normal;
+    font-size: 16px;
+    border-bottom: 1px solid #eeeeee;
+    padding-left: 20px;
+}
+.clicking{
+    border:1px solid #ff7e00;
+}
+.more_head{
+    background: #ff7e00;
+    /*height: 100px;*/
+    font-size: 12px;
+    padding: 5px 0 7px 0;
+    position: relative;
+}
+.more_div{
+    background: white;
+    height: 26px;
+    border-radius: 50px;
+    line-height: 26px;
+    /*width: 925px;*/
+    margin: auto 10px;
+    /*margin-top: 25px;*/
+}
+.more_div p{
+    width: 70px;
+    /*text-align: center;*/
+    float: left;
+    position: relative;
+    /*border: 1px solid black;*/
+}
+.more_div p span{
+    display: inline-block;
+    text-align: center;
+    width: 70px;
+}
+.more_div p i{
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    padding: 5px;
+    background: #ff7e00;
+    border-radius: 50%;
+    position: absolute;
+    top: 5px;
+    right: -20px;
+}
+.more_div input{
+    font-size: 12px;
+    float: right;
+    text-align: right;
+    line-height: 26px;
+    width: 71%;
+    border: none;
+    margin-right: 10px;
+    outline: none;
+}
+.switch{
+    position: absolute;
+    background: #ffffff;
+    padding: 0 10px;
+    top: 48px;
+    left: 10px;
+    box-shadow: 1px 3px 9px rgba(0,0,0,0.3);
+}
+.switch p{
+    line-height: 30px;
+    border-bottom: 1px solid #eeeeee;
+}
+.switch p.click{
+    color: #ff7e00;
+}
+.switch span{
+    width: 0;
+    height: 0;
+    display: block;
+    border: 8px solid;
+    border-color: transparent transparent white transparent;
+    position: absolute;
+    top: -24px;
+    /*left: 15px;*/
+}
+.switch p:last-of-type{
+    border-bottom: none;
+}
+
+
+.dingNei_more_list{
+    margin-top: 8px;
+    background: white;
+}
+.dingNei_more_list li{
+    padding: 5px 20px 0px 20px;
+    border-bottom: 1px solid #eeeeee;
+}
+.dingNei_more_list li h2{
+    font-size: 14px;
+    font-weight: normal;
+}
+.dingNei_more_list li div{
+    padding-top: 10px;
+}
+.dingNei_more_list li div p{
+    float: left;
+    font-size: 12px;
+    padding: 3px 15px;
+    background: #cccccc;
+    border-radius: 50px;
+    color: white;
+    margin-right: 15px;
+    margin-bottom: 10px;
+}
+.dingNei_more_list li div p.click{
+    background: #ff7e00;
+}
+
+.more_Foot{
+    line-height: 40px;
+    background: #ff7e00;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+.more_Foot div{
+    font-size: 15px;
+    color: white;
+    float: left;
+    width: 50%;
+    text-align: center;
+    font-weight: bold;
+}
+.more_Foot i{
+    position: absolute;
+    height: 20px;
+    border-left: 1px solid #666666;
+    top: 25%;
+    left: 50%;
+}
+
+#waiMai_more input{
+    width: 94%;
+}
+.waiMai_more_list{
+    /*margin-top: 8px;*/
+    background: white;
+}
+.waiMai_more_list li{
+    padding: 5px 20px 8px 20px;
+    border-bottom: 1px solid #eeeeee;
+}
+.waiMai_more_list li h2{
+    font-size: 14px;
+    font-weight: normal;
+}
+.waiMai_more_list li div{
+    padding: 10px 0;
+}
+.waiMai_more_list li div p{
+    float: left;
+    font-size: 12px;
+    padding: 3px 15px;
+    background: #cccccc;
+    border-radius: 50px;
+    color: white;
+    margin-right: 10px;
+}
+.waiMai_more_list li div p.click{
+    background: #ff7e00;
+}
+#dingDanMingXi_div ul{
+    font-size: 0px;
+    /*padding: 0 10px;*/
+}
+#dingDanMingXi_div ul li:nth-of-type(even){
+    background: rgba(255,126,0,0.1);
+}
+#dingDanMingXi_div ul p{
+    text-align: center;
+    font-size: 12px;
+    float: left;
+    line-height: 35px;
+    /*width: 20%;*/
+}
+#dingDanMingXi_div ul li.noData{
+	line-height: 100px;
+	text-align: center;
+	font-size: 12px;
+	color: #999;
+}
+
+#dingDanXiangPing{
+    padding: 10px;
+    background: #fff;
+    font-size: 13px;
+    color: #333333;
+}
+#dingDanXiangPing p{
+    line-height: 38px;
+}
+#dingDanXiangPing p i{
+    height: 10px;
+    border-left: #ff7e00 2px solid;
+    margin: 0 10px;
+}
+#dingDanXiangPing .moneyList{
+    border-bottom: 1px solid #eeeeee;
+    margin: 10px 0;
+}
+#dingDanXiangPing .moneyList li{
+    line-height: 38px;
+    font-size: 13px;
+}
+#dingDanXiangPing .moneyList span{
+    display: inline-block;
+}
+#dingDanXiangPing .moneyList .caiName{
+    width: 45%;
+}
+#dingDanXiangPing .moneyList .oneMoney{
+    width: 23%;
+}
+#dingDanXiangPing .moneyList .howMany{
+    width: 12%;
+}
+#dingDanXiangPing .moneyList .andMoney{
+    width: 20%;
+    text-align: right;
+}
+.youHuiList{
+    color: #ff7e00;
+}
+#dingDanXiangPing .total{
+    
+}
+.total span.right{
+    font-size: 24px;
+    color: #ff7e00;
+}
+.total span.balck{
+	font-size: 13px;
+	color: #333;
+}
+.total span em{
+    font-style: normal;
+    font-size: 14px;
+}
+#dingDanXiangPing .gray_foot{
+    color: #666;
+    border-bottom: none;
+    line-height: 24px;
+}
+.completeFoot{
+    background: #ff7e00;
+    color: #ffffff;
+    font-size: 16px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    left: 0;
+    text-align: center;
+    line-height: 38px;
+}
+
+.tiShi_Div{
+	position: fixed;
+	top: 25%;
+	width: 100%
+}
+.tiShi_Div p{
+	background: rgba(0,0,0,0.3);
+	padding: 25px;
+	text-align: center;
+	width: 100px;
+	font-size: 12px;
+	color: #fff;
+	margin: 0 auto;
+}

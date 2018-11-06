@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>商品属性</title>
+<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+<link rel="stylesheet" href="./attr.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+
+<body>
+<script type="text/javascript">		
+			$(document).ready(function(){ 
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.ATTRFIND,
+				 	data: { 
+            			goodId:1
+        			},
+					success:function(data) {
+						 var list = data.list;
+						 var html='';
+					for(var i = 0;i < list.length;i++){
+							html='<li>'+
+								 '<p>'+list[i].name+'</p>'+
+								 '<button type="button">删除</button>'+
+								 '<button type="button">添加属性值</button>'+
+								 '</li>';		
+						$("#attr").append(html);
+					 }	
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+		});
+		
+		</script>
+		<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="#"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>商品属性</p>
+		</div>
+	</div>
+    <div class="wrap">
+        <ul class="attr" id="attr">
+			
+		</ul>
+    </div>
+			<ul class="foot-ul">
+		<li>
+			<a href="#">
+				<img src="../common/img/f1.png" >
+				待处理
+			</a>
+		</li>
+		<li class="active">
+			<a href="#">
+				<img src="../common/img/f2.png" >
+				订单管理
+			</a>
+		</li>
+		<li>
+			<a href="#">
+				<img src="../common/img/f3.png" >
+				我的
+			</a>
+		</li>
+	</ul>
+</body>
+
+</html>

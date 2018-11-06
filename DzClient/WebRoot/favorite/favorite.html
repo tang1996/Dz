@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>我的收藏</title>
+    		<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+		<link rel="stylesheet" type="text/css" href="./favorite.css" />
+		<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+		
+<style type="text/css">
+.collection{width:20px;height:20px;float: left;margin-top:30px;margin-right:15px;display:none;}
+</style>
+</head>
+<body>
+<script type="text/javascript">
+			var count = 0;
+			$(document).ready(function(){  
+			
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.INCLUDEVIEW,
+				 	data: { 
+            			token: GetQueryString("token")
+        			},
+					success:function(data) {
+						var list = data.list;
+						count = list.length;
+						if(list != null){
+							for(var i = 0;i < list.length;i++){
+								var assess=list[i].assess;
+								var lineType='';
+								if(assess>0 && assess<1){
+										lineType = '<img src="../common/img/null.png" alt="">';
+								}else if(assess==1){
+									   lineType = '<img src="../common/img/favourable.png" alt="">';
+								}else if(assess>1 && assess<2){
+										lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else  if(assess==2){
+										lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(assess>2 && assess<3){
+										lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(assess==3){
+										lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(assess>3 && assess< 4 ){
+		 							    lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(assess==4){
+										lineType ='<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(assess>4 && assess<5){
+										lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(assess==5){
+										lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';	
+								}
+								var type = list[i].classifyName;
+								var lineTypeNew = '';
+								var lineH='';
+								var lineA='';
+								switch(type){
+									case '外卖':
+										lineTypeNew = '<span>起送¥'+list[i].miniPrice+'</span>';
+										lineH='<span class="slogan">'+list[i].mode+'</span>';
+										lineA='<span class="sales-count">月售'+list[i].monSales+'</span>';
+										break;
+									case '美食':
+										lineTypeNew = '<span>人均消费¥'+list[i].GDP+'</span>';
+										lineH='<span class="slogan"></span>';
+										lineA='<span class="sales-count"></span>';
+										break;
+									case 'KTV':
+										lineTypeNew = '<span>最低消费¥'+list[i].miniConsume+'</span>';
+										lineH='<span class="slogan"></span>';
+										lineA='<span class="sales-count"></span>';
+										break;
+									case '酒店':
+									    lineTypeNew = '<span>最低消费¥'+list[i].miniConsume+'</span>';
+										lineH='<span class="slogan"></span>';
+										lineA='<span class="sales-count"></span>';
+										break;
+									case '外卖,美食':
+									    lineTypeNew = '<span>起送¥'+list[i].miniPrice+'</span><span>人均消费¥'+list[i].GDP+'</span>';
+										lineH='<span class="slogan">'+list[i].mode+'</span>';
+										lineA='<span class="sales-count">月售'+list[i].monSales+'</span>';
+										break;
+									default :
+									    lineTypeNew = '<span></span>';
+										lineH='<span class="slogan"></span>';
+										lineA='<span class="sales-count"></span>';
+										break;
+								}
+								var html='<a href="javascript:valLink(\'search\','+list[i].companyId+');"><li class="favorite-item"><input type="checkbox" name="collection" id="collection[]" value="'+list[i].id+'" class="collection">'+
+		            					 '<span class="img-placeholder"><img style="width:100px;height:90px;" src='+list[i].logo+'> </span>'+
+		           						 '<div class="favorite-info">'+
+		              					  '<p class="title">'+list[i].name+'</p>'+
+		               				       '<p class="mark">'+lineType+'<span>&nbsp;&nbsp;'+assess+'分&nbsp;&nbsp;&nbsp;</span>'+lineA+lineH+'</p>'+
+		               			 '</p>'+
+		               			 '<p>'+lineTypeNew+'</p>'+
+		              			  '<p class="special-description"><span>支持自取</span><span>极速退款</span></p>'+
+		              			  '</br>'+
+		          				  '</div>'+
+		        				'</li></a>';
+									$("#favorite-list").append(html);
+							}
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+		});
+		
+		function openCheckbox(){//编辑
+			if(count > 0){
+				$(".collection").css('display','block'); 
+				$("#del").css('display','block');
+			}
+		}
+		
+		function noneCheckbox(){//隐藏
+			$(".collection").css('display','none'); 
+			$("#del").css('display','none');
+		}
+		
+		
+		function delect(){//删除
+				var ids="";
+			$.each($('input:checkbox:checked'),function(){
+					if(this.checked){
+							var value=$(this).val();
+							ids+=value+",";
+					}
+					
+            });
+			var length=$('input[type=checkbox]:checked').length;
+				if(length > 0){
+							if(!confirm("确认要删除吗？")){ 
+								window.event.returnValue = false; 
+							}		
+					$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.INCLUDEDELECT,
+				 	data: { 
+            			ids: ids
+        			},
+						success:function(data) {
+							if(data.success==true){
+								window.location.reload(); 
+							}
+						}
+					});
+				}else{
+						alert("请选择要删除的收藏");
+				}
+		}
+		</script>
+
+
+    <ul class="favorite-list" id="favorite-list"></ul>
+    <input type="button" value="删除" onclick="delect();" id="del"  style="display:none;color: #fff;width: 100%;height: 46px;position: absolute;bottom: 0px;background-color: #FF0000;"/>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>账单汇总</title>
+    <link rel="stylesheet" type="text/css" href="./management_order.css">
+    <link rel="stylesheet" type="text/css" href="./mobiscroll.custom.min.css">
+    <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../common/js/baseUrl.js"></script>
+    <script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+<body>
+
+    <div id="bigDiv">
+
+
+        <div id="main">
+        <a class="h-l" href="../management/management.html"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<h3 class="headTitle">美食消费统计</h3>
+            <div id="head" class="clear">
+                <div class="hearBody clear">
+                    <p class="left dateInput"><input id="startTime" type="text"value="2018-07-28 00:00"></p>
+                    <p class="left mi_line">-</p>
+                    <p class="left dateInput"><input id="endTime" type="text"value="2018-07-28 23:59"></p>
+                </div>
+
+            </div>
+
+            <div id="body">
+
+                <!--店内账单汇总-->
+                <ul class="list dianNei">
+                    <li class="clear">
+                        <p class="left">订单总数</p>
+                        <p class="right dingDanShu"><i>0</i>单</p>
+                    </li>
+                   <li>
+                        <p class="left">总金额</p>
+                        <p class="right youHuiTongJi"><i>0.00</i>元</p>
+                    </li>
+                 
+                      <li>
+                        <p class="left">优惠统计</p>
+                        <p class="right yingShouJinE"><i>0.00</i>元</p>
+                    </li>
+                      <li>
+                        <p class="left">实收金额(不含未完成的)</p>
+                        <p class="right shiShouJinE"><i>0.00</i>元</p>
+                    </li>
+                </ul>
+
+                <script>
+                
+                </script>
+
+                <!--外卖结算汇总-->
+                <ul class="list hidden waiMai">
+                     <li class="clear">
+                        <p class="left">订单总数</p>
+                        <p class="right dingDanShu"><i>0</i>单</p>
+                    </li>
+                   <li>
+                        <p class="left">总金额</p>
+                        <p class="right youHuiTongJi"><i>0.00</i>元</p>
+                    </li>
+                 
+                      <li>
+                        <p class="left">优惠统计</p>
+                        <p class="right yingShouJinE"><i>0.00</i>元</p>
+                    </li>
+                      <li>
+                        <p class="left">实收金额</p>
+                        <p class="right shiShouJinE"><i>0.00</i>元</p>
+                    </li>
+               </ul>
+            </div>
+            <div id="foot">
+                <div class="left moneySum">美食账单汇总</div>
+            </div>
+
+            <div class="bg_div hidden"></div>
+            <div id="huiZong_div">
+                <p><em>美食账单汇总</em><i class="right click">✔</i></p>
+                <p><em>外卖结算汇总</em><i class="right hidden">✔</i></p>
+            </div>
+        </div>
+        <div class="tiShi_Div hidden">
+        	<p></p>
+        </div>
+
+
+        <script type="text/javascript" src="../common/js/mobiscroll.custom.min.js"></script>
+        <script>
+   	
+           	//当前时间
+         var dates = new Date();
+         var year = dates.getFullYear();
+         var month = dates.getMonth();
+         var day = dates.getDate();
+      //   var hours = dates.getHours();
+      //   var Minute = dates.getMinutes();
+         
+        var monthAddOne = month + 1;
+		
+		if (monthAddOne >= 1 && monthAddOne <= 9) {
+		  monthAddOne = "0" + monthAddOne;
+		}
+		
+		if(day >= 1 && day <= 9){
+			day = "0" + day;
+		}
+		
+		$("#startTime").val(year+"-"+monthAddOne+"-"+day);
+		$("#endTime").val(year+"-"+monthAddOne+"-"+day);
+		           
+               var startTime;
+               var endTime;
+               var companyId;
+               dian_newData();
+               //店内数据
+               function dian_newData(){
+                   startTime = $("#startTime").val();
+                   endTime = $("#endTime").val();
+                   
+                   $.ajax({
+                       url: BASE_URL + LOGIN_ACTION.MSCOUNT,
+                       type:"POST",
+                       data:{
+                       	"companyId":getCookie('cid'),
+                       	"startTime":startTime,
+                       	"endTime":endTime
+                       },
+                       dataType:"json",
+                       success:function (data) {
+		                     $(".dianNei .dingDanShu i").html(data.num);
+		                     $(".dianNei .youHuiTongJi i").html(data.total);
+		                     $(".dianNei .shiShouJinE i").html(data.balance);
+		                     $(".dianNei .yingShouJinE i").html(data.discount);
+		               },
+                       error:function(jqXHR,textStatus,errorThrown){
+                       	  valLink("alert","店内信息展示错误！");
+                       }
+                   });
+               }
+               
+               //外卖数据
+               function wai_newData() {
+                   startTime = $("#startTime").val();
+                   endTime = $("#endTime").val();
+                   $.ajax({
+                       url:BASE_URL + LOGIN_ACTION.WMCOUNT,
+                       type:"POST",
+                       data:{"companyId":getCookie('cid'),
+                       	"startTime":startTime,
+                       	"endTime":endTime
+                       },
+                       dataType:"json",
+                       success:function(data) {
+	                     $(".waiMai .dingDanShu i").html(data.num);
+	                     $(".waiMai .youHuiTongJi i").html(data.total);
+	                     $(".waiMai .yingShouJinE i").html(data.discount);
+	                     $(".waiMai .shiShouJinE i").html(data.balance);
+	                 },
+                       error:function (error) {
+						   valLink("alert","外卖信息展示错误！");
+                       }
+                   });
+               }
+               
+               var startNum;
+               var endNum;
+
+               $("#startTime").change(function () {
+               	startNum = parseInt($("#startTime").val().replace(/-/g, ''), 10);
+       			endNum = parseInt($("#endTime").val().replace(/-/g, ''), 10);
+       			
+               	if($(this).val() <= $("#endTime").val()){
+               		if(endNum - startNum <= 100){
+               			if(!$(".dianNei").hasClass("hidden")){
+               				dian_newData();
+               			}else{
+               				wai_newData();
+               			}
+               		}else{
+               			valLink("alert","只能查询一个月以内的信息");
+               		}
+               	}else{
+               		valLink("alert","开始时间不可以大于结束时间");
+               	}
+                   
+               })
+               $("#endTime").change(function () {
+               	startNum = parseInt($("#startTime").val().replace(/-/g, ''), 10);
+       			endNum = parseInt($("#endTime").val().replace(/-/g, ''), 10);
+               	
+               	if($(this).val() >= $("#startTime").val()){
+               		if(endNum - startNum <= 100){
+               			if(!$(".dianNei").hasClass("hidden")){
+               				dian_newData();
+               			}else{
+               				wai_newData();
+               			}
+               		}else{
+               			valLink("alert","只能查询一个月以内的信息");
+               		}
+               	}else{
+               		valLink("alert","结束时间不可以小于开始时间");
+               	}
+                   
+               })
+        	
+        
+            //账单汇总
+            $(".moneySum").click(function () {
+                $(".bg_div").removeClass("hidden");
+                $("#huiZong_div").css("bottom","0px");
+            })
+            $(".bg_div").click(function () {
+                $(this).addClass("hidden");
+                $("#huiZong_div").css("bottom","-110px");
+            })
+            $("#huiZong_div p").click(function () {
+                $(this).find("i").removeClass("hidden");
+                $(this).find("i").addClass("click");
+                $(this).siblings().find("i").addClass("hidden");
+                $(this).siblings().find("i").removeClass("click");
+                $(".bg_div").addClass("hidden");
+                $("#huiZong_div").css("bottom","-110px");
+                if ($(this).find("em").html() == "美食账单汇总") {
+                    $(".dianNei").removeClass("hidden");
+                    $(".dianNei").siblings().addClass("hidden");
+                    $(".headTitle").html("美食消费统计");
+                    
+                    dian_newData();
+                }else {
+                    $(".waiMai").removeClass("hidden");
+                    $(".waiMai").siblings().addClass("hidden");
+                    $(".headTitle").html("外卖消费统计");
+                    
+                    wai_newData();
+                }
+                $(".moneySum").html($(this).find("em").html());
+            })
+            $("#huiZong_div").click(function () {
+                $(this).css("bottom","-110px");
+                $(".bg_div").addClass("hidden");
+            })
+            //账单汇总
+
+            //时间插件
+            var theme = "ios";
+            var mode = "scroller";
+            var display = "bottom";
+            var lang="zh";
+
+		/* 	$('#startTime').mobiscroll().range({
+			    theme: 'mobiscroll',
+			    lang: 'zh',
+			    display: 'bottom',
+			    controls: ['calendar', 'time'],
+			    defaultValue: [ new Date(2013, 6, 12), new Date(2013, 6, 18, 23, 59) ],
+			    startInput: '#startDate',
+			    endInput: '#endDate'
+			}); */
+			
+
+            $("#startTime").mobiscroll().date({
+                theme: 'mobiscroll',
+        		display: 'bottom',
+                lang: lang,
+                dateFormat:"yyyy-mm-dd",
+                minDate: new Date(year,month-1,day),
+                maxDate: new Date(year,month,day)
+            }); 
+            $("#endTime").mobiscroll().date({
+                theme: 'mobiscroll',
+                mode: 'bottom',
+                display: display, //显示方式 
+                lang: lang,
+                dateFormat:"yyyy-mm-dd",
+                minDate: new Date(year,month,day),
+                maxDate: new Date(year,month,day)
+            });
+        </script>
+    </div>
+</body>
+</html>

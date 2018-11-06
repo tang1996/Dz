@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>支付成功</title>
+	<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../common/js/common.js"></script>
+    <link rel="stylesheet" type="text/css" href="./pay-success.css">
+  
+</head>
+<body>
+  <script type="text/javascript">
+     $(function () {
+	        var width_num = $(window).width() - 150;
+	        $(".line_one").css("width",width_num+"px");
+			
+			$.ajax( {
+				type : 'POST',
+				url : BASE_URL + LOGIN_ACTION.RESUTL,
+				data : {
+					orderId: GetQueryString("orderId")
+				},
+				success : function(data) {
+					$("#submit_time").html(data.payTime);
+					if(data.status == "2"){
+						$("#submit_accapt").attr("class", "process_zi click");
+						$("#submit_accapt_time").attr("class","process_time");
+						$("#submit_accapt_time").html(data.confirmTime);
+						$("#title").html('<i class="success_img"></i>' + data.confirmTime);
+					}else if(data.status == "3"){
+						$("#submit_accapt").attr("class", "process_zi click");
+						$("#submit_fix").attr("class", "process_zi click");
+						$("#submit_fix_time").attr("class","process_time");
+						
+						$("#submit_fix_time").html(data.content);
+						$("#title").html('<i class="success_img"></i>' + data.content);
+					}
+					
+					var html = '<ul>'+
+						'<li>'+
+							'订单号：'+data.orderNo+
+						'</li>'+
+						'<li>'+
+							'商家名称：'+data.companyName+
+						'</li>'+
+						'<li>'+
+							'商家电话：'+data.companyPhone+
+						'</li>'+
+					'</ul>';
+		
+					$("#body").html(html);
+				},
+				error:function(error) {
+					console.log(error);
+				}
+			})
+			
+			$("#btnselect").click(function(){
+			 	link('goIndex');
+			});			
+			
+	 })
+</script>
+    <div id="bigDiv">
+        <div id="head">
+		
+            <div id="head_top">
+                <div class="top_l">
+                </div>
+                <div class="top_r">
+                    <div class="success" id="title"></div>
+                </div>
+            </div>
+
+            <div id="head_middle" class="clear">
+                <div class="process_div ">
+                    <p class="process_zi click" id="submit_click">提交订单</p>
+                    <p class="process_time" id="submit_time"></p>
+                </div>
+                <div class="process_div" style="margin: auto" >
+                    <p class="process_zi" id="submit_accapt">商家确认</p>
+                    <p class="process_time hidden" id="submit_accapt_time" >&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                </div>
+                <div class="process_div ">
+                    <p class="process_zi" id="submit_fix">预定成功</p>
+                    <p class="process_time hidden" id="submit_fix_time"></p>
+                </div>
+                <p class="line_one"></p>
+                <p class="line_two"></p>
+            </div>
+            <div id="head_foot">
+                <h1>温馨提示</h1>
+                <ul>
+                    <li>预定成功或失败，推送消息告知您预定结果。</li>
+                    <li>3分钟的倒计时，如果商家还没有确认订单或者拒绝，说明商家已经没有桌位，系统会退款。</li>
+                     <li>结账时，消费者可凭付款码向商家以现金形式多退少补结算账单，并要求商家开具发票。</li>
+                </ul>
+            </div>
+
+        </div>
+        <div id="body">
+         	<img alt="" src="../common/images/null.png" style="width: 300px; position: absolute;left: 14%;top: 54%;">
+        </div>
+    </div>
+</body>
+</html>

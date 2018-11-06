@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>TaxInformation.html</title>
+  </head>
+  <body>
+  	<script type="text/javascript">
+  		  Ext.onReady(function(){
+  	   var fm = Ext.form;
+
+       var dateStr = new Date();
+	   dateStr = dateStr.format('Ymd');
+
+	    TaxInformationStroe= new Ext.data.GroupingStore({
+			  proxy: new Ext.data.HttpProxy({url:'/GXDS/listTaxInformation'}),
+			  reader: new Ext.data.JsonReader({totalProperty:'totalCount', root:'list',id:'ENC_LEVX',
+			  successProperty :'@success',
+			  fields:['ENC_LEVX','ENC_LEVX_NAME','AMT10','AMT11','YEAR']
+			  })
+		});
+
+		var cm = new Ext.grid.ColumnModel([{   
+	           header: "ENC_LEVX",   
+	           dataIndex: 'ENC_LEVX',   
+	           width: 220,   
+	           editor: false,
+	           hidden:true
+	        },{   
+	           header: "登记注册类型",   
+	           dataIndex: 'ENC_LEVX_NAME',   
+	           width: 220,   
+	           editor: false
+	       },{
+	           header: "增值税纳税人户数",   
+	           dataIndex: 'AMT10',   
+	           width: 220,
+	           editor: new fm.TextField({   
+	               allowBlank: false  
+	           })   
+	        },{
+	           header: "其中：一般纳税人",
+	           dataIndex: 'AMT11',
+	           width: 220,
+	           editor: new fm.TextField({   
+	               allowBlank: false  
+	           }) 
+	        },{
+	           header: "年份",
+	           dataIndex: 'YEAR',
+	           width: 220,
+	           hidden:true,
+	           editor: new fm.DateField({   
+	               allowBlank: false, 
+	               readOnly:true,
+			       showToday:true,
+			       allowBlank: true,
+			       format:'Ymd',
+			       value:dateStr 
+	           })
+	        }
+	    ]);
+
+		 TaxInformationGrid =new Ext.grid.EditorGridPanel({
+					ds:TaxInformationStroe,
+					height:document.body.clientHeight-124,
+					width:document.body.clientWidth-193,
+					cm: cm,
+					closable:true,
+					stripeRows:true,
+					tbar:[{		
+					text:'查询',
+					iconCls:'select-fredd',
+					handler:function(){
+					
+					var date = new Date();
+					var year = date.getYear();	
+					var taxdata = [[year],[year-1],[year-2],[year-3],[year-4],[year-5]];
+					var taxStore = new Ext.data.SimpleStore({fields:['text'],data:taxdata});
+	
+					var TaxInformationDate = new Ext.form.ComboBox({
+					 		store: taxStore,
+							fieldLabel: '选择年份',
+							displayField: ['text'],
+							mode: 'local',
+							emptyText:'选择...',
+							forceSelection: true,
+							allowBlank:true,
+							editable: false,
+							width:200,
+							triggerAction:'all'
+					});
+				
+				var TaxInformationForm = new Ext.form.FormPanel({
+				        labelWidth: 95,
+				        width: 500,
+				        height:342,
+				        defaultType: 'textfield',
+				        items:TaxInformationDate
+				});
+
+			var TaxInformationWindow = new Ext.Window({
+			        title: '条件查询',
+			        width: 513,
+			        height:410,
+			        resizable:false,
+			        closable :false, 
+			        buttonAlign:'center', 
+			        items: TaxInformationForm,
+			        buttons: [{
+			            text: '确定',
+			            handler:function(){
+					 		if(TaxInformationForm.getForm().isValid()){
+					 		var dates = TaxInformationDate.value;
+					 		
+					 		Ext.getCmp('dates').setText("年份：<span style='color:green'>"+dates+"</span>");
+			       			TaxInformationStroe.load({
+				       			 params:{YEAR:TaxInformationDate.value}
+						    });
+			        		TaxInformationWindow.destroy();
+					       	} else {
+					       		Ext.MessageBox.alert( "错误","不允许为空!" );
+					       	}
+			         	 }
+			        },{
+			            text: '取消',
+			            handler: function(){
+			            	TaxInformationForm.getForm().reset();
+			           		TaxInformationWindow.destroy();
+			            }
+			        }]
+		     });
+						TaxInformationWindow.show();
+				}},'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',{text:'',id:'dates'}]
+		});
+		
+			TaxInformationGrid.render('grid-TaxInformation');
+				
+			var updateDate = function (obj){
+			    var r = obj.record;//获取被修改的行
+			   	if( Number(r.data.AMT10) < Number(r.data.AMT11)){
+						Ext.Msg.alert('温馨提示','户数不能小于一般纳税人');
+						return;
+				}
+				
+				if(r.data.AMT10.length>8){
+				   Ext.Msg.alert('温馨提示','增值税纳税人户数数值超长');
+						return;
+				}
+	    		Ext.Ajax.request({
+					url: '/GXDS/taxInformation',
+					waitMsg : '处理中，请稍等..',
+					waitTitle: '请稍等',
+					params :{
+						ENC_LEVX:r.data.ENC_LEVX,
+						AMT10:r.data.AMT10,
+						AMT11:r.data.AMT11,
+						YEAR:r.data.YEAR
+					},
+					success:function(response, options){
+						Ext.Msg.alert('温馨提示','修改成功');
+					},failure: function(form,action){
+						Ext.Msg.alert('错误','后端异常');
+					}
+				});
+			}
+
+			TaxInformationGrid.addListener('afteredit', updateDate);//给editgrid的''afteredit''事件增加回调函数3. });
+			
+	});
+  		
+  	</script>
+  	<div id="grid-TaxInformation"></div>
+  </body>
+</html>

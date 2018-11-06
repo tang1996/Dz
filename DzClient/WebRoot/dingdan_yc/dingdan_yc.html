@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>订单异常</title>
+<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+<link rel="stylesheet" href="./dingdan_yc.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+<body>
+<script type="text/javascript">		
+		$(document).ready(function(){
+			$.ajax({
+				type:'POST',
+				url: BASE_URL + LOGIN_ACTION.UNUSUAL,
+			 	data: { 
+           			companyId: getCookie('cid'),
+           			start : 0,
+           			limit : 1000
+       			},
+				success:function(data) {
+					var list = data.list;
+				    var html='';
+				    $("#dd-li").html('');
+					for(var i = 0;i < list.length;i++){
+						html='<ul>'+
+							 '<li>'+
+							 '<div class="n-li">'+
+							 '<p>'+list[i].userName+'</p>'+
+							 '<span><a href="tel:'+list[i].userPhone+'">'+
+							 '<img src="../common/img/tell_user.png" style="width:90px"></a></span>'+
+							 '</div>'+
+							 '<div class="n-li n-li1">'+
+							 '<p class="p-hs">配送地址：</p>'+
+							 '<span class="p-hs p-address">'+list[i].address+'</span>'+  
+							 '</div>'+
+							 '<div class="n-li n-li1">'+
+							 '<p class="p-hs">订单号：'+list[i].orderNo+'</p>'+
+							 '</div>'+
+							 '<div class="n-li n-li1">'+
+							 '<p class="p-hs">下单时间：'+list[i].time+'</p>'+
+							 '</div>'+
+							 '<div class="n-li">'+
+							 '<p>配送人员:'+list[i].runningName+'</p>'+
+							 '<span><a href="tel:'+list[i].runningphone+'">'+					                
+							 '<img src="../common/img/tell_running.png" style="width:90px">'+
+							 '</a></span>'+
+							  '</div>'+
+							   '<div class="lb">'+
+							 '<p>合计</p>'+
+							 '<p class="red">￥'+list[i].total_new+'元</p>'+
+							 '</div>'+
+							'</li>'+
+							'<li>'+
+							'<p class="hs-a">'+list[i].content+'<i></i></p>'+
+							'</li>'+
+							'<li><div class="btn-zu">'+
+							'<a onclick="recovery('+list[i].orderId+');" style="margin-top: 10px;float: right;margin-right: 1px;">恢复配送</a>'+
+							'</div></li>'+
+						    '</ul>';			
+						$("#dd-li").append(html);
+					}
+				},
+				error:function(error) {
+					console.log(error);
+				}
+			});
+		});
+		
+function recovery(orderId){
+	$.ajax({
+				type:'POST',
+				url: BASE_URL + LOGIN_ACTION.REBACKRUNNING,
+			 	data: { 
+           				orderId:orderId
+           		},
+				success:function(data) {
+					if(data.success){
+						valLink("alert",data.message);
+						window.location.reload(); 
+					}else{
+						valLink("alert",data.message);
+						window.location.reload(); 
+					}
+				},
+				error:function(error) {
+					console.log(error);
+				}
+			});
+}		
+		
+		
+		</script>
+    	<div class="head">
+    		<ul class="dd-ul">
+    			<li>
+    				<a href="../dingdan_new/dingdan_new.html">
+    					<img src="../common/img/dd1.png" >
+    					<p>新订单</p>
+    				</a>
+    			</li>
+    			<li class="active">
+    				<a href="../dingdan_yc/dingdan_yc.html">
+    					<img src="../common/img/dd2.png" >
+    					<p>异常配送</p>
+    				</a>
+    			</li>
+    			<!--<li>
+    				<a href="../dingdan_cd/dingdan_cd.html">
+    					<img src="../common/img/dd3.png" >
+    					<p>催单</p>
+    				</a>
+    			</li>-->
+    			<li>
+    				<a href="../dingdan_tk/dingdan_tk.html">
+    					<img src="../common/img/dd4.png" >
+    					<p>退款</p>
+    				</a>
+    			</li>
+    		</ul>
+    </div>
+    <div class="wrap top70">
+        <div class="dd">
+            <div class="dd-li" id="dd-li">
+			</div>
+        </div>
+    </div>
+			<ul class="foot-ul">
+		<li>
+				<a href="../dingdan_list/dingdan_list.html">
+					<img src="../common/img/f1.png" >
+					待处理
+				</a>
+			</li>
+			<li class="active">
+				<a href="#">
+					<img src="../common/img/f2.png" >
+					订单管理
+				</a>
+			</li>
+			<li>
+				<a href="../admin_index/admin_index.html">
+					<img src="../common/img/f3.png" >
+					我的
+				</a>
+			</li>
+	</ul>
+</body>
+</html>

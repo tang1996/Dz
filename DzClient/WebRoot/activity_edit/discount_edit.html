@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>编辑折扣活动</title>
+      <link rel="stylesheet" type="text/css" href="../common/css/time.css" />
+<link rel="stylesheet" href="./activity_edit.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+<script src="../common/js/time.js" type="text/javascript" charset="utf-8"></script>
+</head>
+
+<body>
+<script type="text/javascript">
+	//2018-10-14      苹果适配    时间选择器    start
+	var windowHeight = $(window).height()
+	$("body").height(windowHeight);
+	//end
+$(document).ready(function(){ 
+	var wid=GetQueryString("wid");
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.ACTIVITYFIND,
+				 	data: { 
+            			id:wid
+        			},
+					success:function(data) {
+						$("#svg").val(data.svg);
+						$("#time1").val(data.startTime);
+						$("#time2").val(data.endTime);
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+});
+		function add(){		
+			var time1=$('#time1').val();
+			var time2=$('#time2').val();
+			var svg=$('#svg').val();
+		
+			
+			if(svg.length==0){
+				valLink("alter","请输入折扣率!");
+				return false;
+			}else{
+				if(svg>=10){
+				valLink("alert","折扣率必须小于10大于等于1的整数或1位小数");
+				return false;
+				}
+			}
+			if(time1.length==0){
+				valLink("alter","请输入活动开始时间!");
+				return false;
+			}
+			if(time2.length==0){
+				valLink("alter","请输入活动结束时间!");
+				return false;
+			}
+				if((time2+" 23:59:59")<(time1 +" 00:00:00")){
+				valLink("alter","活动结束时间必须大于活动开始时间!");
+				return false;
+			   }
+			var	fid=GetQueryString("fid");
+				var wid=GetQueryString("wid");
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.ACTIVITYUPDATE,
+				 	data: { 
+            			id:wid,
+						startTime:time1,
+						endTime:time2,
+						svg:svg
+        			},
+					success:function(data) {
+						if(data.success){
+							var url="../activity_new_list/activity_list_ze.html";
+							window.location.href=url+'?fid='+fid;
+						}
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+	}	
+	
+function cancel(){
+	var url="../activity_list/activity_list.html";
+	window.location.href=url;
+}
+
+function trim(str){ 
+  return str.replace(/(^\s*)|(\s*$)/g, "");
+}
+
+function getStrLength(str) {  
+    var cArr = str.match(/[^\x00-\xff]/ig);  
+    return str.length + (cArr == null ? 0 : cArr.length);  
+}  
+
+function onlyNumber(obj){  
+			   var t = obj.value.charAt(0);    
+			    obj.value = obj.value.replace(/[^\d\.]/g,'');     
+			     obj.value = obj.value.replace(/^\./g,'');      
+			     obj.value = obj.value.replace(/\.{2,}/g,'.');     
+			     obj.value = obj.value.replace('.','$#$').replace(/\./g,'').replace('$#$','.');
+			     obj.value = obj.value.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3');
+			     if(t == '-'){  
+			        
+			       return;
+			     }else if(t<1){
+			     	valLink("alert","折扣率必须小于10大于等于1的整数或1位小数");
+			     	$(obj).val('');
+			     	return;
+			     }
+ 
+}
+		</script>
+    <div class="head">
+        <div class="h-div">
+            <a class="h-l" href="../activity_list/activity_list.html">
+                <img class="jt" src="../common/img/iconjt.png" alt="">
+            </a>
+            <p>编辑折扣活动</p>
+        </div>
+    </div>
+    <div class="wrap sort_add">
+	    <p></p>
+		<div style="width:100%;"><input  type="text" id="svg" onkeyup="onlyNumber(this);" style="width:50px;text-align:center;margin-left:10px;"  /><font style="color:red;">*</font>&nbsp;&nbsp;&nbsp;折(折扣率只能保留一位小数)</div>
+        <p><font style="color:red;">*</font>&nbsp;活动开始时间</p>
+        <input id="time1" type="text" readonly="" name="input_date" placeholder="开始时间" data-lcalendar="2010-01-11,2019-12-31" />
+        <p><font style="color:red;">*</font>&nbsp;活动结束时间</p>
+        <input id="time2" type="text" readonly="" name="input_date" placeholder="结束时间" data-lcalendar="2010-01-11,2019-12-31" />
+    </div>
+    <div class="foot_xg" >
+      <button type="button" onclick="cancel();">取消</button>
+		<button type="button" onclick="add();">保存</button>
+    </div>
+
+    <script>
+        var calendardatetime1 = new lCalendar();
+        calendardatetime1.init({
+            'trigger': '#time1',
+            'type': 'date'
+        });
+		var calendardatetime2 = new lCalendar();
+		calendardatetime2.init({
+			'trigger': '#time2',
+			'type': 'date'
+		});
+    </script>
+</body>
+
+</html>

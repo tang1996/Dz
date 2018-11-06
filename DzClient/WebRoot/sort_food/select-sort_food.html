@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>管理分类</title>
+		<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+		<link rel="stylesheet" href="./select-sort.css">
+		<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+
+	</head>
+
+	<body>
+	<script type="text/javascript">		
+			$(document).ready(function(){ 
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.GETIFICATION,
+				 	data: { 
+            			id: 2
+        			},
+					success:function(data) {
+						 var list = data.list;
+						 var html='';
+						for(var i = 0;i < list.length;i++){
+						html='<li>'+
+							 	'<p>'+list[i].name+'<span>'+list[i].totail+'个商品</span></p>'+
+								'<button type="button" onclick="checkbox('+list[i].id+');">选择分类</button>'+
+							'</li>';
+						$("#sort").append(html);
+										
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+		});
+		
+		function checkbox(id){
+			alert(id);
+			// checked="checked"
+		}
+	</script>
+		<div class="wrap">
+			<ul class="attr sort" id="sort">
+				
+			</ul>
+		</div>
+	</body>
+
+</html>

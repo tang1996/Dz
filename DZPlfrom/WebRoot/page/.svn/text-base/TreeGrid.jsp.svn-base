@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+<script type="text/javascript">
+var reconDate = null;
+var startDate = null;
+var loading = null;
+
+var start = '';
+var end = '';
+Ext.onReady(function(){
+	var wid = document.body.clientWidth-193;
+	var treeRoot = new Ext.tree.AsyncTreeNode({
+			text:'请点击查询按钮选择时间段'
+	});
+
+	with(todays=new   Date())   
+	{   
+	  setDate(getDate()-1)   
+    }   
+    var days = todays.toLocaleDateString();
+    var m=todays.getMonth()+1;
+    var d=todays.getDate();
+	var year=todays.getFullYear();	
+	var rq1 = ""+year;
+ 	if(m>9)
+	{
+	  rq1=rq1+m;
+	}
+	else if(m<10 && m>1)
+	{
+	   rq1=rq1+"0"+m;
+	}
+	else
+	{
+	   rq1=rq1+"01";
+	}
+	if(d>9)
+	{
+	  rq1=rq1+d;
+	}
+	else if(d<10 && d>1)
+	{
+	   rq1=rq1+"0"+d;
+	}
+	start = rq1;
+	end = rq1;
+     columnTree = new Ext.tree.ColumnTree({
+        height:document.body.clientHeight-124,
+	    width:document.body.clientWidth-193,
+        autoScroll:true,
+        renderTo: 'treeGridPanel',
+        id:'yuel',
+        rootVisible:false,
+        columns:[{
+            header:'对账机关',
+            width:wid*0.35,
+            dataIndex:'organ'
+        },{
+            header:'<div align="right">国库入库</div>',
+            width:wid*0.2,
+            dataIndex:'gks'
+        },{
+            header:'<div align="right">地税入库</div>',
+            width:wid*0.2,
+            dataIndex:'dss'
+        },{
+            header:'<div align="right">差额</div>',
+            width:wid*0.25,
+            dataIndex:'cha'
+        }],
+        tbar:[{		
+					text:'查询',
+					iconCls:'select-fredd',
+					handler:function(){
+
+				 	var recon = new Date();
+					recon = recon.format('Ymd');
+		   	    reconDate = new Ext.form.DateField({
+					 	 width:200,
+					 	 fieldLabel:'对账日期选择(止)',
+					     allowBlank: true,
+					     format:'Ymd',
+					     value:recon
+				});
+				
+			    startDate = new Ext.form.DateField({
+					 	 width:200,
+					 	 fieldLabel:'对账日期选择(起)',
+					     allowBlank: true,
+					     format:'Ymd',
+					     value:recon
+				});
+
+			var reconForm = new Ext.form.FormPanel({
+			        labelWidth: 100,
+			        width: 500,
+			        height:350,
+			        items:[startDate,reconDate]
+			});
+
+			var reconWindow = new Ext.Window({
+			        title: '条件查询',
+			        width: 513,
+			        height:410,
+			        resizable:false,
+			        closable :false, 
+			        buttonAlign:'center', 
+			        items: reconForm,
+			        buttons: [{
+			            text: '确定',
+			            handler:function(){
+				            start = startDate.value;
+				            end = reconDate.value;
+			                columnTree.loader.dataUrl = '/GXDS/treeGrid?date='+end+'&startDate='+ start;
+			                columnTree.render();
+			                treeRoot.reload();
+   						    treeRoot.expand();
+   						    reconWindow.destroy();
+					 		Ext.getCmp('testx').setText("对账日期：<span style='color:green'>"+start+" 起 至 "+end+" 止</span>");
+			         	}
+			        },{
+			            text: '取消',
+			            handler: function(){
+			           	   reconWindow.destroy();
+			            }
+			        }]
+		     });
+						reconWindow.show();
+				}},"-",{		
+					text:'导出Excle',
+					iconCls:'execle',
+					handler:function(){
+					    document.getElementById('ahref').click();
+					}
+			},"-",{		
+					text:'保存',
+					iconCls:'execle',
+					handler:function(){
+						
+						var unt_name = '';
+						var gk_shu = '';
+						var ds_shu = '';
+						var cha_er = '';
+						var dates = '';
+						
+						dates = start + '--' + end
+						var nodes = treeRoot.childNodes;
+						if(nodes.length<0){
+							return;
+						}else{
+							 for(var i=0; i<nodes.length; i++){
+								  var rend = nodes[i];
+								  if(i==rend.length-1){
+									   	unt_name = unt_name + rend.attributes.organ;
+									   	gk_shu = gk_shu + rend.attributes.gks;
+									   	ds_shu = ds_shu + rend.attributes.dss;
+								   		cha_er = cha_er + rend.attributes.cha;
+								  }else{
+								  		unt_name = unt_name + rend.attributes.organ+',';
+									   	gk_shu = gk_shu + rend.attributes.gks+',';
+									   	ds_shu = ds_shu + rend.attributes.dss+',';
+								   		cha_er = cha_er + rend.attributes.cha+',';
+								  }
+							 }
+						}
+					
+						Ext.Ajax.request({         
+					           url: '/GXDS/through',  
+					           waitMsg : '正在处理......', 
+					           params: { organ : unt_name, gk_shu:gk_shu, ds_shu:ds_shu, cha_er:cha_er, reconDate:dates },
+					           success:function(form,action)
+					           {
+					        	 Ext.Msg.alert('错误','保存成功');
+					           },failure: function(form,action){
+					           	 Ext.Msg.alert('错误','后端异常');
+					           } 
+						});	
+					}
+			},'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red">口径为：一般预算收入</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',{text:'',id:'testx'}],
+        loader: new Ext.tree.TreeLoader({
+        	dataUrl:'/GXDS/treeGrid?date='+rq1+'&startDate=' + rq1,
+            uiProviders:{
+                'col': Ext.tree.ColumnNodeUI
+            }
+        }),
+        listeners: {
+             'beforeload': beforeloadHandler,
+             'load': loadHandler
+        },
+        root: treeRoot
+    });
+
+    function beforeloadHandler() { // 加载前事件响应处理
+          loading = new Ext.LoadMask(Ext.get(Ext.getCmp('yuel').getEl()), { msg: "loading" });
+          loading.show();  
+    }
+
+    function loadHandler() { // 加载后事件响应处理
+        loading.hide();
+    }
+
+     Ext.tree.TreeLoader.override({
+		requestData : function(node, callback){
+				if(this.fireEvent("beforeload", this, node, callback) !== false){
+				this.transId = Ext.Ajax.request({
+						method:this.requestMethod,
+						url: this.dataUrl||this.url,
+						success: this.handleResponse,
+						failure: this.handleFailure,
+						timeout: this.timeout || 3000000,
+						scope: this,
+						argument: {callback: callback, node: node},
+						params: this.getParams(node)
+				});
+			}else{
+				if(typeof callback == "function"){
+					callback();
+				}
+			}
+		}
+	});
+});
+</script>
+</head>
+<body>
+	<div id="treeGridPanel"></div>
+	<a id="ahref" href="/GXDS/exportExcel"></a>
+</body>
+</html>

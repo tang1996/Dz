@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>商家</title>
+    <link rel="stylesheet" href="./shop.css">
+    <link rel="stylesheet" href="../common/css/swiper.css">
+    <link rel="stylesheet" href="./seller-comment.css">
+    <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../common/js/jquery.lazyload.min.js"></script>
+    <script type="text/javascript" src="../common/js/baseUrl.js"></script>
+    <script type="text/javascript" src="../common/js/common.js"></script>
+    <script type="text/javascript" src="../common/js/swiper.min.js"></script>
+    <script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+
+            $("#fix").click(function () {
+                valLink('fix', GetQueryString("cid"));
+            });
+
+            $("#menushow").click(function () {
+                valLink('menushow', GetQueryString("cid"));
+            });
+
+            //收藏
+            $(".collection").click(function () {
+                $.ajax({
+	                type: 'POST',
+	                url: BASE_URL + LOGIN_ACTION.INCLUDE_SAVE,
+	                data: {
+                    	token: GetQueryString("token"),
+                    	cid: GetQueryString("cid")
+	                },
+	                success: function (data) {
+		                if(data.success){
+		                	$(this).addClass("yes");
+		                	valLink("alert",data.message);
+		                }else{
+		               		valLink("alert","美食收藏功能暂不开放");
+		                }
+	                },
+	                error: function (error) {
+	                    console.log(error);
+	                }
+            	});
+            })
+
+            $.ajax({
+                type: 'POST',
+                url: BASE_URL + LOGIN_ACTION.FINDMS,
+                data: {
+                    companyId: GetQueryString("cid")
+                },
+                success: function (data) {
+                    if (data.success) {
+                        var isOpen1 = data.isOpen1;
+                        var isOpen2 = data.isOpen2;
+                        var isOpen3 = data.isOpen3;
+                        var isOpen4 = data.isOpen4;
+                        var html = '';
+                        if (isOpen1 == true) {
+                            var html =
+                                '<span class="icon">减</span><span class="coupon-desc">' +
+                                data.subtraction + '</span><span class="coupon-num">' + data.count + '个优惠<i class="hd-down"></i></span>';
+                            $("#shop-coupon").html(html);
+                            if (isOpen3 == true) {
+                                html = '<li><a href="javascript:void(0);"><span class="zise">折</span>' +
+                                    '<p>' + data.svg + '</p></a>' +
+                                    '</li>';
+                                $("#hd-zd").append(html);
+                            }
+                            if (isOpen4 == true) {
+                                html = '<li><a href="javascript:void(0);"><span class="yellow">卷</span>' +
+                                    '<p>' + data.coupon + '</p></a></li>';
+                                $("#hd-zd").append(html);
+                            }
+                            if (isOpen2 == true) {
+                                html = '<li><a href="javascript:void(0);"><span class="cs">首</span>' +
+                                    '<p>' + data.newUser + '</p></a></li>';
+                                $("#hd-zd").append(html);
+                            }
+                        } else {
+                            if (isOpen2 == true) {
+                                var html =
+                                    '<span class="icon2">首</span><span class="coupon-desc">' +
+                                    data.newUser + '</span><span class="coupon-num">' + data.count + '个优惠<i class="hd-down"></i></span>';
+                                $("#shop-coupon").html(html);
+                                if (isOpen3 == true) {
+                                    html = '<li><a href="javascript:void(0);"><span class="zise">折</span>' +
+                                        '<p>' + data.svg + '</p></a>' +
+                                        '</li>';
+                                    $("#hd-zd").append(html);
+                                }
+                                if (isOpen4 == true) {
+                                    html = '<li><a href="javascript:void(0);"><span class="yellow">卷</span>' +
+                                        '<p>' + data.coupon + '</p></a></li>';
+                                    $("#hd-zd").append(html);
+                                }
+                            } else {
+                                if (isOpen3 == true) {
+                                    var html = '<span class="icon3">折</span><span class="coupon-desc">' +
+                                        data.svg + '</span><span class="coupon-num">' + data.count + '个优惠<i class="hd-down"></i></span>';
+                                    $("#shop-coupon").html(html);
+                                    if (isOpen4 == true) {
+                                        html = '<li><a href="javascript:void(0);"><span class="yellow">卷</span>' +
+                                            '<p>' + data.coupon + '</p></a></li>';
+                                        $("#hd-zd").append(html);
+                                    }
+                                } else {
+                                    if (isOpen4 == true) {
+                                        var html = '<span class="icon4">卷</span><span class="coupon-desc">' +
+                                            data.coupon + '</span><span class="coupon-num">' + data.count + '个优惠<i class="hd-down"></i></span>';
+                                        $("#shop-coupon").html(html);
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    } else {
+                        var html =
+                            '<span class="coupon-desc"></span><span class="coupon-num"></span>';
+                        $("#shop-coupon").html(html);
+                    }
+
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+            $.ajax({
+                type: 'POST',
+                url: BASE_URL + LOGIN_ACTION.FIND,
+                data: {
+                    id: GetQueryString("cid"),
+                    location: GetQueryString("location")
+                },
+                success: function (data) {
+                    var business = '';
+                    if (data.isBusiness == false) {
+                        $('#fix').hide();
+                        business = '本店已打烊';
+                    } else {
+                        business = '营业中';
+                    }
+                    var html = '<li>' +
+                        '商家名称：' + data.name +
+                        '</li>' +
+                        '<li>' +
+                        '商家电话：' + data.phone +
+                        '</li>' +
+                        '<li>' +
+                        '营业时间：' + data.business_time + "&nbsp;&nbsp;营业状态: " + business +
+                        '</li>' +
+                        '<li>' +
+                        '退订时间：' + data.unsubscribe_time +
+                        '</li>' +
+                        '<li>' +
+                        '商家地址：' + data.address +
+                        '</li>' +
+                        '<li>' +
+                        '啄呗提示：结账时，消费者可凭付款码向商家以现金形式多退少补结算账单，并要求商家开具发票。' +
+                        '</li>';
+
+                    $("#info").html(html);
+
+                    $("#shop-info").html("<a style='float:right;margin-right:15px;color:#317ef3' onclick='valLink(\"nav\",\"" + data.coordinates + "\")'>"+
+                    "<span class='Navigation'>立即导航</span></a>" + data.name + "<a href='javascript:link(\"openCamber\")'><span class='lookKitchen'>查看后厨</span></a>");
+                    $("#ping").html("评分" + data.assess);
+                    $("#yue").html("人均消费" + data.GDP + "元");
+                    $("#logo").attr("src", data.logo);
+                    $("#img").attr("src", data.img);
+
+                    if (data.type == 1) {
+                        $("#pei").html("配送约" + dat人.time + "分钟");
+                    }
+                    $("#ju").html("距离" + data.range);
+                    $("#shop-tips").html('<img src="../common/img/tips.png" alt="">' + data.notice);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        });
+
+        function init() {
+            $.ajax({
+                type: 'POST',
+                url: BASE_URL + LOGIN_ACTION.COMPANYCOUNT,
+                data: {
+                    customId: GetQueryString("cid"),
+                },
+                success: function (data) {
+                    var html = '';
+                    $('#totalcount').html('全部' + data.total);
+                    $('#imgcount').html('有图' + data.imgCount);
+                    //	$('#good').html('好评'+data.praiseCount);
+                    //$('#difference').html('差评'+data.negativeCount);
+                    $('#fen').html(data.totalCount);
+                    var taste = data.taste;
+                    var quality = data.quality;
+                    var lineType = '';
+                    var lineType1 = '';
+                    if (taste > 0 && taste < 1) {
+                        lineType = '<img src="../common/img/null.png" alt="">';
+                    } else if (taste == 1) {
+                        lineType = '<img src="../common/img/favourable.png" alt="">';
+                    } else if (taste > 1 && taste < 2) {
+                        lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                    } else if (taste == 2) {
+                        lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                    } else if (taste > 2 && taste < 3) {
+                        lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                    } else if (taste == 3) {
+                        lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                    } else if (taste > 3 && taste < 4) {
+                        lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                    } else if (taste == 4) {
+                        lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                    } else if (taste > 4 && taste < 5) {
+                        lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                    } else if (taste == 5) {
+                        lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                    }
+                    if (quality > 0 && quality < 1) {
+                        lineType1 = '<img src="../common/img/null.png" alt="">';
+                    } else if (quality == 1) {
+                        lineType1 = '<img src="../common/img/favourable.png" alt="">';
+                    } else if (quality > 1 && quality < 2) {
+                        lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                    } else if (quality == 2) {
+                        lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                    } else if (quality > 2 && quality < 3) {
+                        lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                    } else if (quality == 3) {
+                        lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                    } else if (quality > 3 && quality < 4) {
+                        lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                    } else if (quality == 4) {
+                        lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                    } else if (quality > 4 && quality < 5) {
+                        lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                    } else if (quality == 5) {
+                        lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+
+                    }
+                    html = '<p>' +
+                        '<span>菜品口味</span>' + lineType +
+                        '<span class="num">' + taste + '</span>' +
+                        '</p>' +
+                        '<p>' +
+                        '<span>服务质量</span>' + lineType1 +
+                        '<span class="num">' + quality + '</span>' +
+                        '</p>';
+                    $("#desc").html(html); //将此处的 append 改成了 html
+                    if (data.total == 0) {
+                        $(".comment_div").html('<div id="noData"><img src="../common/images/null.png"><p>没有评论内容</p></div>');
+                    }
+
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+
+        //全部数据
+        function whole(start) {
+            $(".loading").css("visibility", "visible");
+            var customId = GetQueryString("cid");
+            $.ajax({
+                type: 'POST',
+                url: BASE_URL + LOGIN_ACTION.EVALUATETYPE,
+                data: {
+                    customId: customId,
+                    status: 'total',
+                    start: start,
+                    limit: 2
+                },
+                success: function (data) {
+                	$(".end").hide();
+                    var list = data.list;
+                    if (list.length == 0) {
+                        start = start - 2;
+                        $(".end").show();
+                    }
+                    var html = '';
+                    for (var i = 0; i < list.length; i++) {
+                        var taste = list[i].taste;
+                        var lineTypeNew = '';
+                        if (taste > 0 && taste < 1) {
+                            lineTypeNew = '<img src="../common/img/null.png" alt="">';
+                        } else if (taste == 1) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 1 && taste < 2) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 2) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 2 && taste < 3) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 3) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 3 && taste < 4) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 4) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 4 && taste < 5) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 5) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        }
+                        var imgtotal = parseInt(list[i].imgtotal);
+                        var img = '';
+                        switch (imgtotal) {
+                            case 1:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 2:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 3:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 4:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"><img src="' + list[i].images3 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 5:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"><img src="' + list[i].images3 + '" onclick="bigImg(this)"><img src="' + list[i].images4 + '" onclick="bigImg(this)"></p>';
+                                break;
+                        }
+                        var label = list[i].label;
+                        var str = '';
+                        if (label != '') {
+                            str = '<p class="label-box">' + label + '</p>';
+                        }
+                        var reply = list[i].reply;
+                        var lian = '';
+                        if (reply != null) {
+                            lian = '<p class="seller-reply"><span>商家回复：</span>' + list[i].reply + '</p>';
+                        }
+                        html = '<li class="item">' +
+                            '<div class="left"><img src="../common/img/tou.png" alt=""></div>' +
+                            '<div class="right">' +
+                            '<p class="nick-name">' + list[i].nickName + '</p>' +
+                            '<p class="level">' +
+                            '<span>评分</span>' + lineTypeNew +
+                            '</p>' +
+                            '<p class="user-comment">' + list[i].content + '</p>' + img + lian +
+                            '<p class="date">' + list[i].createTime + '</p>' + str +
+                            '</div>' +
+                            '</li>';
+                        $("#list").append(html);
+                    }
+
+
+                    $(".loading").css("visibility", "hidden");
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+        
+        function bigImg(val){
+        	var src = $(val).attr("src");
+        	window.location.href="../common/img.html?img="+src;
+        }
+
+        function whole1(start1) {
+            $(".loading").css("visibility", "visible");
+            var customId = GetQueryString("cid");
+            $.ajax({
+                type: 'POST',
+                url: BASE_URL + LOGIN_ACTION.EVALUATETYPE,
+                data: {
+                    customId: customId,
+                    status: 'total',
+                    start: start1,
+                    limit: 2
+                },
+                success: function (data) {
+					$(".end").hide();
+                    var list = data.list;
+                    if (list.length == 0) {
+                        start1 = start1 - 2;
+                        $(".end").show();
+                    }
+                    var html = '';
+                    for (var i = 0; i < list.length; i++) {
+                        var taste = list[i].taste;
+                        var lineTypeNew = '';
+                        if (taste > 0 && taste < 1) {
+                            lineTypeNew = '<img src="../common/img/null.png" alt="">';
+                        } else if (taste == 1) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 1 && taste < 2) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 2) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 2 && taste < 3) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 3) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 3 && taste < 4) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 4) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 4 && taste < 5) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 5) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        }
+                        var imgtotal = parseInt(list[i].imgtotal);
+                        var img = '';
+                        switch (imgtotal) {
+                            case 1:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 2:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 3:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 4:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"><img src="' + list[i].images3 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 5:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"><img src="' + list[i].images3 + '" onclick="bigImg(this)"><img src="' + list[i].images4 + '" onclick="bigImg(this)"></p>';
+                                break;
+                        }
+                        var label = list[i].label;
+                        var str = '';
+                        if (label != '') {
+                            str = '<p class="label-box">' + label + '</p>';
+                        }
+                        var reply = list[i].reply;
+                        var lian = '';
+                        if (reply != null) {
+                            lian = '<p class="seller-reply"><span>商家回复：</span>' + list[i].reply + '</p>';
+                        }
+                        html = '<li class="item">' +
+                            '<div class="left"><img src="../common/img/tou.png" alt=""></div>' +
+                            '<div class="right">' +
+                            '<p class="nick-name">' + list[i].nickName + '</p>' +
+                            '<p class="level">' +
+                            '<span>评分</span>' + lineTypeNew +
+                            '</p>' +
+                            '<p class="user-comment">' + list[i].content + '</p>' + img + lian +
+                            '<p class="date">' + list[i].createTime + '</p>' + str +
+                            '</div>' +
+                            '</li>';
+                        $("#list").append(html);
+                    }
+
+                    $(".loading").css("visibility", "hidden");
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+
+        //有图
+        function graph(start_img) {
+            $(".loading").css("visibility", "visible");
+            var customId = GetQueryString("cid");
+            $.ajax({
+                type: 'POST',
+                url: BASE_URL + LOGIN_ACTION.EVALUATETYPE,
+                data: {
+                    customId: customId,
+                    status: 'img',
+                    start: start_img,
+                    limit: 2
+                },
+                success: function (data) {
+					$(".end").hide();
+                    var list = data.list;
+                    if (list.length == 0) {
+                        start_img = start_img - 2;
+                        $(".end").show();
+                    }
+                    var html = '';
+                    for (var i = 0; i < list.length; i++) {
+                        var taste = list[i].taste;
+                        var lineTypeNew = '';
+                        if (taste > 0 && taste < 1) {
+                            lineTypeNew = '<img src="../common/img/null.png" alt="">';
+                        } else if (taste == 1) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 1 && taste < 2) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 2) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 2 && taste < 3) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 3) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 3 && taste < 4) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 4) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 4 && taste < 5) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 5) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        }
+                        var imgtotal = parseInt(list[i].imgtotal);
+                        var img = '';
+                        switch (imgtotal) {
+                            case 1:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 2:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 3:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 4:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"><img src="' + list[i].images3 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 5:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"><img src="' + list[i].images3 + '" onclick="bigImg(this)"><img src="' + list[i].images4 + '" onclick="bigImg(this)"></p>';
+                                break;
+                        }
+                        var label = list[i].label;
+                        var str = '';
+                        if (label != '') {
+                            str = '<p class="label-box">' + label + '</p>';
+                        }
+                        var reply = list[i].reply;
+                        var lian = '';
+                        if (reply != null) {
+                            lian = '<p class="seller-reply"><span>商家回复：</span>' + list[i].reply + '</p>';
+                        }
+                        html = '<li class="item">' +
+                            '<div class="left"><img src="../common/img/tou.png" alt=""></div>' +
+                            '<div class="right">' +
+                            '<p class="nick-name">' + list[i].nickName + '</p>' +
+                            '<p class="level">' +
+                            '<span>评分</span>' + lineTypeNew +
+                            '</p>' +
+                            '<p class="user-comment">' + list[i].content + '</p>' + img + lian +
+                            '<p class="date">' + list[i].createTime + '</p>' + str +
+                            '</div>' +
+                            '</li>';
+                        $("#list").append(html);
+
+                    }
+
+
+                    $(".loading").css("visibility", "hidden");
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        //好评
+        function good(start_good) {
+            $(".loading").css("visibility", "visible");
+            var customId = GetQueryString("cid");
+            $.ajax({
+                type: 'POST',
+                url: BASE_URL + LOGIN_ACTION.EVALUATETYPE,
+                data: {
+                    customId: customId,
+                    status: 'praise',
+                    start: start_good,
+                    limit: 2
+                },
+                success: function (data) {
+					$(".end").hide();
+                    var list = data.list;
+                    if (list.length == 0) {
+                        start_good = start_good - 2;
+                        $(".end").show();
+                    }
+                    var html = '';
+                    for (var i = 0; i < list.length; i++) {
+                        var taste = list[i].taste;
+                        var lineTypeNew = '';
+                        if (taste > 0 && taste < 1) {
+                            lineTypeNew = '<img src="../common/img/null.png" alt="">';
+                        } else if (taste == 1) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 1 && taste < 2) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 2) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 2 && taste < 3) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 3) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 3 && taste < 4) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 4) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 4 && taste < 5) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 5) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        }
+                        var imgtotal = parseInt(list[i].imgtotal);
+                        var img = '';
+                        switch (imgtotal) {
+                            case 1:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 2:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 3:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 4:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"><img src="' + list[i].images3 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 5:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"><img src="' + list[i].images3 + '" onclick="bigImg(this)"><img src="' + list[i].images4 + '" onclick="bigImg(this)"></p>';
+                                break;
+                        }
+                        var label = list[i].label;
+                        var str = '';
+                        if (label != '') {
+                            str = '<p class="label-box">' + label + '</p>';
+                        }
+                        var reply = list[i].reply;
+                        var lian = '';
+                        if (reply != null) {
+                            lian = '<p class="seller-reply"><span>商家回复：</span>' + list[i].reply + '</p>';
+                        }
+                        html = '<li class="item">' +
+                            '<div class="left"><img src="../common/img/tou.png" alt=""></div>' +
+                            '<div class="right">' +
+                            '<p class="nick-name">' + list[i].nickName + '</p>' +
+                            '<p class="level">' +
+                            '<span>评分</span>' + lineTypeNew +
+                            '</p>' +
+                            '<p class="user-comment">' + list[i].content + '</p>' + img + lian +
+                            '<p class="date">' + list[i].createTime + '</p>' + str +
+                            '</div>' +
+                            '</li>';
+                        $("#list").append(html);
+                    }
+
+                    $(".loading").css("visibility", "hidden");
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        //差评
+        function difference(start_difference) {
+            $(".loading").css("visibility", "visible");
+            var customId = GetQueryString("cid");
+            $.ajax({
+                type: 'POST',
+                url: BASE_URL + LOGIN_ACTION.EVALUATETYPE,
+                data: {
+                    customId: customId,
+                    status: 'negative',
+                    start: start_difference,
+                    limit: 2
+                },
+                success: function (data) {
+                	$(".end").hide();
+                    var list = data.list;
+                    if (list.length == 0) {
+                        start_difference = start_difference - 2;
+                        $(".end").show();
+                    }
+                    var html = '';
+                    for (var i = 0; i < list.length; i++) {
+                        var taste = list[i].taste;
+                        var lineTypeNew = '';
+                        if (taste > 0 && taste < 1) {
+                            lineTypeNew = '<img src="../common/img/null.png" alt="">';
+                        } else if (taste == 1) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 1 && taste < 2) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 2) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 2 && taste < 3) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 3) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 3 && taste < 4) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 4) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        } else if (taste > 4 && taste < 5) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+                        } else if (taste == 5) {
+                            lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+                        }
+                        var imgtotal = parseInt(list[i].imgtotal);
+                        var img = '';
+                        switch (imgtotal) {
+                            case 1:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 2:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 3:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 4:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"><img src="' + list[i].images3 + '" onclick="bigImg(this)"></p>';
+                                break;
+                            case 5:
+                                img = '<p class="img-list"><img src="' + list[i].images0 + '" onclick="bigImg(this)"><img src="' + list[i].images1 + '" onclick="bigImg(this)"><img src="' + list[i].images2 + '" onclick="bigImg(this)"><img src="' + list[i].images3 + '" onclick="bigImg(this)"><img src="' + list[i].images4 + '" onclick="bigImg(this)"></p>';
+                                break;
+                        }
+                        var label = list[i].label;
+                        var str = '';
+                        if (label != '') {
+                            str = '<p class="label-box">' + label + '</p>';
+                        }
+                        var reply = list[i].reply;
+                        var lian = '';
+                        if (reply != null) {
+                            lian = '<p class="seller-reply"><span>商家回复：</span>' + list[i].reply + '</p>';
+                        }
+                        html = '<li class="item">' +
+                            '<div class="left"><img src="../common/img/tou.png" alt=""></div>' +
+                            '<div class="right">' +
+                            '<p class="nick-name">' + list[i].nickName + '</p>' +
+                            '<p class="level">' +
+                            '<span>评分</span>' + lineTypeNew +
+                            '</p>' +
+                            '<p class="user-comment">' + list[i].content + '</p>' + img + lian +
+                            '<p class="date">' + list[i].createTime + '</p>' + str +
+                            '</div>' +
+                            '</li>';
+                        $("#list").append(html);
+                    }
+
+                    $(".loading").css("visibility", "hidden");
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+        }
+
+    </script>
+</head>
+
+<body>
+<header>
+    <div class="head">
+
+        <div class="backgroungWall">
+            <img id="img" src="../common/img/defual.png" data-original="../common/img/defual.png">
+            <div class="backgroung"></div>
+            <div class="logo_div">
+                <img alt="" id="logo"
+                     src="http://39.108.6.102:8080/DzClient/common/images/AC2EF3DC232FF9E3FFEA5A5C9D7950E6.jpg">
+            </div>
+            <div class="collection"></div>
+        </div>
+
+
+        <div class="shop-desc" id="shop-desc" style="margin-top:21px;">
+            <p class="shop-info" id="shop-info"></p>
+            <p class="shop-service">
+                <span id="ping"></span>
+                <span id="yue"></span>
+                <span id="ju"></span>
+            </p>
+            <p class="shop-tips" id="shop-tips">
+                <img src="../common/img/tips.png" alt="">
+            </p>
+            <p class="shop-coupon" id="shop-coupon">
+
+            </p>
+
+            <div class="hd-zd">
+                <ul id="hd-zd">
+
+
+                </ul>
+            </div>
+
+        </div>
+        <ul class="sj-ul" style="margin-top: 15px;">
+            <li class="active">
+                <span>商家</span>
+            </li>
+            <li>
+                <span>评价</span>
+            </li>
+        </ul>
+    </div>
+</header>
+<div class="swiper-container">
+    <div class="swiper-wrapper">
+        <!-- 商家 -->
+        <div class="swiper-slide">
+
+            <div class="seller-box">
+                <ul id="info">
+                </ul>
+                <div class="button" id="menushow">预览菜品</div>
+                <div class="button" id="fix">去预定</div>
+                <br>
+                <br>
+            </div>
+        </div>
+
+        <div class="swiper-slide comment_div">
+            <header>
+                <div class="seller-comment">
+                    <div class="level">
+                        <p id="fen"><i></i></p>
+                        <p>商家评分</p>
+                    </div>
+                    <div class="desc" id="desc">
+                        <i></i>
+                    </div>
+                </div>
+            </header>
+            <div class="comment-box">
+                <div class="title">
+                    <span class="label active" id="totalcount"></span>
+                    <span class="label" id="imgcount"></span>
+                    <!--      <span class="label" id="good"></span>
+                         <span class="label" id="difference"></span> -->
+                </div>
+                <div class="list_div">
+                    <ul class="list" id="list">
+
+                    </ul>
+                    <div class="end">到底部了~</div>
+                    <div class="loading"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var swiper = new Swiper('.swiper-container', {
+        touchAngle: 20,
+        // roundLengths: true, //设定为true将slide的宽和高取整(四舍五入)以防止某些分辨率的屏幕上文字或边界(border)模糊。
+
+
+        onTransitionEnd: function (swiper) {
+            $('.sj-ul li').eq(swiper.activeIndex).addClass('active').siblings().removeClass('active');
+            $(".swiper-slide").css("height","100%");
+        	$(".swiper-slide-next").css("height","100px");
+            show();
+        }
+    });
+    $('.sj-ul li').click(function () {
+        //alert();
+        $(this).addClass('active').siblings().removeClass('active');
+        swiper.slideTo($(this).index(), 500);
+        $(".swiper-slide").css("height","100%");
+        $(".swiper-slide-next").css("height","100px");
+		show();
+		
+		
+    });
+    
+    var start = 0;
+    var start1 = 0;
+    var start_img = 0;
+    var start_good = 0;
+    var start_difference = 0;
+    var n = 0;
+    function show(){
+    	init();
+        start = 0;
+	    start1 = 0;
+	    start_img = 0;
+	    start_good = 0;
+	    start_difference = 0;
+	    n = 0;
+        //获得全部数据
+        
+        $("#list").html('');
+        whole(start);
+        
+
+        //总切换
+        $("#totalcount").click(function () {
+            $(".active").removeClass('active');
+            $("#totalcount").addClass('active');
+            $("#list").html('');
+            whole1(0);
+            n = 1;
+            start1 = 0;
+        });
+        //有图切换
+        $("#imgcount").click(function () {
+            $(".active").removeClass('active');
+            $("#imgcount").addClass('active');
+            $("#list").html('');
+            graph(0);
+            n = 2;
+            start_img = 0;
+        });
+        //好评切换
+        $("#good").click(function () {
+            $(".active").removeClass('active');
+            $("#good").addClass('active');
+            $("#list").html('');
+            good(0);
+            n = 3;
+            start_good = 0;
+        });
+        //差评切换
+        $("#difference").click(function () {
+            $(".active").removeClass('active');
+            $("#difference").addClass('active');
+            $("#list").html('');
+            difference(0);
+            n = 4;
+            start_difference = 0;
+        });
+        
+        $(window).scroll(function () {
+	         var bot = 0;
+	         if ((bot + $(window).scrollTop()) == ($(document).height() - $(window).height())) {
+	             if (n == 0) {
+	                 start = start + 2;
+	                 whole(start);
+	             } else if (n == 1) {
+	                 start1 = start1 + 2;
+	                 whole1(start1);
+	             } else if (n == 2) {
+	                 start_img = start_img + 2;
+	                 graph(start_img);
+	             } else if (n == 3) {
+	                 start_good = start_good + 2;
+	                 good(start_good);
+	             } else if (n == 4) {
+	                 start_difference = start_difference + 2;
+	                 difference(start_difference);
+	             }
+	         }
+	     });
+        
+        
+    }
+    
+    
+
+
+    $('.shop-coupon').click(function () {
+
+        if ($('.hd-zd').css('display') == 'none') {
+            $('.hd-down').addClass('hd-top')
+        } else {
+            $('.hd-down').removeClass('hd-top')
+        }
+        $(".hd-zd").slideToggle("slow");
+    });
+
+</script>
+
+<br>
+</body>
+
+</html>

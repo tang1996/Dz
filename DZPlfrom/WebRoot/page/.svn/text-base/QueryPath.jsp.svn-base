@@ -1,0 +1,171 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title> </title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+</head>
+<body>
+	<strong><script type="text/javascript">
+
+Ext.onReady(function(){
+var searchWin;
+var name  = new Array();
+var but = new Array();
+var bill ='';
+var push = '';
+var nesd;
+
+var columns = '';
+var name = '';
+var array = '';
+var fields = '';
+
+			var queryPathGrid = new Ext.grid.ColumnModel(array);
+
+	        var queryPathDs = new Ext.data.GroupingStore({
+				  proxy: new Ext.data.HttpProxy({url:''}),
+				  reader: new Ext.data.JsonReader({totalProperty:'totalCount', root:'list',id:'id',
+				  successProperty :'@success',
+				  fields:fields
+				  })
+			});
+
+			this.pagingBar = new Ext.PagingToolbar
+	        ({
+	            displayInfo:true,
+	            emptyMsg:"没有数据显示",
+	            displayMsg:"显示从{0}条数据到{1}条数据，共{2}条数据",
+	            store:queryPathDs,
+	            pageSize:400
+	        });
+
+			var queryPathGrid = new Ext.grid.GridPanel({
+				 	    ds:queryPathDs,
+						cm:queryPathGrid,
+				        height:document.body.clientHeight-120,
+						width:document.body.clientWidth-193,
+				        stripeRows:true,
+				        loadMask : true,// 载入遮罩动画
+				        frame : false,
+				        renderTo : 'page_mants',
+				        autoShow : true,
+				        viewConfig : {
+				            forceFit : true
+				        },
+						 tbar : [{
+				            text : '转换Excel处理',
+				            tooltip : '转换Excel处理',
+				            iconCls : 'refresh',
+				            handler: function(){
+
+									try{
+												var xml = "";
+										        var ss = queryPathGrid.getStore();
+												ss.each(function(record) {
+												 var slit = columns.toString().split(',');
+										            for(var i = 0 ; i < slit.length ; i++ ){
+										               	if(i - slit.length == -1){
+										            		xml = xml +record.get(slit[i])+";";
+										            	}else{
+										            		xml = xml +record.get(slit[i])+"|"
+										            	}
+										            }
+												 });
+							
+												if(xml){
+													 var desstr="户籍查询.xls";
+													 var XLObj = new ActiveXObject("Excel.Application" );
+													 var xlBook = XLObj.Workbooks.Add; //新增工作簿
+													 var ExcelSheet =xlBook.Worksheets(1);  
+													 var oSheet  = xlBook.ActiveSheet
+													var lit =  columns.toString().split(',');
+							                        for(var i = 1 ; i <= lit.length ; i++ ){
+										                ExcelSheet.Columns(i).NumberFormatLocal="@";
+										            }
+										            var verhei = name.toString().split(',');
+												    ExcelSheet.Cells(1,1).HorizontalAlignment = 3;
+												    ExcelSheet.Cells(1,1).VerticalAlignment = 2;
+													//垂直对齐方式枚举*(1-靠上，2-居中，3-靠下，4-两端对齐，5-分散对齐)
+												    ExcelSheet.Cells(1,1).Font.Size = 14;
+													 //设置为10号字*
+												    ExcelSheet.Cells(1,1).Font.Name = "宋体";
+														//设置字体
+												    ExcelSheet.Cells(1,1).Font.Bold = true;
+													//设置为粗体*
+												    ExcelSheet.cells(1,1)="    广西地税-户籍查询   ";
+												    ExcelSheet.cells(1,1).Interior.ColorIndex =14 ;
+							
+												    XLObj.Range("A1",XLObj.Cells(1, verhei.length)).MergeCells = true;
+												    ExcelSheet.Application.Visible = true;
+													 
+										            for(var y = 0 ; y < verhei.length ; y++ ){
+										            	 ExcelSheet.cells(2,y+1)=verhei[y];
+										            }
+							
+													   var arr_row=xml.split(';');
+													   for(var i=0;i<arr_row.length;i++){
+													     var arr_clum=arr_row[i].split('|');
+													      for(var j=0;j<arr_clum.length-1;j++){
+													            oSheet.Columns.AutoFit;
+														    	ExcelSheet.cells(i+3,j+1)=arr_clum[j];
+														     }
+													       }
+													    }
+                                   }catch(e){   
+						            if(Ext){   
+						                Ext.Msg.show({   
+						                    title:'提示',   
+						                    msg:'请设置IE的菜单\'工具\'->Internet选项->安全->自定义级别->\'对未标记为可安全执行脚本ActiveX控件初始化并执行脚本\'->选择[启用]&nbsp;&nbsp;就可以生成Excel',   
+						                    buttons:Ext.Msg.OK,   
+						                    icon:Ext.Msg.INFO   
+						                });   
+						            }else{   
+						                alert('不支持ExtJs框架');   
+						                return;   
+						            }   
+						        }
+
+
+						
+				            }	
+				        }],
+				        bbar: pagingBar
+			 });
+
+				Ext.Ajax.request({         
+			           url: '/GXDS/getColNames',  
+			           waitMsg : '正在处理......', 
+			           params:{heiver:nyeha},
+			           success:function(response, options){
+			           var msg = Ext.util.JSON.decode(response.responseText);
+						   queryPathGrid.reconfigure(
+							new Ext.data.JsonStore({
+								url:"/GXDS/getInforn", 
+								root:"list", 
+								totalProperty:"totalCount",successProperty :'@success', fields:msg.column
+							}),
+							new Ext.grid.ColumnModel(msg.columnModel));    
+							
+						columns = msg.columns;
+						name = msg.name;	
+							
+						//重新加载数据
+						var testFiled = queryPathGrid.getStore();
+						this.pagingBar.bind(testFiled);
+						testFiled.load({params:{nsrdm:dN,djlx:type,nsrzt:stuats,zgswjg:trees,gly:admin,djzclx:ZType,nsrsbh:dm,nsrmc:nsName,TcolNames:integrated,XcolNames:riname, start:0, limit:400}});
+			          	
+		          		testFiled.on('beforeload',function(loader){
+							loader.baseParams = {nsrdm:dN,djlx:type,nsrzt:stuats,zgswjg:trees,gly:admin,djzclx:ZType,nsrsbh:dm,nsrmc:nsName,TcolNames:integrated,XcolNames:riname};
+						});
+			          
+			           },failure: function(form,action){
+			        	Ext.Msg.alert('温馨提示','后端异常');
+			           } 
+				 });	
+		});
+	</script></strong>
+	<div id='page_mants'></div>
+</body>
+</html>

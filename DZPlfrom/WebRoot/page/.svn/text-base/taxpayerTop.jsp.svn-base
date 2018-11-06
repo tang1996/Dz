@@ -1,0 +1,549 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+<script type="text/javascript">
+var onClickSearch;   
+var SzName='';
+var array = '';
+var fields = '';
+var columns = '';
+var name = '';
+var zhuTrees='';
+var hyTrees = '';
+
+var Topdate = new Date();
+var Topyear = Topdate.getFullYear();
+var TopyearStore = new Ext.data.SimpleStore({
+    fields:['yearN','yearD'],   
+   data:[['空',''],[(Topyear)+'年',Topyear],[(Topyear-1)+'年',Topyear-1],[(Topyear-2)+'年',Topyear-2],[(Topyear-3)+'年',Topyear-3],[(Topyear-4)+'年',Topyear-4],[(Topyear-5)+'年',Topyear-5]]   
+}); 
+ var TopmmStore = new Ext.data.SimpleStore({   
+       fields:['mmN','mmD'],   
+      data:[['空',''], 
+             ['1月','1'],
+             ['2月','2'],
+             ['3月','3'],
+             ['4月','4'],
+             ['5月','5'],
+             ['6月','6'],
+             ['7月','7'],
+             ['8月','8'],
+             ['9月','9'],
+             ['10月','10'],
+             ['11月','11'],
+             ['12月','12']
+                                 
+      ]   
+});  
+
+var TopzhuGuanDeparment = new Ext.form.ComboBox({
+		 fieldLabel: '对账单位选择',
+		 store:new Ext.data.SimpleStore({fields:[],data:[[]]}),
+		 shadow:false,
+		 mode: 'local',
+		 editable :false,
+		 width:150,
+		 triggerAction:'all',
+		 maxHeight: 200,
+		 value:'广西自治区地方税务局',
+		 tpl: '<tpl for="."><div style="height:200px"><div id="TopzhuGuane"></div></div></tpl>'
+	});
+		var TopzhuGuanTax = new Ext.tree.TreePanel({
+			  loader: new Ext.tree.TreeLoader({dataUrl:'/GXDS/getLevFj'}),
+			  border:false,
+			  rootVisible:false,
+			  root:new Ext.tree.AsyncTreeNode({text: '请选择税务部门',id:'098'})
+		});
+		TopzhuGuanTax.on('click',function(node){
+			deptny = node.text;
+			zhuTrees = node.id
+	  		TopzhuGuanDeparment.setValue(node.text);
+	  		TopzhuGuanDeparment.collapse();
+	  	});
+		TopzhuGuanDeparment.on('expand',function(){
+		 	TopzhuGuanTax.render('TopzhuGuane');
+	    });
+	TopzhuGuanTax.on('checkchange', function(node, checked) {
+		 node.expand();
+		 node.attributes.checked = checked;
+		 node.eachChild(function(child) {
+		 child.ui.toggleCheck(checked);
+		 child.attributes.checked = checked;
+		 child.fireEvent('checkchange', child, checked);
+	 });
+	},TopzhuGuanTax);
+
+var TopHy = new Ext.form.ComboBox({
+			 fieldLabel: '行业选择',
+			 store:new Ext.data.SimpleStore({fields:[],data:[[]]}),
+			 shadow:false,
+			 mode: 'local',
+			 editable :false,
+			 emptyText:"空",
+			 width:150,
+			 triggerAction:'all',
+			 maxHeight: 200,
+			 value:'',
+			 tpl: '<tpl for="."><div style="height:200px"><div id="DivTopHy"></div></div></tpl>'
+		});
+			var TopHyTax = new Ext.tree.TreePanel({
+				  loader: new Ext.tree.TreeLoader({dataUrl:'/GXDS/getHyDz'}),
+				  border:false,
+				  rootVisible:false,
+				  root:new Ext.tree.AsyncTreeNode({text: '请选择行业',id:'098'})
+			});
+			TopHyTax.on('click',function(node){
+				deptny = node.text;
+				hyTrees = node.id
+		  		TopHy.setValue(node.text);
+		  		TopHy.collapse();
+		  	});
+			TopHy.on('expand',function(){
+			 	TopHyTax.render('DivTopHy');
+		    });
+		TopHyTax.on('checkchange', function(node, checked) {
+			 node.expand();
+			 node.attributes.checked = checked;
+			 node.eachChild(function(child) {
+			 child.ui.toggleCheck(checked);
+			 child.attributes.checked = checked;
+			 child.fireEvent('checkchange', child, checked);
+		 });
+		},TopHyTax);
+		
+Ext.onReady(function() {
+
+    var skly = new Ext.data.JsonStore({
+	url:'/GXDS/getSkly',
+	fields: ["code", "name"],
+	root: 'root'
+ })
+
+ skly.load(); 
+ 
+ var type = new Ext.data.JsonStore({
+	url:'/GXDS/getLoginType',
+	fields: ["id", "name"],
+	root: 'root'
+})
+
+type.load();
+	
+	var taxPayerCm = new Ext.grid.ColumnModel(array);
+
+    var taxPayerDs = new Ext.data.GroupingStore({
+		  proxy: new Ext.data.HttpProxy({url:''}),
+		  reader: new Ext.data.JsonReader({totalProperty:'totalCount', root:'list',id:'id',
+		  successProperty :'@success',
+		  fields:fields
+		  })
+	});
+			
+    var taxpayerGrid = new Ext.grid.GridPanel( {
+        store : taxPayerDs,
+        cm : taxPayerCm,
+        loadMask:true,
+        width: document.body.clientWidth-193,
+        height:document.body.clientHeight-252,
+        stripeRows:true//行奇偶颜色
+    });
+ 	
+	onClickSearch=function(status){
+		if(!status)return;
+		  	Ext.Ajax.request({         
+	           url: '/GXDS/getTopColName',  
+	           params:{heiver:SzName},
+	           success:function(response, options){
+	           var msg = Ext.util.JSON.decode(response.responseText);
+				   taxpayerGrid.reconfigure(
+					   new Ext.data.GroupingStore({   
+					        reader: new Ext.data.JsonReader({   
+					            root:'list',   
+					            totalProperty:'totalCount',
+					            id:"id",   
+					            fields:msg.column
+					        }),
+					        proxy:new Ext.data.HttpProxy({   
+					            url:'/GXDS/selectTaxpayerTop',   
+					            autoAbort:true,   
+					            disableCaching:true,   
+					            timeout:18000000,   
+					            method:'POST'  
+					        })   
+					    }),
+				new Ext.grid.ColumnModel(msg.columnModel));    
+				columns = msg.columns;
+				name = msg.name;
+				var taxPayerDs = taxpayerGrid.getStore();
+				taxPayerDs.load({params:{swjg:zhuTrees,zcdjlx:Ext.getCmp('zcdjlx').value,hy:hyTrees,skly:Ext.getCmp('skly').value,sz:Ext.getCmp('Tsz').value,nd:Ext.getCmp('nd').value,yf:Ext.getCmp('yf').value,pm:document.getElementById('pm').value}});
+	           },failure: function(form,action){
+	        		Ext.Msg.alert('温馨提示','后端异常');
+	           } 
+		 });
+	}
+	
+									ExportExcel = function(status){
+										if(!status)return;
+										try{
+												var xml = "";
+										        var ss = taxpayerGrid.getStore();
+												ss.each(function(record) {
+												 var slit = columns.toString().split(',');
+										            for(var i = 0 ; i < slit.length ; i++ ){
+										               	if(i - slit.length == -1){
+										            		xml = xml +record.get(slit[i])+";";
+										            	}else{
+										            		xml = xml +record.get(slit[i])+"|"
+										            	}
+										            }
+												 });
+							
+												if(xml){
+													 var desstr="纳税人排行榜.xls";
+													 var XLObj = new ActiveXObject("Excel.Application" );
+													 var xlBook = XLObj.Workbooks.Add; //新增工作簿
+													 var ExcelSheet =xlBook.Worksheets(1);  
+													 var oSheet  = xlBook.ActiveSheet
+													var lit =  columns.toString().split(',');
+							                        for(var i = 1 ; i <= lit.length ; i++ ){
+										                ExcelSheet.Columns(i).NumberFormatLocal="@";
+										            }
+										            var verhei = name.toString().split(',');
+												    ExcelSheet.Cells(1,1).HorizontalAlignment = 3;
+												    ExcelSheet.Cells(1,1).VerticalAlignment = 2;
+													//垂直对齐方式枚举*(1-靠上，2-居中，3-靠下，4-两端对齐，5-分散对齐)
+												    ExcelSheet.Cells(1,1).Font.Size = 14;
+													 //设置为10号字*
+												    ExcelSheet.Cells(1,1).Font.Name = "宋体";
+														//设置字体
+												    ExcelSheet.Cells(1,1).Font.Bold = true;
+													//设置为粗体*
+												    ExcelSheet.cells(1,1)="    广西地税-纳税人排行榜   ";
+												    ExcelSheet.cells(1,1).Interior.ColorIndex =14 ;
+							
+												    XLObj.Range("A1",XLObj.Cells(1, verhei.length)).MergeCells = true;
+												    ExcelSheet.Application.Visible = true;
+													 
+										            for(var y = 0 ; y < verhei.length ; y++ ){
+										            	 ExcelSheet.cells(2,y+1)=verhei[y];
+										            }
+							
+													   var arr_row=xml.split(';');
+													   for(var i=0;i<arr_row.length;i++){
+													     var arr_clum=arr_row[i].split('|');
+													      for(var j=0;j<arr_clum.length;j++){
+													            oSheet.Columns.AutoFit;
+													            if(arr_clum[j] != 'undefined'){
+													               if(arr_clum[j] == 'null'){
+											      			          ExcelSheet.cells(i+3,j+1)= '';	
+											      			       }else{
+											      			          ExcelSheet.cells(i+3,j+1)=arr_clum[j];	
+											      			      }
+													            }
+														   
+														  }
+													    }
+													  }
+                                  
+                                   }catch(e){   
+						            if(Ext){   
+						                Ext.Msg.show({   
+						                    title:'提示',   
+						                    msg:'请设置IE的菜单\'工具\'->Internet选项->安全->自定义级别->\'对未标记为可安全执行脚本ActiveX控件初始化并执行脚本\'->选择[启用]&nbsp;&nbsp;就可以生成Excel',   
+						                    buttons:Ext.Msg.OK,   
+						                    icon:Ext.Msg.INFO   
+						                });   
+						            }else{   
+						                alert('不支持ExtJs框架');   
+						                return;   
+						            }   
+						        }
+			  }	
+			  
+	var paihang = new Ext.form.NumberField({
+			id:'pm',
+			width:150,
+			name: 'pm',
+			value:100,
+			allowBlank:true
+	});
+
+	var topPanel = new Ext.FormPanel({
+		autoWidth : true,
+		autoHeight : true,
+		border:false,
+        frame : true,
+        bodyStyle : 'padding:10px 10px 10px 10px',
+		defaults : {width:800},
+		labelWidth : 70,
+        labelAlign:"right",
+	   	items:[
+		   	{xtype:"panel",layout:"column",border:false,items:[{html:"主管税务局:",width:80,border:false,bodyStyle:"padding:5px"},{xtype:"panel",width:150,id:'swjg',name:'swjg',border:false,items:TopzhuGuanDeparment},
+		   	{html:"税款来源:",border:false,width:60,bodyStyle:"padding:4px"},
+		   	{ xtype:"textfield",readOnly:true, emptyText:"请按Shit键弹出对话框...",width:150,fieldLabel: '',id:'skly',name: 'conValue',	listeners:{   
+	            specialkey:function(field,e){   
+	                if (e.getKey()==16){
+	                		var id='';
+			                   var skly = new Tree.TreePanel({
+										width:250,
+										height:300,
+										autoScroll:true,
+										border:false,
+										region:"west",
+									    rootVisible:false,
+										dataUrl: '/GXDS/getSkly',
+									    root: {
+									           text: '系统管理',
+									           draggable:false,
+									           id:'source'
+									   },
+								       listeners:{
+						       		  load :function(node){
+						              skly.on("checkchange",function(node,checked){
+							              if(checked){
+							               if(id==''){
+							                 id=node.id;
+							               }else{
+							                 id = id +','+node.id;
+							               }
+							              	
+							              }else{
+							              	var index = id.indexOf(node.id);
+							              	var start = id.substring(0,index);
+							              	var last  = id.substring(index+node.id.length+1,id.length);
+							              	id = start+last;
+							              }
+						              });
+						          	 }
+						    		}
+								   });
+								
+							    var addintegratedWin;
+								if(addintegratedWin) addintegratedWin.destroy();
+								addintegratedWin = new Ext.Window({
+							              layout : 'fit',
+							              width : 500,
+							              height : 300,
+									      title:"数据添加",
+							              items : skly,
+							              buttons: [{
+										   text: '全选',
+									            handler: function(){
+									            	var nodes = skly.getRootNode().childNodes;
+								            		for(var i=0;i<nodes.length;i++){
+													  //设置UI状态为未选中状态
+													  nodes[i].getUI().toggleCheck(true);
+													  //设置节点属性为未选中状态
+													  nodes[i].attributes.checked=true;
+													 }
+									            }
+										  },{
+										  	text:'取消',
+										  	handler: function(){
+										  		var check = skly.getChecked(); 
+										  		if( check && check.length ){
+										  			  for(var i=0;i<check.length;i++){
+													  //设置UI状态为未选中状态
+													  check[i].getUI().toggleCheck(false);
+													  //设置节点属性为未选中状态
+													  check[i].attributes.checked=false;
+												 }
+										  		}
+										  	}
+										  },{
+									            text: '确定',
+									            handler: function(){
+													Ext.getCmp('skly').setValue(id);
+									            	 addintegratedWin.destroy();
+									            }
+										  }]
+									    });
+								addintegratedWin.show();
+	                	}   
+	            	}   
+        		}},{html:"",width:10,border:false,bodyStyle:"padding:0px"},
+		             	 {html:"登记注册类型:",width:80,border:false,bodyStyle:"padding:0px"},
+				             {xtype:"panel",width:150,border:false,items:new Ext.form.ComboBox({
+									              				hiddenName:"event",
+												   				displayField:"name",
+												   				id:'zcdjlx',
+												   				valueField:"id",
+																emptyText:"空",
+																editable :false,
+												   				store:type,
+								   								typeAhead:true,
+											   					mode:"local",
+											   					triggerAction:"all",
+											   					selectOnFocus:false,
+											   					width:150
+									            				})
+									            		}]},
+		                {xtype:"panel",layout:"column",border:false,items:[{html:"主行业:",border:false,width:80,bodyStyle:"padding:4px"},
+						
+		          {xtype:"panel",width:150,id:'hy',name:'hy',border:false,items:TopHy},						            		
+			     
+            {html:"税种:",border:false,width:60,bodyStyle:"padding:4px"},
+		   	{ xtype:"textfield",readOnly: true,emptyText:"请按Shit键弹出对话框...",width:150,fieldLabel: '',editable :false,id:'Tsz',name: 'conValue',	listeners:{   
+	            specialkey:function(field,e){   
+	                if (e.getKey()==16){
+	                		   //var name='';
+	                		   var Sid='';
+	                		   SzName='';
+			                   var nameu = new Tree.TreePanel({
+										width:250,
+										height:300,
+										autoScroll:true,
+										border:false,
+										region:"west",
+									    rootVisible:false,
+										dataUrl: '/GXDS/getSelectList?colDm=SZ?',
+									    root: {
+									           text: '系统管理',
+									           draggable:false,
+									           id:'source'
+									   },
+								       listeners:{
+						       		  load :function(node){
+						              nameu.on("checkchange",function(node,checked){
+							              if(checked){
+							              	SzName = SzName + node.id + '=' + node.text + '-,';
+							              	if(Sid==''){
+							              	  Sid=node.id;
+							              	}else{
+							              	  Sid=Sid+','+node.id;
+							              	}
+							              	
+							              }else{
+							              	var index = SzName.indexOf(node.id);
+							              	var start = SzName.substring(0,index);
+							              	var last  = SzName.substring(index+node.id.length+node.text.length+3,SzName.length);
+							              	SzName = start+last;
+							              	var Sindex = Sid.indexOf(node.id);
+							              	var Sstart = Sid.substring(0,Sindex);
+							              	var Slast  = Sid.substring(Sindex+node.id.length+1,Sid.length);
+							              	Sid = Sstart+Slast;
+							              }
+						              });
+						      	}
+						    		}
+								   });
+								
+							    var addintegratedWin;
+								if(addintegratedWin) addintegratedWin.destroy();
+								addintegratedWin = new Ext.Window({
+							              layout : 'fit',
+							              width : 500,
+							              height : 300,
+									      title:"数据添加",
+							              items : nameu,
+							              buttons: [{
+										   text: '全选',
+									            handler: function(){
+									            	var nodes = nameu.getRootNode().childNodes;
+								            		for(var i=0;i<nodes.length;i++){
+													  //设置UI状态为未选中状态
+													  nodes[i].getUI().toggleCheck(true);
+													  //设置节点属性为未选中状态
+													  nodes[i].attributes.checked=true;
+													 }
+									            }
+										  },{
+										  	text:'取消',
+										  	handler: function(){
+										  		var check = nameu.getChecked(); 
+										  		if( check && check.length ){
+										  			  for(var i=0;i<check.length;i++){
+													  //设置UI状态为未选中状态
+													  check[i].getUI().toggleCheck(false);
+													  //设置节点属性为未选中状态
+													  check[i].attributes.checked=false;
+												 }
+										  		}
+										  	}
+										  },{
+									            text: '确定',
+									            handler: function(){
+													Ext.getCmp('Tsz').setValue(Sid);
+									            	 addintegratedWin.destroy();
+									            }
+										  }]
+									    });
+								addintegratedWin.show();
+	                	}   
+	            	}   
+        		}},
+        	{html:"",width:10,border:false,bodyStyle:"padding:0px"},
+		   	{html:"",width:10,border:false,bodyStyle:"padding:0px"},
+		   	{html:"年度:",border:false,width:80,bodyStyle:"padding:4px"},									            									            		
+		   	 new Ext.form.ComboBox({  
+                           id:'nd',
+                           fieldLabel: '年份',
+                           store: TopyearStore,  
+                           displayField:'yearN',  
+                           valueField:'yearD',  
+                           typeAhead: true,  
+                           mode: 'local',  
+                           emptyText:"空",
+                           editable :false,
+                           triggerAction: 'all',  
+                           width:150,  
+                           selectOnFocus:true,  
+                           resizable:true  
+                        })
+		   	]},
+		   	{xtype:"panel",layout:"column",border:false,items:[
+		   	{html:"月份:",border:false,width:80,bodyStyle:"padding:4px"},
+		   	new Ext.form.ComboBox({  
+                           id:'yf',
+                           fieldLabel: '月份',
+                           store: TopmmStore,  
+                           displayField:'mmN',  
+                           valueField:'mmD',  
+                           typeAhead: true,  
+                           editable :false,
+						   emptyText:"空",
+                           mode: 'local',  
+                           triggerAction: 'all',  
+                           width:150,  
+                           selectOnFocus:true,  
+                           resizable:true  
+                        }),
+		   	{html:"",width:10,border:false,bodyStyle:"padding:0px"},
+		   	{html:"排名前:",border:false,width:60,bodyStyle:"padding:4px"},
+		   	paihang
+		   ]},
+		    {html:"<input type='button' onClick='onClickSearch(true);' value='查询'><input type='button' onClick='ExportExcel(true);' value='导出Excel'>",border:false}
+		]
+	});
+
+
+	var MainPanel = new Ext.Panel({
+		id:'main-tabs',
+        activeTab:0,
+        region:'center',
+        margins:'0 5 5 0',
+        resizeTabs:true,
+        tabWidth:150,
+        minTabWidth: 120,
+        enableTabScroll: true,
+        items: [topPanel, {
+                id:'bottom-preview',
+                layout:'fit',
+                items:taxpayerGrid,
+                height: 340,
+                split: true,
+                border:false,
+                region:'south'
+        }]
+	});
+
+    MainPanel.render("top_panel");
+    
+});
+</script>
+  </head>
+  <body>
+<div id="top_panel"></div>
+  </body>
+</html>

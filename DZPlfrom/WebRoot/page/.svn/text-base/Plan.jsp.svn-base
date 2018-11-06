@@ -1,0 +1,289 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<html>
+  <head>
+   <title>数据调整</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<script type="text/javascript">
+	  	  depatment = '<%=request.getSession().getAttribute("depatment")%>';
+		  depatmentID = '<%=request.getSession().getAttribute("depatmentID")%>';
+		  nesd = depatmentID;
+		  deptny = depatment;
+	</script>
+  </head>
+  <body>
+  	<script type="text/javascript">
+var value = null;
+var selectPanl;
+var addPlanForm;
+var plangrid;
+var plandss= new Ext.data.GroupingStore({
+	  proxy: new Ext.data.HttpProxy({url:'/GXDS/listplan'}),
+	  reader: new Ext.data.JsonReader({totalProperty:'totalCount', root:'list',id:'city',
+	  successProperty :'@success',
+	  fields:['city','cityID','dates' ,'fendou' ,'bibao' ,'bibao1' ,'bibao2' ,'bibao3' ,'bibao4' ,'bibao5','qq1','qq2','qq3','qq4']
+	  })
+});
+
+var grades = [['南宁市地方税务局','南宁市地方税务局'],['柳州市地方税务局',' 柳州市地方税务局'],['桂林市地方税务局','桂林市地方税务局'],['梧州市地方税务局','梧州市地方税务局'],['北海市地方税务局','北海市地方税务局'],['防城市地方税务局','防城市地方税务局'],['钦州市地方税务局','钦州市地方税务局'],['贵港市地方税务局','贵港市地方税务局'],['玉林市地方税务局','玉林市地方税务局'],['百色市地方税务局','百色市地方税务局'],['贺州市地方税务局','贺州市地方税务局'],['河池市地方税务局','河池市地方税务局'],['来宾市地方税务局','来宾市地方税务局'],['崇左市地方税务局','崇左市地方税务局'],['广西地税局直属税务分局','广西地税局直属税务分局']]
+var clumStores = new Ext.data.SimpleStore({fields:['value','text'],data:grades})
+
+var city = new Ext.form.ComboBox({
+	   valueField :"value",
+	   displayField: "text",
+	   id:'city', 
+	   store: clumStores,
+	   mode: 'local',
+	   forceSelection: true,
+	   allowBlank:true,
+	   editable: false,
+	   width:200,
+	   triggerAction:'all'
+    });
+
+var plancbsm=new Ext.grid.CheckboxSelectionModel();
+var plancm = new Ext.grid.ColumnModel([new Ext.grid.RowNumberer(),
+			  plancbsm,{   
+	           header: "单位",   
+	           dataIndex: 'city',   
+	           width:120,
+	           editor: city
+	        },{   
+	           header: "单位编码",   
+	           dataIndex: 'cityID',   
+	           width:120,
+	           hidden:true
+	        },{   
+	           header: "必保数初始值(万元)",   
+	           dataIndex: 'bibao',   
+	            width:150,
+	            align: 'right',   
+	           editor: new Ext.form.TextField({   
+	               allowBlank: false  
+	           })   
+	       },{
+	           header: "必保调整1(万元)",   
+	           dataIndex: 'bibao1',   
+	            width:100,
+	            align: 'right',
+	           editor: new Ext.form.TextField({   
+	               allowBlank: false  
+	           })   
+	        },{
+	           header: "必保调整2(万元)",
+	           dataIndex: 'bibao2',
+	            width:100,
+	            align: 'right',
+	           editor: new Ext.form.TextField({   
+	               allowBlank: false  
+	           })   
+	        },{
+	           header: "必保调整3(万元)",
+	           dataIndex: 'bibao3',
+	           width:100,
+	           align: 'right',
+	           editor: new Ext.form.TextField({   
+	               allowBlank: false  
+	           })   
+	        },{
+	           header: "必保调整4(万元)",
+	           dataIndex: 'bibao4',
+	            width:100,
+	            align: 'right',
+	           editor: new Ext.form.TextField({   
+	               allowBlank: false  
+	           })   
+	        },{
+	           header: "必保调整5(万元)",
+	           dataIndex: 'bibao5',
+	           width:100,
+	           align: 'right',
+	           editor: new Ext.form.TextField({   
+	               allowBlank: false  
+	           })   
+	        },{
+	           header: "奋斗目标值(万元)",
+	           dataIndex: 'fendou',
+	            width:150,
+	            align: 'right',
+	           editor: new Ext.form.TextField({   
+	               allowBlank: false  
+	           })   
+	        },{
+	           header: "时间",
+	           dataIndex: 'dates',
+	           align: 'center',
+	           width:100,
+	           editor: false
+	        },{
+	           header: "第一季度奋斗目标",
+	           dataIndex: 'qq1',
+	            width:100,
+	            align: 'right',
+	           editor: new Ext.form.TextField({   
+	               allowBlank: false  
+	           })   
+	        },{
+	           header: "第二季度奋斗目标",
+	           dataIndex: 'qq2',
+	           width:100,
+	           align: 'right',
+	           editor: new Ext.form.TextField({   
+	               allowBlank: false  
+	           })   
+	        },{
+	           header: "第三季度奋斗目标",
+	           dataIndex: 'qq3',
+	           width:100,
+	           align: 'right',
+	           editor: new Ext.form.TextField({   
+	               allowBlank: false  
+	           })   
+	        },{
+	           header: "第四季度奋斗目标",
+	           dataIndex: 'qq4',
+	           width:100,
+	           align: 'right',
+	           editor: new Ext.form.TextField({   
+	               allowBlank: false  
+	           })   
+	        }
+	    ]);
+	    
+Ext.onReady(function(){
+ plangrid =new Ext.grid.EditorGridPanel({
+			   ds:plandss,
+			   cm:plancm,
+			   sm:plancbsm,
+			   height:document.body.clientHeight-124,
+			   width:document.body.clientWidth-193,
+		tbar:[{		
+					text:'查询',
+					iconCls:'select-fredd',
+					handler:function(){
+					
+					var plandate = new Date();
+					var planyear = plandate.getYear();	
+					var plantaxdata = [[planyear],[planyear-1],[planyear-2],[planyear-3],[planyear-4],[planyear-5]];
+					var plantaxStore = new Ext.data.SimpleStore({fields:['text'],data:plantaxdata});
+	
+					var planTaxInformationDate = new Ext.form.ComboBox({
+					 		store: plantaxStore,
+							fieldLabel: '选择年份',
+							displayField: ['text'],
+							mode: 'local',
+							emptyText:'选择...',
+							forceSelection: true,
+							allowBlank:true,
+							editable: false,
+							width:200,
+							triggerAction:'all'
+					});
+				
+				var planTaxInformationForm = new Ext.form.FormPanel({
+				        labelWidth: 95,
+				        width: 500,
+				        height:342,
+				        defaultType: 'textfield',
+				        items:planTaxInformationDate
+				});
+
+			var planTaxInformationWindow = new Ext.Window({
+			        title: '条件查询',
+			        width: 513,
+			        height:410,
+			        resizable:false,
+			        closable :false, 
+			        buttonAlign:'center', 
+			        items: planTaxInformationForm,
+			        buttons: [{
+			            text: '确定',
+			            handler:function(){
+					 		if(planTaxInformationForm.getForm().isValid()){
+					 		var plandates = planTaxInformationDate.value;
+					 		
+					 		Ext.getCmp('plandates').setText("年份：<span style='color:green'>"+plandates+"</span>");
+			       			plandss.load({
+				       			 params:{planyear:planTaxInformationDate.value}
+						    });
+			        		planTaxInformationWindow.destroy();
+					       	} else {
+					       		Ext.MessageBox.alert( "错误","不允许为空!" );
+					       	}
+			         	 }
+			        },{
+			            text: '取消',
+			            handler: function(){
+			            	planTaxInformationForm.getForm().reset();
+			           		planTaxInformationWindow.destroy();
+			            }
+			        }]
+		     });
+						planTaxInformationWindow.show();
+				}},'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',{text:'',id:'plandates'}]
+			});
+
+	plandss.load({params:{start:0,limit:10}});
+	plangrid.render('grid-plan');
+	
+			var updateDate = function (obj){
+			 var r = obj.record;//获取被修改的行
+	    		Ext.Ajax.request({
+					url: '/GXDS/addplan',
+					waitMsg : '处理中，请稍等..',
+					waitTitle: '请稍等',
+					params: { 
+					       qq1:r.data.qq1,qq2:r.data.qq2
+					      ,qq3:r.data.qq3,qq4:r.data.qq4
+					      ,birthday:r.data.dates,city:r.data.city
+					      ,bibao:r.data.bibao,bibao2:r.data.bibao2
+					      ,bibao1:r.data.bibao1,bibao3:r.data.bibao3
+					      ,bibao4:r.data.bibao4,bibao5:r.data.bibao5
+					      ,fendou:r.data.fendou,cityID:r.data.cityID 
+					},
+					success:function(response, options){
+						Ext.Msg.alert('温馨提示','修改成功');
+					},failure: function(form,action){
+						Ext.Msg.alert('错误','后端异常');
+					}
+				});
+			}
+			
+	plangrid.addListener('afteredit', updateDate);//给editgrid的''afteredit''事件增加回调函数3. });
+});
+  		
+ function dodelteplan(btn){
+		if(btn=='yes'){
+			var b = "";
+			var rends = plangrid.getSelections();
+			if(rends.length>0){
+			for(var i = 0 ; i<rends.length ; i++)
+			{
+			  var rend = rends[i];
+				  if(i==rends.length-1)
+				  {
+				     b = b + rend.get("city");
+				  }else
+				  {
+				     b = b + rend.get("city")+",";
+				  }
+			}
+		      Ext.Ajax.request({         
+		           url: '/GXDS/deletePlan',  
+		           waitMsg : '正在处理......', 
+		           params: { planID: b },
+		           success:function(form,action)
+		           {
+		        	 plandss.reload();
+		           },failure: function(form,action){
+		           			Ext.Msg.alert('错误','后端异常');
+		           } 
+			 });
+		}else{
+			Ext.Msg.alert('错误','请选择需要删除的数据!');
+		}
+	}
+ }   
+  	</script>
+	<div id="grid-plan" ></div>
+  </body>
+</html>

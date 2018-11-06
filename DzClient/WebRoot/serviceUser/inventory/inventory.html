@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>沽清</title>
+    <script type="text/javascript" src="../../common/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../../common/js/baseUrl.js"></script>
+    <link href="./inventory.css" type="text/css"  rel="stylesheet">
+	<script type="text/javascript" src="../../common/js/jquery.lazyload.min.js"></script>
+	<script type="text/javascript" src="../../common/js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="../../common/js/common.js"></script>
+	<script type="text/javascript" src="../../common/js/jquery.timers.js"></script>
+	<!-- 增加浏览器小图标 -->
+<link rel="icon" href="../../common/images/logo.jpg" type="image/x-icon">
+</head>
+
+<body>
+
+<script>
+/* 	companyId = GetQueryString("companyId");
+	token = GetQueryString("token"); */
+	companyId = getCookie("companyId");
+	token = getCookie("token");
+	var liWidth = 0;
+	var oneFood_Height = 0;
+	var oneFood_margin = 0;
+	var food_Div = 0;
+	var ul_Height = 0;
+	$(document).ready(function() {	//页面加载
+		loginCookie();
+		getFication();
+		menuInit();
+		
+		
+		//菜单栏 左右
+		var i = 0;
+        $(".leftMove").click(function() {
+        	if(i < 0){
+                i++;
+            }
+            $(".menuType_DIV ul").css("left",i*(liWidth + 1) + "px");
+        })
+        $(".rightMove").click(function() {
+            //alert(liWidth)
+            var rightNum = parseInt($(".menuType_DIV ul").css("right"));
+            if(rightNum < 0) {
+                if (-rightNum < liWidth) {
+                    $(".menuType_DIV ul").css("left", i * (liWidth + 1) + rightNum + "px");
+                } else {
+                    i--;
+                    $(".menuType_DIV ul").css("left", i * (liWidth + 1) + "px");
+                }
+            }
+        });
+        
+        
+        
+	    var ul_top = 0;
+	    var j = 0;
+	    $(".f_up").click(function () {
+	        ul_top = $(".foodList_div ul").css("top");
+	        if(0 > parseFloat(ul_top)){
+	            j++;
+	        }
+	        $(".foodList_div ul").css("top",food_Div * j + "px");
+	    });
+	    $(".f_down").click(function () {
+	        ul_top = $(".foodList_div ul").css("top");
+	        var f_Surplus = ul_Height + parseFloat(ul_top);
+	        //alert(f_Surplus + " ? " + parseFloat(ul_top))
+	        if (f_Surplus > food_Div) {
+	            j--;
+	        }
+	
+	        $(".foodList_div ul").css("top",food_Div * j + "px");
+	    });
+	    
+	    
+		
+        
+        	init();
+			 $('body').everyTime('10s','ds1',function (){
+	             init();
+	        }); 
+		
+	});
+	
+	function playSound(soundSrl){
+	   var strAudio = '<audio id="audioPlay" src='+soundSrl+' hidden="true">';
+	   if ( $( "body" ).find( "audio" ).length <= 0 )
+		 $( "body" ).append(strAudio );
+	   var audio = document.getElementById( "audioPlay" );
+	   audio.play();			 
+	}
+	function init(){
+		$.ajax({
+			type : 'POST',
+			url : BASE_URL + LOGIN_ACTION.NEWORDER,
+			data : {
+				companyId : companyId
+			},
+			success : function(data) {
+				$(".deliciousFoodOrderNum").html(data.length);
+				if(data.length>0){
+					var soundSrl="../../common/new.mp3";
+					playSound(soundSrl);
+				}
+			},
+			error : function(error) {
+				console.log(error);
+			}
+		});
+	}
+	
+	function menuInit(){	//初始化加载商家菜品
+		$.ajax({
+			type:'POST',
+			url: BASE_URL + LOGIN_ACTION.CTOGOODSMS,
+		 	data: { 
+		        id: companyId,
+		        },
+			success:function(data) {
+				var list = data.list;
+				var html = '';
+				var stock=''
+				for(var i = 0;i <list.length;i++){
+					if(parseInt(list[i].stock)==-1){
+						stock='未沽清';
+					}else if(parseInt(list[i].stock)==0){
+						stock='已售空';
+					}else if(parseInt(list[i].stock)>0){
+						stock=parseInt(list[i].stock);
+					}
+					if(list[i].svg_price > 0){
+			 			princeTo = list[i].svg_price;
+			 		}else{
+			 			princeTo = list[i].price;
+			 		}
+					html = html + '<li class="oneFood" onclick="addInventory('+list[i].id+',true)"><p class="foodName">'+list[i].name+'</p><p class="stock">库存:<span>'+stock+'</span><p>￥'+princeTo+'</p></li>';
+					
+				}	
+				$("#FoodList").html(html);
+				oneFood_Height = $(".oneFood").outerHeight();
+				oneFood_margin = $(".oneFood").css("margin-bottom");
+				food_Div = (parseFloat(oneFood_Height) + parseFloat(oneFood_margin)) * 4;
+				$(".foodList_div").height(food_Div);
+	    		ul_Height = $(".foodList_div ul").outerHeight();
+				
+			},
+			error:function(error) {
+				console.log(error);
+			}
+		});			
+	}
+	
+	function getFication(){		//得到商家的菜品分类框
+		$.ajax({
+			type:'POST',
+			url: BASE_URL + LOGIN_ACTION.GETFICATION,
+		 	data: { 
+	         	id: companyId,
+	         		  },
+			success:function(data) {
+				var list = data.list;
+				var html = '';
+				html += '<li id="0" onclick="menusType(0)" class="active">全部</li>'
+				for(var i = 0;i <list.length;i++){
+					html = html + '<li id='+list[i].id+' onclick="menusType('+list[i].id+')">'+list[i].name+'</li>';
+				}	
+				$("#typeName").html(html);
+				$("#typeName").css("width", 121 * (list.length + 1) + "px")   //这个要放在 循环菜品类型中
+				liWidth = parseInt($(".menuType_DIV ul li").css("width"));
+			},
+			error:function(error) {
+				console.log(error);
+			}
+		});		
+	}	
+	
+	function menusType(id){	//得到对应分类框内的所有菜品
+		$("#"+id).addClass("active");
+		$("#"+id).siblings().removeClass("active");
+		$("#FoodList").css("top","0px");
+        if(id == '0'){
+        	menuInit();
+        } else {
+			$.ajax({
+				type:'POST',
+				url: BASE_URL + LOGIN_ACTION.GETGODSLIST,
+			 	data: { 
+	         		id:companyId,
+	         		ifiId:id,
+	         		type : '2'
+	     		},
+				success:function(data) {
+					var list = data.list;
+					var html = '';
+					var stock='';
+					for(var i = 0;i <list.length;i++){
+						if(parseInt(list[i].stock)==-1){
+							stock='未沽清';
+						}else if(parseInt(list[i].stock)==0){
+							stock='已售空';
+						}else if(parseInt(list[i].stock)>0){
+							stock=parseInt(list[i].stock);
+						}
+						html = html + '<li class="oneFood" onclick="addInventory('+list[i].id+',true)"><p class="foodName">'+list[i].name+'</p><p class="stock">库存:<span>'+stock+'</span><p>￥'+list[i].price+'</p></li>';
+					}
+					$("#FoodList").html(html);
+				},
+				error:function(error) {
+					console.log(error);
+				}
+			});
+		}
+	}
+	
+	function addInventory(goodsId,typeId) {	//加库存
+		str = "";
+		if(typeId==false){
+	               // var stockNum= document.getElementById('numval').value;
+	                var stockNum= $("#numval").val();
+	                if(stockNum!=''){
+							$.ajax({
+								type:'post',
+							    url: BASE_URL + LOGIN_ACTION.GOODSUPDATESTOCK,
+								data:{
+								    id:goodsId,
+							      	stock: stockNum
+								},
+								success:function(data){
+									menuInit();
+								},
+								error:function(error){
+									console.log(error);
+									}
+							});
+	                 }
+			$("#sellbox").hide();
+		}else{
+			//document.getElementById('numval').value='';
+			$("#numval").val('');
+			//$("#confirm").html("<a href='javascript:addInventory("+goodsId+",false)'>确定</a>");	
+			//$("#confirm").html("<a href='javascript:addInventory("+goodsId+",false)'>确定</a>");
+			//$("#noInventory").html("<a href='javascript:noInventory("+goodsId+")'>未沽清</a>");
+			$("#confirm").attr("onclick","addInventory("+goodsId+",false)>确定");
+			$("#noInventory").attr("onclick","noInventory("+goodsId+")>未沽清");
+			$("#sellbox").show();
+		}
+	}
+			
+	function noInventory(goodsId) {//设置商品为未沽清	
+		$.ajax({
+			type:'post',
+	        url: BASE_URL + LOGIN_ACTION.GOODSUPDATESTOCK,
+			data:{
+			    id:goodsId,
+	            stock: -1
+			}, 
+			success:function(data){
+				menuInit();
+			},
+			error:function (error) {
+				console.log(error);
+	        }
+		});
+		$("#sellbox").hide();
+	}
+	
+	function sellboxHide(){	//隐藏沽清器
+		$("#sellbox").hide();
+	}
+	
+	
+	function exit(){	//点击退出系统
+	
+	    var msg = "确定要退出系统吗？";
+	    
+	    $(".promptContent").text(msg);				
+		$(".backgroundPrompt").show();
+		$("#PromptCancel").click(function(){
+			$(".backgroundPrompt").hide();
+		});
+		$("#PromptOk").click(function(){
+			$(".backgroundPrompt").hide();
+	    	window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";//跳转到登录页面
+		});
+	}
+
+    // ----------------------------------------------------------------------
+    // <summary>
+    // 限制只能输入数字
+    // </summary>
+    // ----------------------------------------------------------------------
+    $.fn.onlyNum = function () {
+        $(this).keypress(function (event) {
+            var eventObj = event || e;
+            var keyCode = eventObj.keyCode || eventObj.which;
+            if ((keyCode >= 48 && keyCode <= 57))
+                if (parseInt($(this).val()) >= 2999) {
+                    $(this).val("2999");
+                    return false;
+                } else {
+                    return true;
+                }
+            else
+                return false;
+        }).focus(function () {
+            //禁用输入法
+            this.style.imeMode = 'disabled';
+        }).bind("paste", function () {
+            //获取剪切板的内容
+            var clipboard = window.clipboardData.getData("Text");
+            if (/^\d+$/.test(clipboard))
+                if (parseInt($(this).val()) >= 2999) {
+                    $(this).val("2999");
+                    return false;
+                } else {
+                    return true;
+                }
+            else
+                return false;
+        });
+    };
+    
+    
+    function gotoInventory() {	//点击沽清
+	//	window.location.href = BASE_URL + "/DzClient/serviceUser/inventory/inventory.html?companyId="+companyId+"&token="+token;
+		window.location.href = BASE_URL + "/DzClient/serviceUser/inventory/inventory.html";
+	}
+	
+	function gotoNetReserve(){	//点击网络订单	
+	//	window.location.href = BASE_URL + "/DzClient/serviceUser/netWorkReservation/netWorkReservation.html?companyId="+companyId+"&token="+token;
+		window.location.href = BASE_URL + "/DzClient/serviceUser/netWorkReservation/netWorkReservation.html";
+	}
+	
+	function gotoMSreceive(){	//点击美食接单
+	//	window.location.href = BASE_URL + "/DzClient/serviceUser/computer_order/computer_order.html?companyId="+companyId+"&token="+token;
+		window.location.href = BASE_URL + "/DzClient/serviceUser/computer_order/computer_order.html";
+	}
+	
+	function gotoIndex(){	//回到首页
+		if(companyId == null || token == null){
+			window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";	
+		}else{
+			window.location.href=BASE_URL+"/DzClient/serviceUser/index/index.html";
+		}	
+	}	
+	
+	function gotoData(){   //点击经营数据
+		window.location.href = BASE_URL + "/DzClient/serviceUser/data/data.html";
+	}
+
+	function onlyOKPrompt(msg,status){		//弹出确认框	
+		$(".onlyOKPrompt_content").text(msg);
+		$(".background_onlyOKPrompt").show();
+		$(".onlyOKPrompt_button p").click(function(){	//确认框的确认事件
+			$(".background_onlyOKPrompt").hide();
+				switch(status){
+					case '0':	//跳转到登录页面
+						window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";
+						break
+					case '1':	//当前页面刷新
+						window.location.reload();
+						break
+					case '2':	//不做反应
+						break
+				}
+
+		});
+	}	
+</script>
+
+<div id="body">
+	
+    <div class="left">
+        <ul class="left_ul">
+	    	<li onclick="gotoIndex()">首页</li>
+	    	<li class="click" onclick="gotoInventory()">沽清</li>
+	    	<li onclick="gotoNetReserve()">网络订单</li>
+	    	<li  onclick="gotoMSreceive()" style="position: relative">今日网络接单<span class="deliciousFoodOrderNum">0</span></li>
+	    	<li  onclick="gotoData()" >经营数据</li>
+	    </ul>
+	    <div class="exit" onclick="exit()"><i></i></div>
+    </div>
+	
+    <div class="right">
+        <div class="right_top">
+            菜单
+        </div>
+
+        <div class="food_div">
+            <div class="menuType">
+                <p class="leftMove"></p>
+                <div class="menuType_DIV">
+                    <ul id="typeName" class="clear">
+                       <!--  <li class="active">主食</li>
+                         <li>饮品</li>
+                        <li>打包盒</li>
+                        <li>炸鸡汉堡</li>
+                        <li>美味扒饭</li>
+                        <li>粥</li>
+                        <li>肠粉</li>-->
+                    </ul>
+                </div>
+                <p class="rightMove"></p>
+            </div>
+
+
+
+            <div class="foodList_div">
+                <ul class="clear" id='FoodList'>
+                    <!--  <ll class="oneFood">
+                        <p class="foodName">可乐</p>
+                        <p class="stock">库存：<span>100</span></p>
+                        <p>￥ 6</p>
+                    </ll>-->
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="f_upAndDown">
+            <p class="f_up"></p>
+            <p class="f_down"></p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="sellClear_background" id="sellbox" style="display: none">
+    <div class="sellClear">
+        <h2>沽清数量</h2>
+        <p class="input_p"><input type="text" value="5" maxlength="15" id="numval"></p>
+        <div class="sellClear_keyboard clear">
+            <div class="sellClear_left">
+                <span onclick="sellClear(7)">7</span>
+                <span onclick="sellClear(8)">8</span>
+                <span onclick="sellClear(9)">9</span>
+                <span onclick="sellClear(4)">4</span>
+                <span onclick="sellClear(5)">5</span>
+                <span onclick="sellClear(6)">6</span>
+                <span onclick="sellClear(1)">1</span>
+                <span onclick="sellClear(2)">2</span>
+                <span onclick="sellClear(3)">3</span>
+                <span onclick="sellClear()">←</span>
+                <span onclick="sellClear(0)">0</span>
+                <span style="color: #ff7e00" id="noInventory">清空沽清</span>
+            </div>
+            <div class="sellClear_right" >
+                <span onclick="sellboxHide()">返回</span>
+                <span class="sellClear_ok" id="confirm">确定</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- 弹窗 -->
+<div class="backgroundPrompt" style="display: none;">
+	<div class="promptBox">
+		<div class="promptContent">提示内容</div>
+		<div class="promptButton">
+			<p class="cancel" id="PromptCancel">取消</p>
+			<p class="ok" id="PromptOk">确认</p>
+		</div>
+	</div>
+</div>
+<!-- 提示 -->
+<div class="background_onlyOKPrompt" style="display: none;">
+	<div class="onlyOKPrompt">
+		<div class="onlyOKPrompt_content">提示内容</div>
+		<div class="onlyOKPrompt_button">
+			<p>确认</p>
+		</div>
+	</div>
+</div>
+
+
+
+
+
+<script>
+    
+
+    
+    // 限制使用了input 样式的控件只能输入数字
+    $(".sellClear input").onlyNum();
+
+
+    var str = "";
+    function sellClear(num) {
+        if(typeof(num) == "undefined"){
+            str = str.substring(0,str.length - 1);
+        }else {
+            str += num;
+        }
+        if(parseInt(str) > 2999){
+            str = "2999";
+        }
+        $(".sellClear input").val(str);
+    }
+
+
+
+</script>
+</body>
+</html>

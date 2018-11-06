@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>经营数据详情——电脑端</title>
+    <link href="./managementData_detailed.css" type="text/css"  rel="stylesheet">
+    <script type="text/javascript" src="../../common/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../../common/js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="../../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../../common/js/common.js"></script>
+	<script type="text/javascript" src="../../common/js/jquery.timers.js"></script>
+    <!-- 增加浏览器小图标 -->
+	<link rel="icon" href="../../common/images/logo.jpg" type="image/x-icon">
+</head>
+<script type="text/javascript">
+
+	// finish 已完成,doing 进行中,cancel 已取消
+		companyId = getCookie("companyId");
+		token = getCookie("token");
+		
+		$(document).ready(function () {
+			loginCookie();
+			init();
+			showList();
+			 $('body').everyTime('10s','ds1',function (){
+	             //init();
+	        }); 
+	        
+	        
+		});
+		
+		function playSound(soundSrl){
+		   var strAudio = '<audio id="audioPlay" src='+soundSrl+' hidden="true">';
+		   if ( $( "body" ).find( "audio" ).length <= 0 )
+			 $( "body" ).append(strAudio );
+		   var audio = document.getElementById( "audioPlay" );
+		   audio.play();			 
+		}
+		function init(){
+			$.ajax({
+				type : 'POST',
+				url : BASE_URL + LOGIN_ACTION.NEWORDER,
+				data : {
+					companyId : companyId
+				},
+				success : function(data) {
+					$(".deliciousFoodOrderNum").html(data.length);
+					if(data.length>0){
+						var soundSrl="../../common/new.mp3";
+						playSound(soundSrl);
+					}
+				},
+				error : function(error) {
+					console.log(error);
+				}
+			});
+		}
+		
+		function showList(){
+			var type = GetQueryString("type");
+			var startTime = GetQueryString("startTime");
+			var endTime = GetQueryString("endTime");
+			if(type == 'ts'){ //堂食
+				$.ajax({
+					url: BASE_URL + LOGIN_ACTION.GETINLIST,//GETINLIST:'/Dz/companyOrderCount?getInList',  GETLIST
+					type: "POST",
+					data:{
+			        	"companyId": companyId,
+			        	"startTime":startTime,
+			        	"endTime":endTime
+			        },
+					dataType:"json",
+					success:function(data){
+						$("#head").html("堂食-已完成订单");
+						var list = data.list;
+						$(".left_body_list table").html('');
+						var html = ""
+						for (var i = 0; i < list.length; i++){
+							if(i == 0){
+								html = '<tr><td style="width: 6%;">'+ (i+1) +'.</td>' + 
+									'<td style="width: 30%;">'+ list[i].orderNo +'</td>' +
+									'<td style="width: 30%;">'+ list[i].addTime +'</td>' + 
+                            		'<td style="width: 17%;">￥'+ list[i].total +'</td>' +
+                            		'<td style="width: 17%;"><span class="click" id='+ list[i].id +' onclick="tsShow('+ list[i].id +')">查看详情</span></td></tr>';
+                            		tsShow(list[i].id);
+							}else {
+								html = '<tr><td>'+ (i+1) +'.</td>' + 
+									'<td>'+ list[i].orderNo +'</td>' +
+									'<td>'+ list[i].addTime +'</td>' + 
+                            		'<td>￥'+ list[i].total +'</td>' +
+                            		'<td><span id='+ list[i].id +' onclick="tsShow('+ list[i].id +')">查看详情</span></td></tr>';
+							}
+							$(".left_body_list table").append(html);
+						}
+						
+						
+					},
+					error:function(){
+						alert("alert","GETINLIST 错误！！！");
+					}
+				})
+			}else if(type == 'ms'){  //美食
+				$.ajax({
+					url: BASE_URL + LOGIN_ACTION.GETLIST,
+					type: "POST",
+					data:{
+			        	"companyId": companyId,
+			        	"startTime":startTime,
+			        	"endTime":endTime,
+			        	"type":2,
+			        	"status": "finish"
+			        },
+					dataType:"json",
+					success:function(data){
+						$("#head").html("美食-已完成订单");
+						var list = data.list;
+						$(".left_body_list table").html('');
+						var html = ""
+						for (var i = 0; i < list.length; i++){
+							if(i == 0){
+								html = '<tr><td style="width: 6%;">'+ (i+1) +'.</td>' + 
+									'<td style="width: 30%;">'+ list[i].orderNo +'</td>' +
+									'<td style="width: 30%;">'+ list[i].addTime +'</td>' + 
+                            		'<td style="width: 17%;">￥'+ list[i].total +'</td>' +
+                            		'<td style="width: 17%;"><span class="click" id='+ list[i].id +' onclick="msShow('+ list[i].id +')">查看详情</span></td></tr>';
+                            		msShow(list[i].id);
+							}else {
+								html = '<tr><td>'+ (i+1) +'.</td>' + 
+									'<td>'+ list[i].orderNo +'</td>' +
+									'<td>'+ list[i].addTime +'</td>' + 
+                            		'<td>￥'+ list[i].total +'</td>' +
+                            		'<td><span id='+ list[i].id +' onclick="msShow('+ list[i].id +')">查看详情</span></td></tr>';
+							}
+							$(".left_body_list table").append(html);
+						}
+						
+						
+					},
+					error:function(){
+						alert("alert","GETINLIST 错误！！！");
+					}
+				})
+			}else if(type == 'wm'){  //外卖
+				$.ajax({
+					url: BASE_URL + LOGIN_ACTION.GETLIST,
+					type: "POST",
+					data:{
+			        	"companyId": companyId,
+			        	"startTime":startTime,
+			        	"endTime":endTime,
+			        	"type":1,
+			        	"status": "finish"
+			        },
+					dataType:"json",
+					success:function(data){
+						$("#head").html("外卖-已完成订单");
+						var list = data.list;
+						$(".left_body_list table").html('');
+						var html = ""
+						for (var i = 0; i < list.length; i++){
+							if(i == 0){
+								html = '<tr><td style="width: 6%;">'+ (i+1) +'.</td>' + 
+									'<td style="width: 30%;">'+ list[i].orderNo +'</td>' +
+									'<td style="width: 30%;">'+ list[i].addTime +'</td>' + 
+                            		'<td style="width: 17%;">￥'+ list[i].total +'</td>' +
+                            		'<td style="width: 17%;"><span class="click" id='+ list[i].id +' onclick="wmShow('+ list[i].id +')">查看详情</span></td></tr>';
+                            		wmShow(list[i].id);
+							}else {
+								html = '<tr><td>'+ (i+1) +'.</td>' + 
+									'<td>'+ list[i].orderNo +'</td>' +
+									'<td>'+ list[i].addTime +'</td>' + 
+                            		'<td>￥'+ list[i].total +'</td>' +
+                            		'<td><span id='+ list[i].id +' onclick="wmShow('+ list[i].id +')">查看详情</span></td></tr>';
+							}
+							$(".left_body_list table").append(html);
+						}
+						
+						
+					},
+					error:function(){
+						alert("alert","GETINLIST 错误！！！");
+					}
+				})
+			}
+		}
+		
+		function tsShow(id){
+			$("#"+id).addClass('click');
+			$("#"+id).parents("tr").siblings().find("span").removeClass('click');
+			$.ajax({
+				url:BASE_URL + LOGIN_ACTION.GETINORDER,// GETINORDER:'/Dz/companyOrderCount?getInOrder',   getInList
+				type:"post",
+				data:{orderId:id},
+				dataType:"json",
+				success : function (data){
+					var top = '<li>订单号：<span>'+ data.orderNo +'</span></li>' +
+                        '<li>完成时间：<span>'+ data.finishTime +'</span></li>';
+                   	$(".inDetails").html(top);
+                    var list = data.list;
+                    $(".detailsList").html('');
+                    $(".detailsList").append('<tr><td style="width: 35%;">菜品名称</td><td style="width: 25%;">单价</td><td style="width: 20%;">数量</td><td style="width: 20%;">小计</td></tr>');
+                    for(var i = 0; i< list.length; i++){
+                    	$(".detailsList").append('<tr><td>'+ list[i].name +'</td><td>'+ list[i].price +'</td><td>'+ list[i].number +'</td><td>'+ list[i].subtotal +'</td></tr>');
+                    }
+                    $(".detailsList").append('<tr><td>餐位费</td><td>'+ data.fee +'</td><td>'+ data.meals +'</td><td>'+ data.mealFee +'</td></tr>');
+                    var foot = '<li>总计：<span>￥ '+ data.total +'</span></li>' +
+                    	'<li>优惠金额：<span>-￥'+ data.discount +'</span></li>' + 
+                        '<li>实收：<span style="color: #ff4400;font-weight: bold">￥ '+ data.pay +'</span></li>';
+                        
+                    $(".moneyDetails").html(foot);
+				}
+			})
+		}
+		
+		
+		
+		
+		
+		function msShow(id){
+			$("#"+id).addClass('click');
+			$("#"+id).parents("tr").siblings().find("span").removeClass('click');
+			$.ajax({
+				url:BASE_URL + LOGIN_ACTION.GETORDER,
+				type:"post",
+				data:{orderId:id},
+				dataType:"json",
+				success : function (data){
+					var top = '<li>订单号：<span>'+ data.orderNo +'</span></li>' +
+                        '<li>完成时间：<span>'+ data.finishTime +'</span></li>';
+                    $(".inDetails").html(top);
+                    var list = data.list;
+                    $(".detailsList").html('');
+                    var foot = '';
+                    if(data.deposit == 0){
+	                    $(".detailsList").append('<tr><td style="width: 35%;">菜品名称</td><td style="width: 25%;">单价</td><td style="width: 20%;">数量</td><td style="width: 20%;">小计</td></tr>');
+	                    for(var i = 0; i< list.length; i++){
+	                    	$(".detailsList").append('<tr><td>'+ list[i].name +'</td><td>'+ list[i].price +'</td><td>'+ list[i].number +'</td><td>'+ list[i].subtotal +'</td></tr>');
+	                    }
+	                    $(".detailsList").append('<tr><td>餐位费</td><td>'+ data.deposit +'</td><td>'+ data.meals +'</td><td>'+ data.mealFee +'</td></tr>');
+	                    foot += '<li>总计：<span>￥ '+ data.total +'</span></li>' +
+	                    	'<li>优惠金额：<span>-￥'+ data.discount +'</span></li>' + 
+	                        '<li>实收：<span style="color: #ff4400;font-weight: bold">￥ '+ data.pay +'</span></li>';
+	                } else {
+	                	foot += '<li>押金：<span>￥ '+ data.deposit +'</span></li>';
+	                }
+                    
+                    $(".moneyDetails").html(foot);
+				}
+			})
+		}
+		
+		
+		function wmShow(id){
+			$("#"+id).addClass('click');
+			$("#"+id).parents("tr").siblings().find("span").removeClass('click');
+			$.ajax({
+				url:BASE_URL + LOGIN_ACTION.GETORDER,
+				type:"post",
+				data:{orderId:id},
+				dataType:"json",
+				success : function (data){
+					var top = '<li>订单号：<span>'+ data.orderNo +'</span></li>' +
+                        '<li>下单时间：<span>'+ data.addTime +'</span></li>';
+                    $(".inDetails").html(top);
+                    var list = data.list;
+                    $(".detailsList").html('');
+                   
+                    	$(".detailsList").append('<tr><td style="width: 35%;">菜品名称</td><td style="width: 25%;">单价</td><td style="width: 20%;">数量</td><td style="width: 20%;">小计</td></tr>');
+	                    for(var i = 0; i< list.length; i++){
+	                    	$(".detailsList").append('<tr><td>'+ list[i].name +'</td><td>'+ list[i].price +'</td><td>'+ list[i].number +'</td><td>'+ list[i].subtotal +'</td></tr>');
+	                    }
+                    
+                    
+                    var foot = '';
+                    if(data.userAddress != '用户自取'){
+                    	foot += '<li>配送费：<span>￥ '+ data.distributionPrice +'</span></li>';
+                    }
+                    foot += '<li>总计：<span>￥ '+ data.total +'</span></li>' +
+                    	'<li>优惠金额：<span>-￥'+ data.discount +'</span></li>' + 
+                        '<li>实收：<span style="color: #ff4400;font-weight: bold">￥ '+ data.pay +'</span></li>' +
+                        '<li style="color: #ff4400;text-align:center;font-weight:bold">'+ data.userAddress +'</li>';
+                    $(".moneyDetails").html(foot);
+				}
+			})
+		}
+		
+		
+		function onlyOKPrompt(msg, status) { //弹出确认框	刷新当前页面
+			$(".onlyOKPrompt_content").text(msg);
+			$(".background_onlyOKPrompt").show();
+			$(".onlyOKPrompt_button p").click(function() { //确认框的确认事件
+				$(".background_onlyOKPrompt").hide();
+				switch (status) {
+				case '0': //跳转到登录页面
+					window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";
+					break
+				case '1': //当前页面刷新
+					window.location.reload();
+					break
+				case '2': //不做反应
+					break
+				}
+			});
+		}
+	</script>
+<body>
+    <div id="big_div">
+        <div id="left">
+            <div class="left_head">
+                <a href="javascript:history.back(-1)"></a>
+                <p id="head">堂食-已完成的订单</p>
+            </div>
+
+            <div class="left_body">
+                <div class="left_body_title clear" id="body_title">
+                    <span style="width: 6%;">序号</span>
+                    <span style="width: 30%;">订单编号</span>
+                    <span style="width: 30%;">完成时间</span>
+                    <span style="width: 17%;">总计</span>
+                    <span style="width: 17%;">操作</span>
+                </div>
+                <div class="left_body_list" id="body_list">
+                    <table cellspacing="0" cellpadding="0">
+                    	<!-- 
+                        <tr>
+                            <td style="width: 6%;">1.</td>
+                            <td style="width: 30%;">MS120180829165512</td>
+                            <td style="width: 30%;">2018-09-01 11:11:11</td>
+                            <td style="width: 17%;">￥ 500.00</td>
+                            <td style="width: 17%;"><span>查看详情</span></td>
+                        </tr>
+                        <tr>
+                            <td>2.</td>
+                            <td>MS120180829165512</td>
+                            <td>2018-09-01 11:11:11</td>
+                            <td>￥ 500.00</td>
+                            <td><span>查看详情</span></td>
+                        </tr>
+                        <tr>
+                            <td>3.</td>
+                            <td>MS120180829165512</td>
+                            <td>2018-09-01 11:11:11</td>
+                            <td>￥ 500.00</td>
+                            <td><span class="click">查看详情</span></td>
+                        </tr>
+                        <tr>
+                            <td>4.</td>
+                            <td>MS120180829165512</td>
+                            <td>2018-09-01 11:11:11</td>
+                            <td>￥ 1500.00</td>
+                            <td><span>查看详情</span></td>
+                        </tr>
+                        <tr>
+                            <td>5.</td>
+                            <td>MS120180829165512</td>
+                            <td>2018-09-01 11:11:11</td>
+                            <td>￥ 500.00</td>
+                            <td><span>查看详情</span></td>
+                        </tr>
+                         -->
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="right">
+            <div class="right_div">
+                <h2><i></i>订单详情</h2>
+                <div class="right_body">
+                    <ul class="details inDetails">
+                    	<!-- 
+                        <li>订单号：<span>MS120180829165512</span></li>
+                        <li>预订时间：<span>2018-08-09 12:11:11</span></li> -->
+                    </ul>
+                    <table cellspacing="0" cellpadding="0" class="detailsList">
+                    	<!-- 
+                        <tr>
+                            <td>菜品名称</td>
+                            <td>单价</td>
+                            <td>数量</td>
+                            <td>小计</td>
+                        </tr>
+                        <tr>
+                            <td>馒头</td>
+                            <td>￥ 1.00</td>
+                            <td>x 2</td>
+                            <td>￥ 2.00</td>
+                        </tr>
+                        <tr>
+                            <td>黄焖鸡</td>
+                            <td>￥ 1.00</td>
+                            <td>x 2</td>
+                            <td>￥ 2.00</td>
+                        </tr>
+                         -->
+                    </table>
+
+
+                    <ul class="details moneyDetails">
+                    	<!-- 
+                        <li>总计：<span>￥ 6.00</span></li>
+                        <li>优惠金额：<span>-￥ 1.00</span></li>
+                        <li>折扣：<span>9.5 折</span></li>
+                        <li>实收：<span style="color: #ff4400;font-weight: bold">￥ 4.75</span></li> -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 提示 -->
+	<div class="background_onlyOKPrompt" style="display: none;">
+		<div class="onlyOKPrompt">
+			<div class="onlyOKPrompt_content">提示内容</div>
+			<div class="onlyOKPrompt_button">
+				<p>确认</p>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+    var left_height = $("#left").height();
+    var left_head = $(".left_head").outerHeight();
+    var left_body_title = $(".left_body_title").outerHeight();
+    $(".left_body_list").height(left_height - left_head - left_body_title);
+
+    var right_div_h2 =$(".right_div h2").outerHeight();
+    $(".right_body").height(left_height - right_div_h2 - 20);
+</script>
+</html>

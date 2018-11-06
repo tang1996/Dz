@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我的评论</title>
+    <link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+    <link rel="stylesheet" href="./comment.css">
+    <link rel="stylesheet" type="text/css" href="../common/css/tip.css" />
+    <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../common/js/common.js"></script>
+	<script type="text/javascript" src="../common/js/jquery.cookie.js" ></script>
+</head>
+<body>
+
+	<script type="text/javascript">
+		var start = 0;
+	
+		$(function(){
+			show(start);
+			$(window).scroll(function () {	 
+				var bot = 1; 
+				console.log((bot + $(window).scrollTop()) >= ($(document).height() - $(window).height()))
+				if ((bot + $(window).scrollTop()) >= ($(document).height() - $(window).height())) {	
+					start = start + 5; 
+					show(start);
+				}
+			 });
+		})
+		
+		function show(start){
+			$(".loading").css("visibility","visible");
+			$.ajax({
+				url:BASE_URL + LOGIN_ACTION.LUSERVIEW,
+				type:"POST",
+				data:{
+					token: GetQueryString("token"),
+					start : start,
+	          		limit : 5
+	          	},
+				dataType:"JSON",
+				success:function (data){
+					var dList = data.list;
+					if(dList.length == 0){
+						start = start - 5;
+					}
+					var htmlValue = '';
+					var line = '';
+					
+					for ( var i = 0; i < dList.length; i++) {
+						if(dList[i].classfy != 'undefined'){
+							if(dList[i].classfy == '1,2'){
+								line = '<p class="evaluate">订座</p><p class="evaluate">外卖</p>';
+							}else if(dList[i].classfy == '1'){
+								line = '<p class="evaluate">外卖</p>';
+							}else if(dList[i].classfy == '2'){
+								line = '<p class="evaluate">订座</p>';
+							}
+						}
+						
+						htmlValue += '<li class="comment-item"><div class="title"><img src="../common/img/food.png" alt=""><span>' + dList[i].companyName + '</span>'+ line +'<div style="float:right;"><a href="javascript:del('+ dList[i].id +')" style="color:#ccc;font-size:12px">撤回</a></div></div>';
+						htmlValue += '<div class="star-date"><span>评分：</span>';
+
+						if(dList[i].quality >= 1 && dList[i].quality < 2){
+							for(var j = 0 ; j < 1 ; j++){
+								htmlValue += '<img src="../common/img/favourable.png" alt="">';
+							}	
+							
+							htmlValue += ' ' + dList[i].quality + ' 分';
+						}else if(dList[i].quality >= 2 && dList[i].quality <3 ){
+							for(var j = 0 ; j < 2 ; j++){
+								htmlValue += '<img src="../common/img/favourable.png" alt="">';
+							}	
+							
+							htmlValue += ' ' + dList[i].quality + ' 分';
+						}else if(dList[i].quality >= 3 && dList[i].quality < 4){
+							for(var j = 0 ; j < 3 ; j++){
+								htmlValue += '<img src="../common/img/favourable.png" alt="">';
+							}	
+							
+							htmlValue += ' ' + dList[i].quality + ' 分';
+						}else if(dList[i].quality >= 4 && dList[i].quality < 5){
+							for(var j = 0 ; j < 4 ; j++){
+								htmlValue += '<img src="../common/img/favourable.png" alt="">';
+							}	
+							
+							htmlValue += ' ' + dList[i].quality + ' 分';
+						}else if(dList[i].quality >= 5){
+							for(var j = 0 ; j < 5 ; j++){
+								htmlValue += '<img src="../common/img/favourable.png" alt="">';
+							}	
+							
+							htmlValue += ' ' + dList[i].quality + ' 分';
+						}
+									
+						htmlValue += '<span class="date">'+ dList[i].createTime +'</span></div>';
+						htmlValue += '<div class="user-comment">'+ dList[i].content +'</div>';
+						
+						htmlValue += '</div>';
+						if(dList[i].reply != null){
+							htmlValue += '<div class="seller"><span>商家回复：</span>'+ dList[i].reply +'</div>';
+						}
+						
+						htmlValue += '<div class="delivery-instructions"><img src="'+ dList[i].logo +'" alt=""><div class="instructions"><p class="title">'+ dList[i].companyName +'</p>';
+						htmlValue += '<p><span>起送 ¥ '+ dList[i].miniPrice +'</span> | <span>人均 ¥ '+ dList[i].GDP +'</span> | <span>配送费 ¥ '+ dList[i].distributionPrice +'</span></p></div></div></li>';
+					}
+					
+					$(".comment-list").append(htmlValue);
+					$(".loading").css("visibility","hidden");
+				},
+				error:function(){
+					valLink("alert","错误！");
+				}
+			})
+		}
+	</script>
+
+    <ul class="comment-list">
+    </ul>
+     <!-- 底部提示   2018-11-03 @Tyy -->
+    <p style="text-align: center;font-size: 14px;">----没有更多评价了----</p>
+    <div class="loading"></div>
+     <!-- 确认框   2018-11-03 @Tyy  start  -->
+    <div id="tips_bg" style="display : none;">
+	    <div class="tips_bg_div">
+			<div class="tips_div">
+				<div class="tips_content">您真的确定要撤回消息吗？</br>请确认！</div>
+				<p hidden id="tip_result"></p>
+				<div class="tips_button">
+					<button class="cancel" onclick="tip_cancel()">取消</button>
+					<button class="ok" onclick="tip_ok()">确定</button>
+				</div>
+			</div>
+		</div>
+    </div>
+    <script  type="text/javascript">
+    	function del(id) {
+			$("#tips_bg").attr("style", "display : block;");
+			var id = $("#tip_result").val(id);
+        }
+		function tip_ok(){
+			$("#tips_bg").attr("style", "display : none;");
+			var id = $("#tip_result").val();
+			$.ajax({
+				type:'POST',
+				url: BASE_URL + LOGIN_ACTION.EVALUATE_DEL,
+			 	data: {
+           			id:  id
+       			},
+				success:function(data) {
+					$(".comment-list").html('');
+					show(0);
+					valLink('alert',data.message);
+				},
+				error:function(error) {
+					console.log(error);
+				}
+			});
+		}
+		function tip_cancel(){
+			$("#tips_bg").attr("style", "display : none;");
+		}
+	</script>
+	<!-- 确认框    end -->
+</body>
+</html>

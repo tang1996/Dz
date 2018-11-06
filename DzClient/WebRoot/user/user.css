@@ -1,0 +1,120 @@
+body, div, h1, h4, html, li, p, ul {
+	margin: 0;
+	padding: 0
+}
+
+li {
+	list-style: none
+}
+
+input {
+	border: none
+}
+#bigDiv{
+	background: #fff;
+}
+
+.f-left {
+	float: left
+}
+
+.f-right {
+	float: right
+}
+
+body {
+	background-color: rgba(230, 230, 230, .8)
+}
+
+.clearfix {
+	zoom: 1;
+	clear: both
+}
+
+.clearfix::after {
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: " ";
+	clear: both;
+	height: 0
+}
+
+.user-income {
+	position: relative;
+	font-size: 0;
+	color: #999;
+	background-color: #fff
+}
+
+.user-income::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 1px;
+	background: #eee;
+	-webkit-transform: scaleY(.5);
+	transform: scaleY(.5)
+}
+
+.user-income li {
+	width: 49.8%;
+	margin-top: 19px;
+	margin-bottom: 12px;
+	font-size: 14px
+}
+
+.user-income li:first-child {
+	border-right: 1px solid #e6e6e6
+}
+
+.user-income li img {
+	width: 30px;
+	height: 32px;
+	float: left;
+	margin: 3px 8px 3px 20px;
+}
+
+.user-income li p:last-child {
+	color: #666
+}
+
+.tools-list {
+	background-color: #fff
+}
+
+.tools-list li {
+	position: relative;
+	padding: 16px 12px 20px;
+	font-size: 14px;
+	color: #666
+}
+
+.tools-list li a {
+    display: block;
+    overflow: hidden;
+    position: relative;
+    line-height: 25px;
+}
+
+.tools-list li a p {
+    float: left;
+    font-size: 15px;
+    color: #333333;
+}
+
+.tools-list li:not (:last-child )::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 1px;
+	background: #eee;
+	-webkit-transform: scaleY(.5);
+	transform: scaleY(.5)
+}
+
+.refreshText{ position: absolute; width: 100%; line-height: 50px; text-align: center; left: 0; top: 0; color: #999;font-size: 12px;}

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>美食费用</title>
+<link rel="stylesheet" href="./delicious_food.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+<script type="text/javascript" src="../common/js/numberUtils.js"></script>
+
+</head>
+<body>
+<script type="text/javascript">	
+$(document).ready(function(){
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.VIEWQUALITY,
+				 	data: { 
+            			companyId:getCookie('cid')
+        			},
+					success:function(data) {
+						$('#mealFee').val(data.mealFee);
+						$('#GDP').val(data.GDP);
+						$('#miniPriceWM').val(data.miniPriceWM);
+
+						},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+
+
+});
+	
+	function add(){
+			var mealFee=$('#mealFee').val();
+			var GDP=$('#GDP').val();
+			var miniPriceWM=$('#miniPriceWM').val();
+			if(mealFee.length==0){
+				valLink("alert","请填写餐位费!");
+					return false;
+			}
+			if(GDP.length==0){
+				valLink("alert","请输写人均消费!");
+					return false;
+			}
+			if(!isNumber(mealFee)){//2018-11-01 @Tyy
+				valLink("alert","餐位费格式不正确");
+					return false;
+			}
+			if(!isNumber(GDP)){//2018-11-01 @Tyy
+				valLink("alert","人均消费格式不正确");
+					return false;
+			}
+					$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.DELICACYUPDATE,
+				 	data: { 
+            			mealFee:mealFee,
+						GDP:GDP,
+						companyId:getCookie('cid')
+        			},
+					success:function(data) {
+						if(data.success){
+							var url="../cost/cost.html";
+							window.location.href=url;
+							
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+			}	
+			
+		</script>
+		<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="../cost/cost.html"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>美食费用</p>
+		</div>
+	</div>
+    <div class="wrap sort_add">
+        <p>餐位费</p>
+		<input type="text" name="mealFee" id="mealFee" placeholder="请填写餐位费" value="" />
+		<p>人均消费</p>
+		<input type="text" name="GDP" id="GDP" placeholder="请输写人均消费" value="" />
+    </div>
+	<div class="foot_sort">
+		<button type="button" onclick="add();">保存</button>
+	</div>
+</body>
+
+</html>

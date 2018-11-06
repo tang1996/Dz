@@ -1,0 +1,157 @@
+<!DOCTYPE html> 
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		
+		<title>服务员</title>
+
+		<link rel="stylesheet" type="text/css" href="./login.css" />
+		
+		<script type="text/javascript" src="../../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../../common/js/jquery.lazyload.min.js"></script>
+		<script type="text/javascript" src="../../common/js/common.js"></script>
+		<script type="text/javascript" src="../../common/js/baseUrl.js"></script>
+		<!-- 增加浏览器小图标 -->
+<link rel="icon" href="../../common/images/logo.jpg" type="image/x-icon">
+
+		<!--  IE 8 兼容性
+		<script type="text/javascript" src="./js/html5shiv.min.js"></script>
+		<script type="text/javascript" src="./js/selectivizr.min.js"></script>
+		-->
+<script type="text/javascript">
+		
+		var companyId='';
+		var token='';
+	
+		function login() {
+
+		var userName = document.getElementById("userName").value;
+		var password = document.getElementById("password").value;
+		
+		if(userName.length < 0){	//用户名
+			alert("请输入用户名");
+			return	false
+		}
+		
+		if(password.length < 0){
+			alert("密码不能为空");
+			return false
+		}
+
+			$.ajax( {
+				type : 'POST',
+				url : BASE_URL + LOGIN_ACTION.SERVICEUSERLOGIN,
+				data : {
+					userName : userName,
+					password : password
+				},
+				success : function(data) {
+					var success=data.success;
+					var message=data.message;
+					
+					if(success){
+						companyId=data.companyId;
+						token=data.token
+						//调用方法
+						saveInfo();
+						window.location.href=BASE_URL+"/DzClient/serviceUser/index/index.html?companyId="+companyId+"&token="+token;
+						//window.location.href=BASE_URL+"/DzClient/serviceUser/index.html?companyId="+companyId+"&token="+token;
+					}else{
+						alert(message);				
+					}
+				}
+			});
+	}
+	
+	//判断按钮是否被选中
+	saveInfo = function () {
+        try {
+          	var isSave = document.getElementById('remember_password').checked;   //保存按键是否选中
+            if (isSave) {
+            var userName = document.getElementById("userName").value;
+			var password = document.getElementById("password").value;
+            if (userName != "" && password != "") {
+                 	SetCookie(userName, password);
+              	}
+             } else {
+                    SetCookie("", "");
+                }
+            } catch (e) {
+ 				
+            }
+       }
+       
+      function SetCookie(userName, password) {
+            var Then = new Date();
+			if(userName==''){
+				//保存24小时(115200000是32个小时的毫秒值,GMT默认加8个小时)
+				Then.setTime(Then.getTime() + 115200000);
+			}else{
+				//记住密码保存15天
+          	 	Then.setTime(Then.getTime() + 1296000000);
+			}
+           		 document.cookie = "userName=" + userName + "%%" + password + ";expires=" + Then.toGMTString();
+           		 document.cookie = "token=" + token+";expires=" + Then.toGMTString();
+           		 document.cookie = "companyId=" + companyId +";expires=" + Then.toGMTString();
+        }
+ 
+        function GetCookie() {
+            var nmpsd;
+            var nm;
+            var psd;
+            var cookieString = new String(document.cookie);
+            var cookieHeader = "userName=";
+            var beginPosition = cookieString.indexOf(cookieHeader);
+            cookieString = cookieString.substring(beginPosition);
+            var ends = cookieString.indexOf(";");
+            if (ends != -1) {
+                cookieString = cookieString.substring(0, ends);
+            }
+            if (beginPosition > -1) {
+                nmpsd = cookieString.substring(cookieHeader.length);
+                if (nmpsd != "") {
+                    beginPosition = nmpsd.indexOf("%%");
+                    nm = nmpsd.substring(0, beginPosition);
+                    psd = nmpsd.substring(beginPosition + 2);
+                    document.getElementById("userName").value = nm;
+                    document.getElementById("password").value = psd;
+                    if (nm != "" && psd != "") {
+                        document.getElementById('remember_password').checked = true;
+                    }
+                }
+            }
+        }  
+        
+        
+</script>
+	</head>
+	
+
+	<body onLoad="document.getElementById('userName').focus();GetCookie();">
+		<div class="ser ie">
+			<img src="../../common/img/wel.png" alt="">
+			
+			<h3>欢迎进入商家点菜系统</h3>
+
+			<form action="" method="post" id="login">
+				<p class="input_p clear"> 
+					<!--<label>用户名：</label> -->
+					<input type="text" name="userName" placeholder="请输入用户名" id="userName" />
+				</p>
+				<p class="input_p clear">
+					<!--<label>密码：</label>-->
+					<input type="password"  name="password" placeholder="请输入密码" id="password" />
+				</p>
+				<div class="checkbox remember-password-container" id="remember">
+					<label for="remember-me">
+						<input type="checkbox" id="remember_password" />
+						记住密码
+					</label>
+				</div>
+				<input type="button" value="登  录" class="sub" onclick="login()" />
+			</form>
+		</div>
+	</body>
+
+</html>

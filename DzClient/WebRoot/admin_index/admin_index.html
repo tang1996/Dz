@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>我的</title>
+<link rel="stylesheet" href="./admin_index.css">
+<link rel="stylesheet" href="./lc_switch.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/lc_switch.js" ></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+</head>
+
+<body>
+<script type="text/javascript">
+			$(document).ready(function(){ 		
+			$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.DAYCOUNT,
+				 	data: { 
+            			companyId:getCookie('cid')
+        			},
+					success:function(data) {
+							$('#money').append('<h2>'+data.balance+'</h2><p>今日订单收入／元<img src="../common/img/s0.jpg" ></p>');
+							$('#count').append('<h2>'+data.num+'</h2><p>今日订单量／单</p>');
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.APPINFO,
+				 	data: { 
+            			id: getCookie('cid')
+        			},
+					success:function(data) {
+						var html='';
+						var html_1='';
+						var tt='';
+						var logo=data.logo;
+						
+						if(logo!=null){
+							tt='<img src="'+logo+'"  alt="">';
+						}else{
+						tt='<img src="../common/img/defual.png"  alt="">';
+						}
+						html=''+tt+'<p>您好，'+data.name+'</p>';
+							 	$("#logo").append(html+"<p style='float: right;margin-top: -20px;margin-right: 49px;'><a href='javascript:valLink(\"logout\",\"\")'>退出</a></p>");
+								var isBusiness=data.isBusiness;
+								var sta='';
+								if(isBusiness){
+									sta='营业中';
+								}else{
+									sta='休息中';
+								}
+						var tuiding='';
+						var tableHtml='';
+						var shopType=data.shopType;
+						var shiping='';
+						if((shopType=="2") || (shopType=="1,2")){
+						var unsubscribeTime=data.unsubscribeTime;
+						var unhtml="";
+							if(unsubscribeTime!=null){
+								unhtml=unsubscribeTime;
+							}
+							tuiding='<li><a href="../unsubscribe_time/unsubscribe_time.html">'+
+								'<p>餐桌退订时间</p><span >'+unhtml+'</span><img src="../common/img/jt.jpg" ></a></li>';
+							
+							tableHtml='<li>'+
+									  '<a href="../mendian/mendian.html">'+
+					      	          '<img src="../common/img/s1.jpg" >'+
+									  '<p>门店设置</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../goods_management/goods_management.html">'+
+									  '<img src="../common/img/s4.jpg" >'+
+									  '<p>菜品</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../activity_management/activity_management.html">'+
+									  '<img src="../common/img/activity.png" >'+
+									  '<p>活动</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../table_list/table_list.html">'+
+									  '<img src="../common/img/table.png" >'+
+									  '<p>餐桌</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../cost/cost.html">'+
+									  '<img src="../common/img/s10.jpg" >'+
+									  '<p>费用</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../order_setting/order_setting.html">'+
+									  '<img src="../common/img/s2.jpg" >'+
+									  '<p>订单设置</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../member_pj/member_pj.html">'+
+									  '<img src="../common/img/s5.jpg" >'+
+									  '<p>用户评价</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../shop_usermessage/shop_usermessage.html">'+
+									  '<img src="../common/img/f7.png" >'+
+									  '<p>我的客户</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../management/management.html">'+
+									  '<img src="../common/img/s7.jpg" >'+
+									  '<p>经营数据</p>'+
+									  '</a>'+
+									  '</li>'+
+									   '<li>'+
+									  '<a href="../video_setting/video_setting.html">'+
+									  '<img src="../common/img/s8.jpg" >'+
+									  '<p>后厨视频</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../update_password/update_password.html?type=1">'+
+									  '<img src="../common/img/sp1.png" >'+
+									  '<p>修改密码</p>'+
+									  '</a>'+
+									  '</li>';
+									 
+
+								
+						}else{
+							tableHtml='<li>'+
+									  '<a href="../mendian/mendian.html">'+
+					      	          '<img src="../common/img/s1.jpg" >'+
+									  '<p>门店设置</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../goods_management/goods_management.html">'+
+									  '<img src="../common/img/s4.jpg" >'+
+									  '<p>菜品</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../activity_management/activity_management.html">'+
+									  '<img src="../common/img/activity.png" >'+
+									  '<p>活动</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../cost/cost.html">'+
+									  '<img src="../common/img/s10.jpg" >'+
+									  '<p>费用</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../order_setting/order_setting.html">'+
+									  '<img src="../common/img/s2.jpg" >'+
+									  '<p>订单设置</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../member_pj/member_pj.html">'+
+									  '<img src="../common/img/s5.jpg" >'+
+									  '<p>用户评价</p>'+
+									  '</a>'+
+									  '</li>'+
+									   '<li>'+
+									  '<a href="../shop_usermessage/shop_usermessage.html">'+
+									  '<img src="../common/img/f7.png" >'+
+									  '<p>我的客户</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../management/management.html">'+
+									  '<img src="../common/img/s7.jpg" >'+
+									  '<p>经营数据</p>'+
+									  '</a>'+
+									  '</li>'+
+									  '<li>'+
+									  '<a href="../update_password/update_password.html?type=1">'+
+									  '<img src="../common/img/sp1.png" >'+
+									  '<p>修改密码</p>'+
+									  '</a>'+
+									  '</li>';
+							
+						}		
+						
+						
+					    html_1='<li>'+
+							    '<a href="../business_state/business.html?isBusiness='+isBusiness+'">'+
+								'<p>营业状态</p>'+
+								'<span >'+sta+'</span>'+
+								'<img src="../common/img/jt.jpg" >'+
+								'</a>'+
+								'</li>'+tuiding
+							$("#status").append(html_1);
+							$("#a-idx").append(tableHtml);	
+							
+								
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});	
+				
+				
+				
+			
+			 
+	});
+	
+
+		</script>
+	<div class="head">
+		<div class="h-div">
+			<div class="htx" id="logo">
+				
+			</div>
+		
+		</div>
+	</div>
+    <div class="wrap">
+		<div class="idx-head">
+			<div id="money">
+				
+			</div>
+			<div id="count">
+				
+			</div>
+		</div>
+        <ul class="md" id="status">
+			
+			
+		</ul>
+		
+		<ul class="md">
+			<li>
+				<a>
+					<p>常用工具</p>
+				</a>
+			</li>
+			<ul class="a-idx" id="a-idx">
+			
+			
+			</ul>
+		</ul>
+		
+		<ul class="md">
+			<li>
+				<a>
+					<p>动致学院</p>
+				</a>
+			</li>
+			<ul class="a-idx">
+			
+				<li>
+					<a href="../openShop/openShop.html">
+						<img src="../common/img/s9.jpg" >
+						<p>开店须知</p>
+					</a>
+				</li>
+				<!--<li>
+					<a href="#">
+						<img src="../common/img/s10.jpg" >
+						<p>赚钱秘籍</p>
+					</a>
+				</li>-->
+				<li>
+					<!-- <a href="#"> -->
+					<a href="../instructions_admin/instructions_admin.html">
+						<img src="../common/img/s11.jpg" >
+						<p>软件使用</p>
+					</a>
+				</li>
+				
+			</ul>
+		</ul>
+		
+		<ul class="md" >
+								    <li>
+									<a href="../feedBack/feedback.html">
+								    <p>产品意见反馈</p>
+									<img src="../common/img/jt.jpg" >
+									</a>
+									</li>
+									<li>
+									<a href="../contact_us/contact_us.html">
+									<p>联系我们</p>
+									<img src="../common/img/jt.jpg" >
+									</a>
+									</li>
+									<li>
+									<a href="../about_us/about_us.html">
+									<p>关于我们</p>
+									<img src="../common/img/jt.jpg" >
+									</a>
+									</li>
+		</ul>
+    </div>
+			<ul class="foot-ul" style="z-index:9999;">
+		<li>
+			<a href="../dingdan_list/dingdan_list.html">
+				<img src="../common/img/f1.png" >
+				待处理
+			</a>
+		</li>
+		<li >
+			<a href="../dingdan_new/dingdan_new.html">
+				<img src="../common/img/f6.png" >
+				订单管理
+			</a>
+		</li>
+		
+		<li class="active">
+			<a href="javascript:void(0);">
+				<img src="../common/img/f7.png" >
+				我的
+			</a>
+		</li>
+	</ul>
+</body>
+
+</html>

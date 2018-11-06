@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport"
+			content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>南山科技园</title>
+
+		<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+
+		<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/jquery.lazyload.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+
+	</head>
+
+	<body>
+		<script type="text/javascript">
+			
+			$(document).ready(function(){ 
+			
+				var cid = GetQueryString("cid");
+				
+				if(cid != null){
+					$.ajax({
+						type:'POST',
+						url: BASE_URL + LOGIN_ACTION.FINDNAME,
+					 	data: { 
+	            			id: cid
+	        			},
+						success:function(data) {
+							$("#cname").html(data.cname);
+						},error:function(error) {
+							console.log(error);
+						}
+					});
+				}
+					
+		 		$("img").lazyload({ 
+				 	placeholder : "../common/img/defual.png",
+		            threshold : 200
+		        });  
+			
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.COMMPANY_TOP,
+				 	data: { 
+            			location: GetQueryString("lng"),//获取来自手机端传递经纬度
+            			start: '0',
+            			limit: '15',
+            			sort: 'volume'
+        			},
+					success:function(data) {
+						var list = data.list;
+						for(var i = 0;i < list.length;i++){
+							var type = list[i].type;
+							var lineType = '';
+							var html = '';
+							var isBusiness=list[i].isBusiness;
+							switch(type){
+							case '1':
+								lineType = '<p class="lp lp1">'+list[i].mode+'</p>';
+								var miniPrice=list[i].miniPrice;
+								var qisong='';
+								if(miniPrice==0){
+									qisong='免起送费';
+								}else{
+									qisong='起送费:'+miniPrice+"元";
+								}
+								var DistributionPrice=list[i].DistributionPrice;
+								var peisong='';
+								if(DistributionPrice==0){
+									peisong='免配送费';
+								}else{
+								    peisong='配送费:'+DistributionPrice+"元";
+								}
+   								var businessHtml='';
+								var businessHtml_2='';	
+								if(isBusiness==false){
+									businessHtml='<div  style="width:100%;position:relative;height:129px;z-index:555;background-color: #fff;opacity:0.5;">';
+									businessHtml_2='</div><span style="text-align: center;z-index:10000;color:#ccc;left: 40%;position:relative;">本店已打烊</span>';
+								}
+    
+								html = '<li>'+businessHtml+
+										'<a href="javascript:valLink(\'search\','+list[i].id+')">'+
+												'<img class="li-l"  src="../common/img/defual.png" data-original='+list[i].logo+' alt=""  />'+
+												'<div class="li-r">'+
+										'<h3>'+list[i].name+'<p>外卖</p></h3><span class="pr">'+list[i].distance+'</span>'+
+														'<p class="lp lp1">'+list[i].assess+'分 | 月销量:'+list[i].monSales+'</p>'+
+														'<p class="lp lp1">'+qisong+',约'+list[i].time+'送达</p>'+
+														'<p class="lp">'+peisong+'</p>'+
+												'</div>'+
+											'</a>'+businessHtml_2+
+										'</div>';
+										break;
+							case '2':
+								var todayCount=list[i].todayCount;
+							var yuding='';
+							if(todayCount!=0){
+								yuding='<p>今日已有'+list[i].todayCount+'人预订</p>';
+							}
+								lineType = '<p class="lp lp1">'+list[i].assess+'分 | 人均'+list[i].GDP+'元/人</p>'+yuding;
+								
+							    var businessHtml='';
+								var businessHtml_2='';	
+								if(isBusiness==false){
+									businessHtml='<div  style="width:100%;position:relative;height:129px;z-index:555;background-color: #fff;opacity:0.5;">';
+									businessHtml_2='</div><span style="text-align: center;z-index:10000;color:#ccc;left: 40%;position:relative;">本店已打烊</span>';
+								}
+									html = '<li>'+businessHtml+
+											'<a href="javascript:valLink(\'foodDetail\','+list[i].id+')">'+
+												'<img class="li-l"  src="../common/img/defual.png" data-original='+list[i].logo+' alt=""  />'+
+												'<div class="li-r">'+
+													'<h3>'+list[i].name+'<p>订座</p></h3><span class="pr">'+list[i].distance+'</span>'+
+													lineType+
+												'</div>'+
+											'</a>'+businessHtml_2+
+										'</li>';
+										break;
+							case '4':
+								lineType = '<p class="lp lp1">最低消费:'+list[i].miniConsume+'</p>';break;
+							case '3':
+								lineType = '<p class="lp lp1">最低消费:'+list[i].miniConsume+'</p>';
+								
+								html = '<li>'+
+											'<a href="javascript:valLink(\'search\','+list[i].id+')">'+
+												'<img class="li-l"  src="../common/img/defual.png" data-original='+list[i].logo+' alt=""  />'+
+												'<div class="li-r">'+
+													'<h3>'+list[i].name+'<p>酒店</p></h3><span class="pr">'+list[i].distance+'</span>'+
+														'<p class="lp lp1">'+list[i].assess+'分 | 1514人评价</p>'+
+												'</div>'+
+											'</a>'+
+										'</li>';
+								break;
+							case '1,2':
+								var miniPrice=list[i].miniPrice;
+								var qisong='';
+								if(miniPrice==0){
+									qisong='免起送费';
+								}else{
+									qisong='起送费:'+miniPrice+"元";
+								}
+								var DistributionPrice=list[i].DistributionPrice;
+								var peisong='';
+								if(DistributionPrice==0){
+									peisong='免配送费';
+								}else{
+								    peisong='配送费:'+DistributionPrice+"元";
+								}
+							var todayCount=list[i].todayCount;
+							var yuding='';
+							if(todayCount!=0){
+								yuding='<p style="margin-top:10px;">今日已有'+list[i].todayCount+'人预订</p>';
+							}
+								lineType = '<p class="lp lp1">'+list[i].assess+'分 |人均 '+list[i].GDP+'元/人</p>'+
+											'<p class="lp lp1">'+qisong+',约'+list[i].time+'送达</p>'+
+											'<p class="lp">'+peisong+'</p>'+yuding;
+							var businessHtml='';
+							var businessHtml_2='';	
+							if(isBusiness==false){
+								businessHtml='<div  style="width:100%;position:relative;height:129px;z-index:555;background-color: #fff;opacity:0.5;">';
+								businessHtml_2='</div><span style="text-align: center;z-index:10000;color:#ccc;left: 40%;position:relative;">本店已打烊</span>';
+							}
+										html = '<li>'+businessHtml+
+											'<a href="javascript:valLink(\'foodDetail\','+list[i].id+')">'+
+												'<img class="li-l"  src="../common/img/defual.png" data-original='+list[i].logo+' alt=""  />'+
+												'<div class="li-r">'+
+													'<h3>'+list[i].name+'<p>订座</p><p>外卖</p></h3><span class="pr">'+list[i].distance+'</span>'+
+													lineType+
+												'</div>'+
+											'</a>'+businessHtml_2+
+										'</li>';
+										break;
+							default :
+								lineType = '<p class="lp lp1"></p>';break;
+							}
+							
+						$("#mlist").append(html);
+							
+						}
+						
+						 $("img").lazyload({ 
+					 		 placeholder : "../common/img/defual.png",
+			                 effect: "fadeIn"
+			           });  
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+				
+		});
+		$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.ADWAREINDEX,
+					success:function(data) {
+						var list = data.list;
+						for(var i = 0;i<list.length;i++){
+							var seat = '';
+							var br = '</p>';
+							var style ='';
+							if(list[i].seat === 'main'){
+								seat = '<div style="height:250px;width: 34%;float: left;border-right: solid #f0f0f0 1px;" onclick="javascript:valLink(\'activity\',\''+list[i].url+'\')">';
+								br = '</p></br>';
+								style = 'width="75%" style="margin-left: 15px;">';
+							}else if(list[i].seat === 'top_left'){
+								seat = '<div style="height:125px;width:33%;float: left;border-bottom: solid #f0f0f0 1px;border-right: solid #f0f0f0 1px;" onclick="javascript:valLink(\'redPack\',\'zhuobei\')">';
+								style = 'width="50%" style="margin-right: 15px;float: right;">';
+							}else if(list[i].seat === 'top_right'){
+								seat = '<div style="height:125px;width:30.5%;float: left;border-bottom: solid #f0f0f0 1px;" onclick="javascript:valLink(\'activity\',\''+list[i].url+'\')">';
+								style = 'width="50%" style="margin-top: 10px;float: right;">';
+							}else if(list[i].seat === 'down_left'){
+								seat = '<div style="height:125px;width:32.5%;float: right" onclick="javascript:valLink(\'activity\',\''+list[i].url+'\')">';
+								style = 'width="45%" style="margin-right: 15px;margin-top: 12px;float: right;">';
+							}else if(list[i].seat === 'down_right'){
+								seat = '<div style="height:125px;width:32.5%;float: right;border-right: solid #f0f0f0 1px;" onclick="javascript:valLink(\'activity\',\''+list[i].url+'\')">';
+								style = 'width="50%" style="margin-top: 10px;margin-right:15px;float: right;">';
+							}
+							
+							var html=seat+
+					'<p style="padding-top: 6px;text-align: left;margin-left: 14px;">'+list[i].name+'</p>'+
+					'<p style="color:#a4a4a4;padding-top: 6px;text-align: left;margin-left: 14px;">'+list[i].depict+br+
+					'<img src="../common/img/defual.png"'+
+								'data-original="'+list[i].img+'" '+
+								style+
+					'</div>';
+					$("#adware").append(html);
+						}
+						
+						 $("img").lazyload({ 
+					 		 placeholder : "../common/img/defual.png",
+			                 effect: "fadeIn"
+			           });  
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+				
+				// 打开遮罩
+				
+				function init(){
+					var cid = GetQueryString("cid");
+					if(cid != null){
+						valLink('search',cid);	
+					}
+				}
+				
+				function getOrder(type){
+					var location = GetQueryString("lng");
+					
+					window.location.href = "../otherSearch/newOtherSearch.html?lng=" + location + "&type=" + type;
+				}
+		</script>
+
+		<div style="background: #FF7E00;height:81px">
+			<img alt="" src="../common/images/main_banner.png" style="width:100%">
+		</div>
+		<div class="wrap">
+			<div class="mtop">
+				<ul>
+					<li>
+						<a href="javascript:init()"><img class="icon1" src="../common/img/defual.png"
+								data-original="../common/images/icon1.png" alt="" /><span id="cname"></span></a>
+					</li>
+					<li>
+						<a href="javascript:link('food')"><img class="icon2" src="../common/img/defual.png"
+								data-original="../common/images/icon2.png" alt="" />美食</a>
+					</li>
+					<li>
+						<a href="javascript:link('other')"><img class="icon3" src="../common/img/defual.png"
+								data-original="../common/images/icon3.png" alt="" />KTV</a>
+					</li>
+					<li>
+						<a href="javascript:link('takeOut')"><img class="icon4" src="../common/img/defual.png"
+								data-original="../common/images/icon4.png" alt="" />外卖</a>
+					</li>
+					<li>
+						<a href="javascript:getOrder('1')"><img class="icon5" src="../common/img/defual.png"
+								data-original="../common/images/icon5.png" alt="" />西餐</a>
+					</li>
+					<li>
+						<a href="javascript:getOrder('2')"><img class="icon6" src="../common/img/defual.png"
+								data-original="../common/images/icon6.png" alt="" />火锅</a>
+					</li>
+					<li>
+						<a href="javascript:link('other')"><img class="icon7" src="../common/img/defual.png"
+								data-original="../common/images/icon7.png" alt="" />住宿</a>
+					</li>
+					<li>
+						<a href="tel:4008333520"><img class="icon8" src="../common/img/defual.png"
+								data-original="../common/images/icon8.png" alt="" />客服</a>
+					</li>
+				</ul>
+			</div>
+			<div style="background: #f0f0f0;height:8px"></div>
+			<div class="main">
+			<div style="border: solid #eaeaea 1px;width:100%;height:251px" id="adware">
+				
+			</div>
+				<div style="background: #f5f5f5;height:8px"></div>
+
+				<h2 class="mh2"><i class="mx mx1"></i>为您订制<i class="mx mx2"></i></h2>
+
+				<ul class="mlist" id="mlist">
+				</ul>
+			</div>
+		</div>
+	</body>
+
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>提交订单</title>
+		<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+		<link rel="stylesheet" type="text/css" href="./check.css" />
+		<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+		<link rel="stylesheet" type="text/css" href="../common/css/mobileSelect.css">
+		<script src="../common/js/mobileSelect.min.js" type="text/javascript"></script>
+		<style type="text/css">
+			.footer{display:block;position:fixed;height:50px;filter:alpha(opacity:90); opacity:0.9;width:100%;z-index:3;bottom:0px;color:#f03c03;background:#FFF;line-height:35px;font-size:15px;border-top:1px solid #e2e2e2;}
+			.footer .left{float:left;margin:5px 10px;}
+			.footer .right{float:right; }
+			.footer .right .disable{background:#818181;font-size:16px}
+			.footer .xhlbtn{background:#ff7e00;display:block;text-align:center;line-height:50px;padding:0 15px;color:#fff;}
+			.shop{position: relative; top: -19px;height: 50px;left: 16px;}	
+			.pay{ position: relative; top: -58px;left: 77px;color: #fff;}	
+			.u-flyer {display: block;width: 50px;height: 50px;border-radius: 50px;position: fixed;z-index: 9999;}
+		</style>
+		<script type="text/javascript">
+		
+			Date.prototype.pattern=function(fmt) {         
+			    var o = {         
+			    "M+" : this.getMonth()+1, //月份         
+			    "d+" : this.getDate(), //日         
+			    "h+" : this.getHours()%24 == 0 ? 24 : this.getHours()%24, //小时         
+			    "H+" : this.getHours(), //小时         
+			    "m+" : this.getMinutes(), //分         
+			    "s+" : this.getSeconds(), //秒         
+			    "q+" : Math.floor((this.getMonth()+3)/3), //季度         
+			    "S" : this.getMilliseconds() //毫秒         
+			    };         
+			    var week = {         
+			    "0" : "/u65e5",         
+			    "1" : "/u4e00",         
+			    "2" : "/u4e8c",         
+			    "3" : "/u4e09",         
+			    "4" : "/u56db",         
+			    "5" : "/u4e94",         
+			    "6" : "/u516d"        
+			    };         
+			    if(/(y+)/.test(fmt)){         
+			        fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));         
+			    }         
+			    if(/(E+)/.test(fmt)){         
+			        fmt=fmt.replace(RegExp.$1, ((RegExp.$1.length>1) ? (RegExp.$1.length>2 ? "/u661f/u671f" : "/u5468") : "")+week[this.getDay()+""]);         
+			    }         
+			    for(var k in o){         
+			        if(new RegExp("("+ k +")").test(fmt)){         
+			            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));         
+			        }         
+			    }         
+			    return fmt;         
+			}    
+			
+			var number;
+			$(document).ready(function() {
+							cid = GetQueryString("cid");
+							var order='';
+							var timeArr = new Array();　
+							var timeArr;
+						
+							var now = new Date();
+							var time = now.getTime() + 1000*60*50;
+							
+							timeArr.push("预计50分钟");
+							timeArr.push(new Date(time).pattern("hh:mm"));
+							
+							var today = new Date(time).pattern("yyyy-MM-dd");
+							
+							$("#trigger2").html(today + " " +  "预计50分钟");
+						
+							var weekdayArr=[today];
+							
+							var toHours = new Date(time).pattern("hh");
+							
+							var deleyToHours = (parseInt(toHours) + 1) - 12;
+			
+							for(var i = deleyToHours; i<10; i++){
+								timeArr.push((i+12) + " :00");
+								
+								if(i != 9 ){
+									timeArr.push((i+12) + " :30");
+								}
+							}
+						
+							var mobileSelect1 = new MobileSelect({
+							    trigger: '#trigger1', 
+							    title: '餐具选择',  
+							    wheels: [
+							         {data:['1人餐具','2人餐具','3人餐具','4人餐具','5人餐具','6人餐具','7人餐具','8人餐具','9人餐具','10人餐具','10人以上餐具']}
+							    ],
+							    position:[2] //初始化定位
+							});
+							
+							var mobileSelect2 = new MobileSelect({
+							    trigger: '#trigger2',
+							    title: '时间选择',
+							    wheels: [
+						                {data: weekdayArr},
+						                {data: timeArr}
+							    ],
+							    position:[0, 0],
+							    transitionEnd:function(indexArr, data){
+							        console.log(data);
+							    },
+							    callback:function(indexArr, data){
+							        console.log(data);
+							    }
+							});
+							
+							order = GetQueryString("orderId");
+	
+							$.ajax( {
+								type : 'POST',
+								url : BASE_URL + LOGIN_ACTION.USER_VIEW,
+								data : {
+									token: GetQueryString("token"),
+									orderId: GetQueryString("orderId")
+								},
+								success:function(data) {
+									$("#companylogo").attr("src",data.logo);
+									$("#companyname").html(data.companyName);
+									
+									var goodslist = data.list;
+									var totalCount=parseFloat("0");
+									var pay=parseFloat(data.pay);
+									for(var i = 0;i < goodslist.length; i++){
+									
+										var price = goodslist[i].price;
+										var svg = goodslist[i].svg_price;	
+										var isSvg = '';
+										
+										if(svg != null && svg.length > 0){
+											isSvg = isSvg +  '<p>'+
+														'<span style="color:#CCC">原价:¥'+ goodslist[i].price +'</span>'+
+													'</p>';
+											price = svg;
+										}
+										
+										totalCount = parseFloat(totalCount) + parseFloat(price * goodslist[i].number);
+										$("#cart-list").append(
+											'<li class="cart-list-item clearfix">'+
+												'<img src="'+goodslist[i].logo+'" alt="">'+
+												'<div class="item-info">'+
+													'<p class="title">'+
+														goodslist[i].name+
+														'<span>¥'+price+'</span>'+
+													'</p>'+
+													isSvg +
+													'<p>'+
+														'<span> x' + goodslist[i].number + '</span>'+
+													'</p>'+
+												'</div>'+
+											'</li>'
+										);
+									}
+									
+									$("#cart-list").append(
+										'<li class="cart-list-item clearfix">'+
+											'<div class="item-info">'+
+												'<p class="title">包装费<span>¥'+data.boxPrice+'</span>'+
+												'</p>'+
+											'</div>'+
+										'</li>'
+									);
+									
+									totalCount = parseFloat(totalCount) + parseFloat(data.boxPrice);
+									
+									$("#total-money").html("¥"+totalCount.toFixed(2));
+									$("#payMoney").html("¥"+totalCount.toFixed(2));
+									money = totalCount.toFixed(2);
+									
+									
+										//优惠活动
+						   				$.ajax({
+											type:'POST',
+											url: BASE_URL + LOGIN_ACTION.GETCOMPANYACTIVITYW,
+										 	data: { 
+						            			token:GetQueryString("token"),
+												orderId:order,
+												cid:cid
+						        			},
+											success:function(data) {
+												var totalCount=data.totalCount;
+													number=totalCount;
+												if(totalCount>0){
+													var list=data.list;
+												   $('#huodong').html('');
+													for(var i = 0; i < list.length; i++){
+															var html_2='';
+															switch(list[i].aid){
+															  	  case 1:	
+																		html_2='<li class="cart-list-item clearfix">'+
+																      '<div class="item-info"><label style="float:left;">'+
+														'<input type="radio" class="activity" name="activit"  value="'+list[i].id+'" onclick="check('+list[i].numb+',1);"></label>'+
+																	   '<p class="title" style="height:20px"><span class="title_s"><i>减</i>'+list[i].name+'</span><span class="jianMoney">-¥'+list[i].numb+'</span></p>'+
+																	   '</div>'+
+																	   '</li>';
+						 
+																	     break;
+																case 2:	
+																		html_2='<li class="cart-list-item clearfix">'+
+																      '<div class="item-info"><label style="float:left;">'+
+																'<input type="radio" class="activity" name="activit"  value="'+list[i].id+'" onclick="check('+list[i].numb+',2);"></label>'+
+																	   '<p class="title" style="height:20px"><span class="title_s_2"><i>首</i>'+list[i].name+'</span><span class="jianMoney">-¥'+list[i].numb+'</span></p>'+
+																	   '</div>'+
+																	   '</li>';
+																	  
+																	     break;
+																case 3:	
+																		html_2='<li class="cart-list-item clearfix">'+
+																      '<div class="item-info"><label style="float:left;">'+
+															'<input type="radio" class="activity" name="activit"  value="'+list[i].id+'" onclick="check('+list[i].numb+',3);"></label>'+
+																	   '<p class="title" style="height:20px"><span class="title_s_3"><i>折</i>'+list[i].name+'</span><span class="jianMoney">'+list[i].numb+'</span></p>'+
+																	   '</div>'+
+																	   '</li>';
+																	  
+																	     break;
+																case 4:	
+																		html_2='<li class="cart-list-item clearfix">'+
+																      '<div class="item-info"><label style="float:left;">'+
+															'<input type="radio" class="activity" name="activit"  value="'+list[i].id+'" onclick="check('+list[i].numb+',4);"></label>'+
+																	   '<p class="title" style="height:20px"><span class="title_s_4"><i>卷</i>'+list[i].name+'</span><span class="jianMoney">-¥'+list[i].numb+'</span></p>'+
+																	   '</div>'+
+																	   '</li>';
+																	  
+																	     break;
+															}
+															 $('#huodong').append(html_2);
+													}
+													
+												}
+											},
+											error:function(error) {
+												console.log(error);
+											}
+										});
+								},
+								error:function(error) {
+									console.log(error);
+								}
+							});
+							
+							
+							$("#btnselect").click(function(){
+									if($("#trigger1").html() == '未选择'){
+										valLink("alert","请选择餐具.");
+										return;
+									}
+									
+									if($("#trigger2").html() == '选择送达时间'){
+										valLink("alert","请选择配送时间.");
+										return;
+									}
+									
+									if(number>0){
+										  var activit= $('input:radio[name="activit"]:checked').val();
+								            if(activit==null){
+								              valLink("alert","请选择优惠活动!");  
+								                return false;
+								            }
+									}
+									
+					   				 $.ajax({
+										type:'POST',
+										url: BASE_URL + LOGIN_ACTION.ORDERPAY,
+									 	data: {
+					            			token: GetQueryString("token"),
+											orderId: order,
+					            			remarks: $('#beizhu').val(),
+					            			quantity: $("#trigger1").html(),
+					            			addressId : 'self',
+					            			shoppingTime: $("#trigger2").html(),
+			            					activit:activit
+					        			},
+										success:function(data) {
+											valLink('taskOutpay',order);
+										},
+										error:function(error) {
+											console.log(error);
+										}
+									});
+			   				})
+			});
+			
+			var money;
+			function check(total,n){
+	
+				switch(n){
+					case 1:
+							var jing=parseFloat(total);
+							var dayMoney=(money-jing).toFixed(2);
+							$('#payMoney').html('¥'+dayMoney);
+								break;
+					case 2:
+							var jing=parseFloat(total);
+							var dayMoney=(money-jing).toFixed(2);
+							$('#payMoney').html('¥'+dayMoney);
+					
+								break;
+					case 3:
+							var jing=parseFloat(total/10).toFixed(2);
+							var dayMoney=(money*jing).toFixed(2);
+							$('#payMoney').html('¥'+dayMoney);
+								break;
+					case 4:
+							var jing=parseFloat(total);
+							var dayMoney=(money-jing).toFixed(2);
+							$('#payMoney').html('¥'+dayMoney);
+								break;
+				
+				}
+			
+			}
+		</script>
+	</head>
+	<body>
+		<div class="cart-info">
+			<div class="title">
+				<img src="../common/img/shop.png" id="companylogo" alt="">
+				<span id="companyname"></span>
+			</div>
+			<ul class="cart-list" id="cart-list">
+			</ul>
+			<ul class="cart-list" id="huodong"></ul>
+			<p class="total-money">
+				原价：
+				<span id="total-money">¥0</span>
+			</p>
+		</div>
+		<div class="remark-info">
+			<p class="pay-way">
+				支付方式
+				<span>在线支付</span>
+			</p>
+			<div class="comments">
+				<h3>
+					备注
+				</h3>
+				<p>
+				<textarea id="beizhu" rows="5" cols="41" placeholder="口味、偏好等要求..." style="overflow:auto;background-attachment:fixed;background-repeat:no-repeat;border-style:solid;border-color:#FFFFFF"></textarea>
+				</p>
+			</div>
+			<div class="tableware">
+				<div>餐具数量</div><div id="trigger1" style="cursor: pointer;float: right;margin-top: -19px;">1人餐具</div>
+			</div>
+		</div>
+		
+		<div class="footer">  
+			<div class="left" id="left">
+					<span style="color:#333;position: relative;top: -3px;">合计:&nbsp;&nbsp;</span><span id="payMoney" style="color:#FF7E00;font-size:20pt">¥0</span>
+			</div>  
+			<div class="right" id="jiesuan">  
+				<a id="btnselect" class="xhlbtn">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;提交&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>  
+			</div>   
+		</div>
+	</body>
+</html>

@@ -1,0 +1,65 @@
+*{
+  margin: 0;
+  padding: 0;
+}
+#innerFrame{
+
+}
+h1{
+     font-size: 18px;
+     margin:25px 0 0 15px;
+     color:#FF7E00;
+}
+.dataDiv{
+
+}
+.img_div{
+    text-align: center;
+   float: left;
+    margin: 70px 15px 0 20px;
+}
+.p_img img{
+    width: 40px;
+    height: 43px;
+}
+.p_zi{
+    font-size: 13px;
+    line-height: 20px;
+    color:#666;
+}
+
+.head{
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	background: #ff7e00;
+	z-index: 9999;
+}
+.head .jt{
+	width: 10px;
+	height: 16px;
+}
+.head .h-div {
+	position: relative;
+	display: block;
+	padding: 12px 0;
+	overflow: hidden;
+}
+
+.head .h-div p{
+display: block;
+	overflow: hidden;
+	text-align: center;
+	font-size: 17px;
+	color: #fff;
+}
+.head .h-div a{
+	position: absolute;
+	top: 13px;
+	color: #fff;
+	font-size: 15px;
+}
+.head .h-div  .h-l{
+	left: 15px;
+}

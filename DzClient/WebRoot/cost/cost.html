@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>费用</title>
+<link rel="stylesheet" href="./cost.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+
+</head>
+
+<body>
+
+	<script type="text/javascript">
+			$(document).ready(function(){ 
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.VIEWQUALITY,
+				 	data: { 
+            			companyId:getCookie('cid')
+        			},
+					success:function(data) {
+						var type=data.type;
+						var html='';
+						if(type=='1'){//外卖
+								var html_1='';
+							html_1='<p style="text-align:center;padding-top:20px;color:#FF7E00;">外卖相关费用</p><li>'+
+									'<a href="../take-out_food/take-out_food.html">'+
+										'<p>起送价格</p>'+
+										 '<span>'+data.miniPriceMS+'</span>'+
+										'<img src="../common/img/jt.jpg" >'+
+									'</a>'+
+								'</li>'+
+								'<li>'+
+									'<a href="../take-out_food/take-out_food.html">'+
+										'<p>配送费</p>'+
+										'<span>'+data.distributionPrice+'</span>'+
+										'<img src="../common/img/jt.jpg" >'+
+									'</a>'+
+								'</li>';								
+									 $("#updateMessge").append(html_1);
+						 }else if(type=='2'){
+								html='<p style="text-align:center;padding-top:20px;color:#FF7E00;">美食相关费用</p><li>'+
+									'<a href="../delicious_food/delicious_food.html">'+
+										'<p>餐位费</p>'+
+										 '<span>'+data.mealFee+'</span>'+
+										'<img src="../common/img/jt.jpg" >'+
+									'</a>'+
+								'</li>'+
+								'<li>'+
+									'<a href="../delicious_food/delicious_food.html">'+
+										'<p>人均消费</p>'+
+										'<span>'+data.GDP+'</span>'+
+										'<img src="../common/img/jt.jpg" >'+
+									'</a>'+
+								'</li>';
+								
+									 $("#fee").append(html);
+
+						 }else if(type=="1,2"){
+										html='<p style="text-align:center;padding-top:20px;color:#FF7E00;">美食相关费用</p><li>'+
+									'<a href="../delicious_food/delicious_food.html">'+
+										'<p>餐位费</p>'+
+										 '<span>'+data.mealFee+'</span>'+
+										'<img src="../common/img/jt.jpg" >'+
+									'</a>'+
+								'</li>'+
+								'<li>'+
+									'<a href="../delicious_food/delicious_food.html">'+
+										'<p>人均消费</p>'+
+										'<span>'+data.GDP+'</span>'+
+										'<img src="../common/img/jt.jpg" >'+
+									'</a>'+
+								'</li>';
+								
+									 $("#fee").append(html);
+
+									 var html_1='';
+							html_1='<p style="text-align:center;padding-top:20px;color:#FF7E00;">外卖相关费用</p><li>'+
+									'<a href="../take-out_food/take-out_food.html">'+
+										'<p>起送价格</p>'+
+										 '<span>'+data.miniPriceMS+'</span>'+
+										'<img src="../common/img/jt.jpg" >'+
+									'</a>'+
+								'</li>'+
+								'<li>'+
+									'<a href="../take-out_food/take-out_food.html">'+
+										'<p>配送费</p>'+
+										'<span>'+data.distributionPrice+'</span>'+
+										'<img src="../common/img/jt.jpg" >'+
+									'</a>'+
+								'</li>';								
+									 $("#updateMessge").append(html_1);
+
+							 }
+						
+					
+						
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+		});
+		
+		</script>
+		<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="../admin_index/admin_index.html"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>费用</p>
+		</div>
+	</div>
+    <div class="wrap">
+	   <ul class="md" id="fee">
+			
+		</ul>
+		<ul class="md" id="updateMessge">
+			
+		</ul>
+
+	
+    </div>
+</body>
+
+</html>

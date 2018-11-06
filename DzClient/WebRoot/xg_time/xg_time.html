@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>营业时间</title>
+ <link rel="stylesheet" type="text/css" href="../common/css/time.css" />
+<link rel="stylesheet" href="./xg_time.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+<script src="../common/js/time.js" type="text/javascript" charset="utf-8"></script>
+
+</head>
+
+<body>
+<script type="text/javascript">
+	
+	function add(){		
+			var time1=$('#time1').val();
+			var time2=$('#time2').val();
+
+			if(time1.length==0){
+				valLink("alert","请输入开始营业时间!");
+				return false;
+			}
+			if(time2.length==0){
+				valLink("alert","请输入结束营业时间!");
+				return false;
+			}
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.COMPANYUPDATE,
+				 	data: { 
+            			id:getCookie('cid'),
+            			businessTimeStart:time1,
+						businessTimeEnd:time2
+        			},
+					success:function(data) {
+						if(data.success==true){
+							var url="../mendian/mendian.html";
+							window.location.href=url;
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+	}	
+	
+	
+	$(document).ready(function(){ 
+		//2018-10-14      苹果适配    时间选择器    start
+	var windowHeight = $(window).height()
+	$("body").height(windowHeight);
+	//end
+			$.ajax({
+				type:'POST',
+				url: BASE_URL + LOGIN_ACTION.GET_XG_TIME,
+			 	data: { 
+           			cid:getCookie('cid')
+       			},
+				success:function(data) {
+					if(data.success){
+						$("#time1").val(data.start);
+						$("#time2").val(data.end);
+					}
+				},
+				error:function(error) {
+					console.log(error);
+				}
+			});
+
+	});
+		
+		
+function cancel(){
+	var url="../mendian/mendian.html";
+	window.location.href=url;
+}
+		</script>
+		
+		<div id="big_div">
+			<div class="head">
+		        <div class="h-div">
+		            <a class="h-l" href="../mendian/mendian.html">
+		                <img class="jt" src="../common/img/iconjt.png" alt="">
+		            </a>
+		            <p>营业时间</p>
+		        </div>
+		    </div>
+		    <div class="wrap sort_add">
+		        <p>开始营业时间</p>
+		        <input id="time1" type="text" readonly="" name="input_date" placeholder="开始时间" data-lcalendar="2010-01-11,2019-12-31" />
+		        <p>结束营业时间</p>
+		        <input id="time2" type="text" readonly="" name="input_date" placeholder="结束时间" data-lcalendar="2010-01-11,2019-12-31" />
+		
+		    </div>
+		    <div class="foot_xg">
+		      <button type="button" onclick="cancel();">取消</button>
+				<button type="button" onclick="add();">保存</button>
+		    </div>
+		</div>
+    
+
+    <script>
+        var calendardatetime1 = new lCalendar();
+        calendardatetime1.init({
+            'trigger': '#time1',
+            'type': 'time'
+        });
+		var calendardatetime2 = new lCalendar();
+		calendardatetime2.init({
+			'trigger': '#time2',
+			'type': 'time'
+		});
+    </script>
+</body>
+
+</html>

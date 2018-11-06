@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>编辑菜品分类</title>
+<link rel="stylesheet" href="./sort_edit.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+<body>
+<script type="text/javascript">		
+			$(document).ready(function(){ 
+				var cid=GetQueryString("cid");
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.IFICATIONFIND,
+				 	data: { 
+            			id: cid
+        			},
+					success:function(data) {
+						$('#classification').val(data.name);
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+		});
+
+		function edit(){
+			var cid=GetQueryString("cid");
+			var classification=$('#classification').val();
+			if(classification.length==0){
+				valLink("alert","请输入菜品分类名称!");
+					return false;
+			}
+					$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.IFICATIONUPDATE,
+				 	data: { 
+            			name: classification,
+						details:'',
+						isView:1,
+						id:cid,
+						keyWord:'',
+						unit:''
+        			},
+					success:function(data) {
+						if(data.success){
+							var url="../sort/sort.html";
+							window.location.href=url;
+							
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+
+
+			}
+		
+		</script>
+		<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="../sort/sort.html"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>编辑菜品分类</p>
+		</div>
+	</div>
+    <div class="wrap sort_add">
+        <p><font style="color:red;">*</font>&nbsp;菜品分类名称</p>
+		<input type="text" name="classification" id="classification" placeholder="请输入菜品分类名称"  />
+    </div>
+	<div class="foot_sort">
+		<button type="button" onclick="edit();">保存</button>
+	</div>
+</body>
+
+</html>

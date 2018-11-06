@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>提交订单</title>
+    <link rel="stylesheet" href="./food_reservation.css">
+	  <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../common/js/common.js"></script>
+	<script type="text/javascript" src="../common/js/jquery.lazyload.min.js" ></script>
+</head>
+<body>
+<script type="text/javascript">
+var number;
+var money;
+$(document).ready(function(){ 
+				$("img").lazyload({ 
+					placeholder : "../common/img/defual.png",
+					threshold : 200
+				});  
+				
+				var orderId=GetQueryString("orderId");
+				var cid=GetQueryString("cid");
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.NUSERVIEWMS,
+				 	data: { 
+            			token:GetQueryString("token"),
+						orderId:orderId
+        			},
+					success:function(data) {
+							$('#phone').html(data.phone);
+							$('#time').html(data.createTime);
+							var seat=data.seat;
+							money=parseFloat(data.pay);
+							if(seat=="dt"){
+								$('#table').html("大厅"+data.tableNo+"号桌");
+							}else if(seat=="bx"){
+								$('#table').html("包厢"+data.reserveName+data.tableNo+"号桌");
+							}
+							$('#company').html('<img src="'+data.companyLogo+'" alt=""><span>'+data.companyName+'</span>');
+							var list=data.list;
+							var html='';
+							for(var i = 0; i < list.length; i++){
+								html=html+'<li class="cart-list-item clearfix">'+
+									      '<div class="item-info">'+
+										  '<p class="title"><span class="title_s">'+list[i].name+'</span><span class="danJia">¥'+list[i].price+'</span><span>x<em>'+list[i].number+'</em></span><span class="money">¥'+list[i].subtotal+'</span></p>'+
+										   '</div>'+
+										   '</li>';
+							}
+							$('#cart-list').html(html);
+							var html_1='<li class="cart-list-item clearfix"><div class="item-info">'+
+								'<p class="title"><span class="title_s">餐位费</span><span class="danJia">¥'+data.fee+'</span>'+
+								'<span>x<em>'+data.meals+'</em></span><span class="money">¥'+data.mealFee+'</span></p>'+
+							'</div></li>';
+							$('#cart-list').append(html_1);
+							var discount=data.discount;
+								$('#lianXi').html('<i></i><a href="tel:'+data.companyPhone+' style="text-decoration:none;">联系商家</a>');
+								$('#sumMoney').html('¥'+data.pay);
+								$('#ren').html(data.meals+"人");
+							
+            					//$('#foot').html('<a href="javascript:submit('+orderId+')" style="text-decoration: none; color: #fff;"><p>提 交</p></a>');
+						
+								$("img").lazyload({ 
+								 	placeholder : "../common/img/defual.png",
+						            threshold : 200
+						        });  
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+				
+				
+				$("#foot").click(function(){
+					submit(orderId);
+				})
+				
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.GETCOMPANYACTIVITY,
+				 	data: { 
+            			token:GetQueryString("token"),
+						orderId:orderId,
+						cid:cid
+        			},
+					success:function(data) {
+						var totalCount=data.totalCount;
+							number=totalCount;
+						if(totalCount>0){
+							var list=data.list;
+						   $('#huodong').html('');
+							for(var i = 0; i < list.length; i++){
+									var html_2='';
+									switch(list[i].aid){
+									  	  case 1:	
+												html_2='<li class="cart-list-item clearfix">'+
+										      '<div class="item-info"><label style="float:left;">'+
+								'<input type="radio" class="activity" name="activit"  value="'+list[i].id+'" onclick="check('+list[i].numb+',1);"></label>'+
+											   '<p class="title"><span class="title_s"><i>减</i>'+list[i].name+'</span><span class="jianMoney">-¥'+list[i].numb+'</span></p>'+
+											   '</div>'+
+											   '</li>';
+ 
+											     break;
+										case 2:	
+												html_2='<li class="cart-list-item clearfix">'+
+										      '<div class="item-info"><label style="float:left;">'+
+										'<input type="radio" class="activity" name="activit"  value="'+list[i].id+'" onclick="check('+list[i].numb+',2);"></label>'+
+											   '<p class="title"><span class="title_s_2"><i>首</i>'+list[i].name+'</span><span class="jianMoney">-¥'+list[i].numb+'</span></p>'+
+											   '</div>'+
+											   '</li>';
+											  
+											     break;
+										case 3:	
+												html_2='<li class="cart-list-item clearfix">'+
+										      '<div class="item-info"><label style="float:left;">'+
+									'<input type="radio" class="activity" name="activit"  value="'+list[i].id+'" onclick="check('+list[i].numb+',3);"></label>'+
+											   '<p class="title"><span class="title_s_3"><i>折</i>'+list[i].name+'</span><span class="jianMoney">'+list[i].numb+'</span></p>'+
+											   '</div>'+
+											   '</li>';
+											  
+											     break;
+										case 4:	
+												html_2='<li class="cart-list-item clearfix">'+
+										      '<div class="item-info"><label style="float:left;">'+
+									'<input type="radio" class="activity" name="activit"  value="'+list[i].id+'" onclick="check('+list[i].numb+',4);"></label>'+
+											   '<p class="title"><span class="title_s_4"><i>卷</i>'+list[i].name+'</span><span class="jianMoney">-¥'+list[i].numb+'</span></p>'+
+											   '</div>'+
+											   '</li>';
+											  
+											     break;
+									}
+									 $('#huodong').append(html_2);
+							}
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+});
+
+function check(total,n){
+	
+	switch(n){
+		case 1:
+				var jing=parseFloat(total);
+				var dayMoney=(money-jing).toFixed(2);
+				$('#sumMoney').html('¥'+dayMoney);
+					break;
+		case 2:
+				var jing=parseFloat(total);
+				var dayMoney=(money-jing).toFixed(2);
+				$('#sumMoney').html('¥'+dayMoney);
+		
+					break;
+		case 3:
+				var jing=parseFloat(total/10).toFixed(2);
+				var dayMoney=(money*jing).toFixed(2);
+				$('#sumMoney').html('¥'+dayMoney);
+					break;
+		case 4:
+				var jing=parseFloat(total);
+				var dayMoney=(money-jing).toFixed(2);
+				$('#sumMoney').html('¥'+dayMoney);
+					break;
+	}
+
+}
+
+function submit(orderId){
+				var remarks_text=$('#remarks_text').val();
+				if(remarks_text.length==0){
+					remarks_text='';
+				}
+				if(number>0){
+					  var activit= $('input:radio[name="activit"]:checked').val();
+			            if(activit==null){
+			              valLink("alert","请选择优惠活动!");  
+			                return false;
+			            }
+				}
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.UPDATEREMARK,
+				 	data: { 
+            			orderId:orderId,
+						remarks:remarks_text,
+						activit:activit
+        			},
+					success:function(data) {
+					
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+					
+   					link('realpay');
+}
+</script>
+    <div class="receiving-info">
+        <div class="addr-tel">
+            <img src="../common/img/phone1.png" alt="">
+            <span class="user-info title">预约手机：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span class="tel title" id="phone"></span>
+        </div>
+        <div class="address"></div>
+    
+    </div>
+    <div class="deliver-info">
+        <img src="../common/img/clock.png" alt="">
+        <span class="time">预约时间</span>
+        <span class="select-time-button" id="time"></span>
+    </div>
+	 <div class="deliver-info">
+        <img src="../common/img/bj.jpg" alt="">
+        <span class="time">预约桌号</span>
+        <span class="select-time-button" id="table"></span>
+    </div>
+    <div class="cart-info">
+        <div class="title" id="company">
+           
+        </div>
+        <ul class="cart-list" id="cart-list">
+        </ul>
+        <ul class="cart-list" id="huodong">
+            
+        </ul>
+        <div class="total-money clearfix">
+            <p class="lianXi" id="lianXi"></p>
+            <p class="zongJi"><span>实付</span><span class="sumMoney" id="sumMoney"></span></p>
+        </div>
+    </div>
+    <div class="remark-info">
+        <p class="pay-way">支付方式<span>在线支付</span></p>
+        
+		<div class="tableware">
+            <p>就餐人数<span id="ren"></span></p>
+        </div>
+		<div class="comments">
+            <h3>备注</h3> 
+           <textarea placeholder="口味、偏好等要求..." class="remarks" maxlength="100" id="remarks_text"></textarea>
+        </div>
+    </div>
+    
+    <div id="foot">
+        <p>提 交</p>
+    </div>
+</body>
+</html>

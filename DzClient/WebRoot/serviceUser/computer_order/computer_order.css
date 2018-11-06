@@ -1,0 +1,399 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+.clear:after{
+    display: block;
+    content: " ";
+    clear: both;
+}
+ul{
+    list-style: none;
+}
+#body{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+.left{
+    width: 11%;
+    height: 100%;
+    float: left;
+    position: relative;
+}
+.left ul{
+    list-style: none;
+}
+.left li{
+    line-height: 60px;
+    height: 60px;
+    border-bottom: 1px solid #f5f5f5;
+    text-align: center;
+}
+.left li.click{
+    background: #373c40;
+    color: #fff;
+    border-bottom: 1px solid #373c40;
+}
+.deliciousFoodOrderNum{
+    display: block;
+    width: 22px;
+    position: absolute;
+    top: 5px;
+    right: 15%;
+    border-radius: 50%;
+    background:#f40;
+    color: #ffffff;
+    font-size: 12px;
+    font-style: normal;
+    line-height: 23px;
+    text-align: center;
+}
+.exit{
+    position: absolute;
+    bottom: 10px;
+    text-align: center;
+    width: 100%;
+}
+.exit i{
+    background: url("../../common/img/efdbd5e6568464e86a04292696d26a5e.png") no-repeat center;
+    background-size: 100%;
+    width: 60px;
+    height: 60px;
+    display: inline-block;
+}
+
+
+
+
+.right{
+    width: 89%;
+    height: 100%;
+    float: right;
+    background: #dfcdbb;
+    position: relative;
+    overflow-y: auto;
+}
+.right_div{
+    padding: 12px;
+}
+
+
+
+
+
+.allOrder_div{
+    width: 100%;
+    margin: auto;
+}
+.oneOrder_div{
+    margin-bottom: 15px;
+    box-shadow: 3px 3px 10px #333333;
+}
+.search_div{
+    height: 50px;
+    margin-bottom: 20px;
+}
+.search_div .search{
+    width: 520px;
+    margin: auto;
+    height: 45px;
+    border: 2px solid #ffffff;
+    border-radius: 50px;
+    background: rgba(255,255,255,0.2);
+    overflow: hidden;
+}
+.search input{
+    float: left;
+    width: 400px;
+    padding: 0 10px;
+    line-height: 45px;
+    background: transparent;
+    border: none;
+    outline: none;
+}
+.search p{
+    width: 100px;
+    float: right;
+    background: #f40;
+    line-height: 45px;
+    text-align: center;
+    color: #ffffff;
+
+}
+.oneOrder_head{
+    color: #ffffff;
+    border-bottom: 1px solid #EEEEEE;
+    height: 45px;
+    line-height: 45px;
+    padding: 0 12px;
+    background: #a6896b;
+}
+.oneOrder_head p{
+    float: left;
+    font-size: 12px;
+}
+.oneOrder_head .orderNo{
+    width: 250px;
+}
+.oneOrder_head .reserve{
+    float: right;
+}
+.orderList{
+    width: 100%;
+    font-size: 14px;
+    background: #ffffff;
+}
+.orderList tr{
+    height: 50px;
+    text-align: center;
+}
+.orderList tr img{
+    width: 45px;
+    height: 45px;
+    display: block;
+    margin: 2px auto;
+}
+.orderList td{
+    border-bottom: 1px solid #EEEEEE;
+}
+.orderList tr td:nth-of-type(1){
+    width: 70px;
+}
+.orderList tr td:nth-of-type(2){
+    text-align: left;
+}
+.orderList tr td:last-of-type{
+    padding-right: 12px;
+}
+.bill_div{
+    font-size: 12px;
+    padding: 12px 0;
+    background: #fff2e5;
+}
+.bill_div ul{
+    float: left;
+}
+.bill_div .bill_time{
+    padding-left: 12px;
+    width: 35%;
+    float: left;
+}
+.bill_div .bill_tip{
+    width: 30%;
+}
+.bill_div .bill_money{
+    float: right;
+    width: 150px;
+    text-align: left;
+    padding-right: 12px;
+}
+.bill_div .bill_money span{
+    width: 113px;
+    display: inline-block;
+    text-align: right;
+    color: #f40;
+    font-weight: bold;
+    font-size: 14px;
+}
+.Remarks{
+    padding: 12px;
+    font-size: 12px;
+    background: #ffffff;
+    border-bottom:5px solid #f5f0ea;
+    float: left;
+    width: 50%;
+    height: 100px;
+}
+.Remarks span{
+    font-weight: bold;
+}
+
+.realPayment{
+    text-align: right;
+    font-weight: bold;
+    line-height: 32px;
+}
+.realPayment span{
+    color: #f40;
+    font-size: 22px;
+    font-weight: bold;
+}
+.time{
+    font-size: 14px;
+    line-height: 30px;
+}
+.time span{
+    font-weight: bold;
+}
+.oneOrder_foot .contact{
+    font-size: 14px;
+    text-align: right;
+}
+.oneOrder_foot .contact span{
+    font-weight: bold;
+}
+
+.realPayment_div{
+    float: right;
+    margin-top: 20px;
+}
+.realPayment_div .red_border{
+    border: 2px solid #f40;
+    background: #ffffff;
+    padding: 12px;
+}
+.people{
+    font-size: 14px;
+}
+.o_Button p{
+    width: 50%;
+    float: left;
+    text-align: center;
+    line-height: 50px;
+    color: #ffffff;
+
+}
+.o_Button p.cancel{
+    color: #ffffff;
+    background: #CCCCCC;
+}
+.o_Button p.receipt{
+    background: #f40;
+    font-weight: bold;
+}
+/*����*/
+
+	*{
+		margin: 0;
+		padding: 0;
+	}
+	.clear:after{
+		display: block;
+		clear: both;
+		content: " ";
+	}
+	.backgroundImportant{
+		position: fixed;
+		width: 100%;
+		height: 100%;
+		background: rgba(0,0,0,0.5);
+		z-index: 1000;
+	}
+	.backgroundImportant .promptBox{
+		background: #fff;
+		width: 500px;
+		margin: 90px auto;
+		border-radius:10px;
+		overflow: hidden;
+		box-shadow: 3px 3px 35px rgba(0,0,0,0.7);
+	}
+	.backgroundImportant .promptBox .promptContent{
+		text-align: center;
+		font-size: 20px;
+	}
+	.backgroundImportant .promptBox .promptButton{
+		line-height: 50px;
+		text-align: center;
+		border-top: 1px solid #ccc;
+	}
+	.backgroundImportant .promptBox .promptButton p{
+		width: 49.9%;
+		float: left;
+		color: #fff;
+	}
+	.backgroundImportant .promptBox .promptButton p.cancel{
+		border-right: 1px solid #ccc;
+		background: #bbb;
+	}
+	.backgroundImportant .promptBox .promptButton p.ok{
+		background: #ff7e00;
+	}
+	.backgroundImportant .other_div{
+		text-align: left;
+		background: #ddd;
+	}
+	.backgroundImportant .other_div div{
+		margin: auto;
+		width: 370px;
+		padding-bottom: 12px;
+	}
+	.backgroundImportant .other_div p{
+		float: left;
+		padding-right: 12px;
+	}
+	.backgroundImportant .other_div ul{
+		float: left;
+		
+	}
+	
+	.backgroundPrompt{
+		position: fixed;
+		width: 100%;
+		height: 100%;
+		background: rgba(0,0,0,0.2);
+		z-index: 1000;
+	}
+	.backgroundPrompt .promptBox{
+		background: #fff;
+		width: 500px;
+		height: 200px;
+		margin: 180px auto;
+		border-radius:10px;
+		overflow: hidden;
+		box-shadow: 3px 3px 35px rgba(0,0,0,0.5);
+	}
+	.backgroundPrompt .promptBox .promptContent{
+		line-height: 150px;
+		text-align: center;
+		font-size: 20px;
+	}
+	.backgroundPrompt .promptBox .promptButton{
+		line-height: 50px;
+		text-align: center;
+		border-top: 1px solid #ccc;
+	}
+	.backgroundPrompt .promptBox .promptButton p{
+		width: 49.9%;
+		float: left;
+		color: #fff;
+	}
+	.backgroundPrompt .promptBox  .promptButton p.cancel{
+		border-right: 1px solid #ccc;
+		background: #ccc;
+	}
+	.backgroundPrompt .promptBox .promptButton p.ok{
+		background: #ff7e00;
+	}
+	
+	/*3*/
+.background_onlyOKPrompt{
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.2);
+	z-index: 100;
+}
+.onlyOKPrompt{
+	background: #fff;
+	width: 350px;
+	height: 200px;
+	margin: 180px auto;
+	border-radius:10px;
+	overflow: hidden;
+	box-shadow: 3px 3px 35px rgba(0,0,0,0.5);
+}
+.onlyOKPrompt_content{
+	line-height: 150px;
+	text-align: center;
+	font-size: 20px;
+}
+.onlyOKPrompt_button{
+	text-align: center;
+	line-height: 50px;
+}
+.onlyOKPrompt_button p{
+	text-align: center;
+	background: #ff7e00;
+	color: #fff;
+}

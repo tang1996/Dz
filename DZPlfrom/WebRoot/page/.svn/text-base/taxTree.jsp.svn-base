@@ -1,0 +1,333 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<html>
+  <head>
+   <title>数据调整</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  </head>
+  <body>
+  	<script type="text/javascript">
+var value = null;
+var selectPanl;
+var addTaxForm;
+var plangrid;
+var nesd;
+
+var taxdss= new Ext.data.GroupingStore({
+	  proxy: new Ext.data.HttpProxy({url:'/GXDS/listTAX'}),
+	  reader: new Ext.data.JsonReader({totalProperty:'totalCount', root:'list',id:'city',
+	  successProperty :'@success',
+	  fields:['tax','dates' ,'fendou' ,'bibao' ,'bibao1' ,'bibao2' ,'bibao3' ,'bibao4' ,'bibao5','taxID','qq1','qq2','qq3','qq4']
+	  })
+});
+
+var taxcbsm=new Ext.grid.CheckboxSelectionModel();
+var taxcm=new Ext.grid.ColumnModel(
+				[new Ext.grid.RowNumberer(),
+			     taxcbsm,
+				 {header: '税种', dataIndex: 'tax',  align: 'right',  width:120,sortable: true},
+				 {header: '必保数初始值(万元)', dataIndex: 'bibao', align: 'right',   width:120,sortable: true},
+				 {header: '必保调整1(万元)', dataIndex: 'bibao1', align: 'right',   width:120,sortable: true},
+				 {header: '必保调整2(万元)', dataIndex: 'bibao2', align: 'right',   width:120,sortable: true},
+				 {header: '必保调整3(万元)', dataIndex: 'bibao3',  align: 'right',  width:120,sortable: true},
+				 {header: '必保调整4(万元)', dataIndex: 'bibao4', align: 'right',  width:120, sortable: true},
+				 {header: '必保调整5(万元)', dataIndex: 'bibao5', align: 'right',  width:120, sortable: true},
+				 {header: '奋斗目标值(万元)', dataIndex: 'fendou', align: 'right',  width:120, sortable: true},
+				 {header: 'ID', dataIndex: 'taxID', align: 'right',  width:120, sortable: true,hidden:true},
+				 {header: '时间', dataIndex: 'dates', align: 'right',  width:50, sortable: true},
+				 {header: '第一季度奋斗目标(万元)', dataIndex: 'qq1',  align: 'right',  width:120,sortable: true},
+				 {header: '第二季度奋斗目标(万元)', dataIndex: 'qq2', align: 'right',  width:120, sortable: true},
+				 {header: '第三季度奋斗目标(万元)', dataIndex: 'qq3', align: 'right',  width:120, sortable: true},
+				 {header: '第四季度奋斗目标(万元)', dataIndex: 'qq4', align: 'right',  width:120, sortable: true}
+]);
+
+Ext.onReady(function(){
+ taxgrid =new Ext.grid.GridPanel({
+			   ds:taxdss,
+			   cm:taxcm,
+			   sm:taxcbsm,
+			   height:document.body.clientHeight-124,
+			   width:document.body.clientWidth-193,
+			    tbar:[{
+				text:'增加',
+				iconCls:'add-fredd',
+				handler:function(){
+						if(taxWin){
+							taxWin.destroy();
+						}
+
+						var taxbibao = new Ext.form.NumberField({
+								fieldLabel: '必保初始值(万元)',
+								allowBlank: false,
+								width:290,
+								name:'taxbibao'
+						});
+						
+						var taxbibao1 = new Ext.form.NumberField({
+								fieldLabel: '必保调整1(万元)',
+								width:290,
+								name:'taxbibao1'
+						});
+						
+						var taxbibao2 = new Ext.form.NumberField({
+								fieldLabel: '必保调整2(万元)',
+								width:290,
+								name:'taxbibao2'
+						});
+						
+						var taxbibao3 = new Ext.form.NumberField({
+								fieldLabel: '必保调整3(万元)',
+								width:290,
+								name:'taxbibao3'
+						});
+						
+						var taxbibao4 = new Ext.form.NumberField({
+								fieldLabel: '必保调整4(万元)',
+								width:290,
+								name:'taxbibao4'
+						});
+						
+						var taxbibao5 = new Ext.form.NumberField({
+								fieldLabel: '必保调整5(万元)',
+								width:290,
+								name:'taxbibao5'
+						});
+						
+						var fendous = new Ext.form.NumberField({
+								fieldLabel: '奋斗目标值(万元)',
+								width:290,
+								name:'taxfendou'
+						});
+						
+						var diyi = new Ext.form.NumberField({
+								fieldLabel: '第一季度(万元)',
+								width:290,
+								name:'qq1'
+						});
+						
+						var dier = new Ext.form.NumberField({
+								fieldLabel: '第二季度(万元)',
+								width:290,
+								name:'qq2'
+						});
+						
+						var disan = new Ext.form.NumberField({
+								fieldLabel: '第三季度(万元)',
+								width:290,
+								name:'qq3'
+						});
+						
+						var disi = new Ext.form.NumberField({
+								fieldLabel: '第四季度(万元)',
+								width:290,
+								name:'qq4'
+						});
+						
+						var date = new Date();
+				        var year = date.getYear();	
+						var taxdata = [[year],[year-1],[year-2],[year-3],[year-4],[year-5]];
+						var taxStore = new Ext.data.SimpleStore({fields:['text'],data:taxdata});
+		
+						var taxYear = new Ext.form.ComboBox({
+						 		store: taxStore,
+								fieldLabel: '选择年份',
+								displayField: ['text'],
+								mode: 'local',
+								emptyText:'选择...',
+								forceSelection: true,
+								allowBlank:true,
+								editable: false,
+								width:290,
+								triggerAction:'all'
+						});
+
+						  var tax = new Ext.form.ComboBox({
+								 fieldLabel: '税种',
+								 store:new Ext.data.SimpleStore({fields:[],data:[[]]}),
+								 shadow:false,
+								 mode: 'local',
+								 editable :false,
+								 width:290,
+								 triggerAction:'all',
+								 maxHeight: 200,
+								 tpl: '<tpl for="."><div style="height:200px"><div id="tax"></div></div></tpl>',
+								 allowBlank:false
+							});
+								var taxs = new Ext.tree.TreePanel({
+									  loader: new Ext.tree.TreeLoader({dataUrl:'/GXDS/taxTree'}),
+									  border:false,
+									  rootVisible:false,
+									  root:new Ext.tree.AsyncTreeNode({text: '请选择税种',id:'2asasa'})
+								 });
+								taxs.on('click',function(node){
+									deptny = node.text;
+									nesd = node.id
+							  		tax.setValue(node.text);
+							  		tax.collapse();
+							  	});
+								 tax.on('expand',function(){
+								 	taxs.render('tax');
+								 });
+							taxs.on('checkchange', function(node, checked) {
+								 node.expand();
+								 node.attributes.checked = checked;
+								 node.eachChild(function(child) {
+								 child.ui.toggleCheck(checked);
+								 child.attributes.checked = checked;
+								 child.fireEvent('checkchange', child, checked);
+							 });
+							},taxs);
+						
+						var taxWin = new Ext.Window({
+					        title: '年度设定和调整',
+					        width: 480,
+					        height:450,
+					        layout: 'fit',
+					        resizable:false,
+					        bodyStyle:'padding:5px;',
+					        closable :false,
+					        buttonAlign:'center',
+					        items: addTaxForm = new Ext.form.FormPanel({
+								    baseCls: 'x-plain',
+							        labelWidth: 130,
+							        defaultType: 'textfield',
+							       	items:[taxYear,tax,taxbibao,taxbibao1,taxbibao2,taxbibao3,taxbibao4,taxbibao5,fendous,diyi,dier,disan,disi]
+							}),
+					        modal: true,
+					        buttons: [{
+					            text: '确定',
+					            handler:function(){
+					            
+							      Ext.Ajax.request({         
+						       		   url:'/GXDS/addTax', 
+							           waitMsg : '正在处理......', 
+							           params: { qq1:diyi.value,qq2:dier.value,qq3:disan.value,qq4:disi.value,taxYear:taxYear.value,tax:nesd,taxbibao:taxbibao.value,taxbibao2:taxbibao2.value,taxbibao1:taxbibao1.value,taxbibao3:taxbibao3.value,taxbibao4:taxbibao4.value,taxbibao5:taxbibao5.value,fendous:fendous.getValue() }, 
+						        	   success:function(form,action){
+							        	  addTaxForm.getForm().reset();
+						        			 taxdss.reload();
+							           },failure: function(form,action){
+						        			Ext.Msg.alert('温馨提示','后端异常');
+							           } 
+								  });
+						        	     taxWin.destroy();
+						        		
+					         	 }
+					        },{
+					            text: '取消',
+					            handler: function(){
+						            addTaxForm.getForm().reset();
+						           	taxWin.destroy();
+					            }
+					        }]
+					});
+						taxWin.show();
+				}},"-",{
+				text:'删除',
+				iconCls:'delete-fredd',
+				handler:function(){
+					Ext.MessageBox.confirm('消息', '确定删除吗?', dodelteTAX);
+				}
+				},"-",{
+				text:'查询',
+				iconCls:'delete-fredd',
+				handler:function(){
+					 
+					var taxDatess = new Date();
+					var taxyear = taxDatess.getYear();	
+					var taxdata = [[taxyear],[taxyear-1],[taxyear-2],[taxyear-3],[taxyear-4],[taxyear-5]];
+					var taxStore = new Ext.data.SimpleStore({fields:['text'],data:taxdata});
+	
+					var taxComDate = new Ext.form.ComboBox({
+					 		store: taxStore,
+							fieldLabel: '选择年份',
+							displayField: ['text'],
+							mode: 'local',
+							emptyText:'选择...',
+							forceSelection: true,
+							allowBlank:true,
+							editable: false,
+							width:200,
+							triggerAction:'all'
+					});
+					
+					var taxForm = new Ext.form.FormPanel({
+					        labelWidth: 95,
+					        width: 500,
+					        height:342,
+					        defaultType: 'textfield',
+					        items:taxComDate
+					});
+	
+					var taxWindows = new Ext.Window({
+					        title: '条件查询',
+					        width: 513,
+					        height:410,
+					        resizable:false,
+					        closable :false, 
+					        buttonAlign:'center', 
+					        items: taxForm,
+					        buttons: [{
+					            text: '确定',
+					            handler:function(){
+							 		if(taxForm.getForm().isValid()){
+	
+					       			taxdss.load({
+						       			 params:{yyID:taxComDate.value}
+								    });
+					        		taxWindows.destroy();
+							       	} else {
+							       		Ext.MessageBox.alert( "错误","不允许为空!" );
+							       	}
+					         	 }
+					        },{
+					            text: '取消',
+					            handler: function(){
+					            	taxForm.getForm().reset();
+					           		taxWindows.destroy();
+					            }
+					        }]
+				     });
+								taxWindows.show();
+				  }
+				}]
+			});
+
+	taxdss.load({params:{start:0,limit:10}});
+	taxgrid.render('grid-tax');
+});
+  		
+ function dodelteTAX(btn){
+		if(btn=='yes'){
+			var b = "";
+			var rends = taxgrid.getSelections();
+			if(rends.length>0){
+			for(var i = 0 ; i<rends.length ; i++)
+			{
+			  var rend = rends[i];
+				  if(i==rends.length-1)
+				  {
+				     b = b + rend.get("taxID");
+				  }else
+				  {
+				     b = b + rend.get("taxID")+",";
+				  }
+			}
+
+		      Ext.Ajax.request({         
+		           url: '/GXDS/deleteTAX',  
+		           waitMsg : '正在处理......', 
+		           params: { taxID: b },
+		           success:function(form,action){
+		        	   taxdss.reload();
+		           },failure: function(form,action){
+		           	   Ext.Msg.alert('错误','后端异常');
+		           } 
+			 });
+		}else{
+			Ext.Msg.alert('错误','请选择需要删除的数据!');
+		}
+	}
+ }   
+  	</script>
+	<div id="grid-tax" ></div>
+  </body>
+</html>

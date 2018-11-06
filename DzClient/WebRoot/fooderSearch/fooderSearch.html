@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>动致美食</title>
+		<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+		<link rel="stylesheet" type="text/css" href="./fooderSearch.css" />
+		<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+		<script type="text/javascript" src="../common/js/jquery.lazyload.min.js" ></script>
+</head>
+<body>
+<script type="text/javascript">
+	
+			$(document).ready(function(){  	
+			//销量最高排序		
+		   $("#volume").click(function(){
+		   $(".active").removeClass("active");
+		   $("#volume").addClass("active");
+		   $("#list-box").html('');
+	      			$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.GETDISTEIBUTION,
+				 	data: { 
+            			location: GetQueryString("lng"),//获取来自手机端传递经纬度
+            			sort: 'volume',
+            			start:0,
+            			limit:15,
+            			classify:2
+        			},
+					success:function(data) {
+						var list = data.list;
+						for(var i = 0;i < list.length;i++){
+						    var type = list[i].type;
+							var lineType = '';
+							switch(type){
+							case '外卖':
+								lineType = '<span>'+list[i].mode+'</span>';break;
+							case '美食':
+								lineType = '<span>人均:'+list[i].GDP+'</span>';break;
+							case 'KTV':
+								lineType = '<span>最低消费:'+list[i].miniConsume+'</span>';break;
+							case '酒店':
+								lineType = '<span>最低消费:'+list[i].miniConsume+'</span>';break;
+							default :
+								lineType = '<span></span>';break;
+							}
+							var isOpen1=list[i].isOpen1;
+							var isOpen2=list[i].isOpen2;
+							var isOpen3=list[i].isOpen3;
+							var isOpen4=list[i].isOpen4;
+							var jian='';
+							var ze='';
+							var juan='';
+							if(isOpen1==true || isOpen2==true){
+								if(isOpen2==true && isOpen1==true){
+									jian= '<p><span class="icon-minus">减</span><span>'+list[i].newUser+";"+list[i].subtraction+'</span></p>';
+								}else if(isOpen1==true){
+									jian= '<p><span class="icon-minus">减</span><span>'+list[i].subtraction+'</span></p>';
+								}else if(isOpen2==true){
+									jian= '<p><span class="icon-minus">减</span><span>'+list[i].newUser+'</span></p>';
+								}
+							}
+							if(isOpen3==true){
+								ze='<p><span class="icon-redpaper" >折</span><span>'+list[i].svg+'</span></p>';
+							}
+							if(isOpen4==true){
+								juan='<p><span class="icon-coupon">卷</span><span>'+list[i].coupon+'</span></p>';
+							}
+							
+							var isBusiness=list[i].isBusiness;
+							var businessHtml='';
+							var businessHtml_2='';	
+							if(isBusiness==false){
+								businessHtml='<div  style="width:100%;position:relative;z-index:555;background-color: #fff;opacity:0.5;">';
+								businessHtml_2='</div><span style="text-align: center;z-index:10000;color:#ccc;left: 40%;position:relative;">本店已打烊</span>';
+							}
+							
+							var html = '<a href="javascript:valLink(\'foodDetail\','+list[i].id+')" class="clear">'+businessHtml+'<div class="item"><div class="avatar-wrap">'+
+											' <img src="../common/img/defual.jpg" data-original='+list[i].logo+' style="display: inline;border-radius: 5px;border: 1px solid #eaeaea;">'+
+												'</div>'+
+												 '<div class="content">'+
+										                '<h4>'+list[i].name+'</h4>'+
+										                '<div class="rating-box">'+
+										                    '<img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iMTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IHgxPSIwJSIgeTE9IjUwJSIgeTI9IjUwJSIgaWQ9ImEiPjxzdG9wIHN0b3AtY29sb3I9IiNGRkRFMDAiIG9mZnNldD0iMCUiLz48c3RvcCBzdG9wLWNvbG9yPSIjRkZCMDAwIiBvZmZzZXQ9IjEwMCUiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cGF0aCBkPSJNNTQuMDE3IDguMDcybC0yLjU1MiAxLjU2MWMtLjQ3Ni4yOTEtLjc1OC4wOTYtLjYyNi0uNDU1bC42OTYtMi45MDktMi4yNzMtMS45NDRjLS40MjQtLjM2Mi0uMzI1LS42OTEuMjM5LS43MzZsMi45ODItLjIzN0w1My42My41ODljLjIxMy0uNTE1LjU1Ny0uNTIzLjc3NCAwbDEuMTQ2IDIuNzYzIDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2bC0yLjI3NCAxLjk0NC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6bS00OCAwTDMuNDY1IDkuNjMzYy0uNDc2LjI5MS0uNzU4LjA5Ni0uNjI2LS40NTVsLjY5Ni0yLjkwOS0yLjI3My0xLjk0NGMtLjQyNC0uMzYyLS4zMjUtLjY5MS4yMzktLjczNmwyLjk4Mi0uMjM3TDUuNjMuNTg5Yy4yMTMtLjUxNS41NTctLjUyMy43NzQgMEw3LjU1IDMuMzUybDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2TDguNDk3IDYuMjY5bC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6bTEyIDBsLTIuNTUyIDEuNTYxYy0uNDc2LjI5MS0uNzU4LjA5Ni0uNjI2LS40NTVsLjY5Ni0yLjkwOS0yLjI3My0xLjk0NGMtLjQyNC0uMzYyLS4zMjUtLjY5MS4yMzktLjczNmwyLjk4Mi0uMjM3TDE3LjYzLjU4OWMuMjEzLS41MTUuNTU3LS41MjMuNzc0IDBsMS4xNDYgMi43NjMgMi45ODIuMjM3Yy41NTYuMDQ0LjY3LjM2OC4yNC43MzZsLTIuMjc0IDEuOTQ0LjY5NiAyLjkxYy4xMy41NDItLjE0My43NS0uNjI2LjQ1NGwtMi41NTEtMS41NnptMTIgMGwtMi41NTIgMS41NjFjLS40NzYuMjkxLS43NTguMDk2LS42MjYtLjQ1NWwuNjk2LTIuOTA5LTIuMjczLTEuOTQ0Yy0uNDI0LS4zNjItLjMyNS0uNjkxLjIzOS0uNzM2bDIuOTgyLS4yMzdMMjkuNjMuNTg5Yy4yMTMtLjUxNS41NTctLjUyMy43NzQgMGwxLjE0NiAyLjc2MyAyLjk4Mi4yMzdjLjU1Ni4wNDQuNjcuMzY4LjI0LjczNmwtMi4yNzQgMS45NDQuNjk2IDIuOTFjLjEzLjU0Mi0uMTQzLjc1LS42MjYuNDU0bC0yLjU1MS0xLjU2em0xMiAwbC0yLjU1MiAxLjU2MWMtLjQ3Ni4yOTEtLjc1OC4wOTYtLjYyNi0uNDU1bC42OTYtMi45MDktMi4yNzMtMS45NDRjLS40MjQtLjM2Mi0uMzI1LS42OTEuMjM5LS43MzZsMi45ODItLjIzN0w0MS42My41ODljLjIxMy0uNTE1LjU1Ny0uNTIzLjc3NCAwbDEuMTQ2IDIuNzYzIDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2bC0yLjI3NCAxLjk0NC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6IiBmaWxsPSJ1cmwoI2EpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=" alt="">'+
+										                    '<span>'+list[i].assess+' | '+list[i].GDP+'元/人</span>'+
+										                '</div>'+
+										                '<div class="price">'+lineType+
+										                '<span class="separator">'+list[i].info+'  | 月销：'+list[i].monSales+'份</span>'+
+										                '</div>'+
+										                '<div class="coupon-wrap">'+jian+ze+juan+
+										               ' </div>'+
+										                '<div class="distance-wrap">'+list[i].distance+'</div>'+
+										            '</div>'+
+										'</div>'+businessHtml_2+'</a>';
+							$("#list-box").append(html);
+						}
+						
+						$("img").lazyload({ 
+						 	placeholder : "../common/img/defual.jpg",
+				            threshold : 200
+				        });  
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+	       });
+	       
+		   $("#active").click(function(){	
+			 $("#list-box").html('');
+			  $(".active").removeClass("active");
+		      $("#active").addClass("active");
+				 jiazai();
+			});	 
+			$("#sort").click(function(){	
+			 $("#list-box").html('');
+			  $(".active").removeClass("active");
+		      $("#sort").addClass("active");
+				 $.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.GETDISTEIBUTION,
+				 	data: { 
+            			location: GetQueryString("lng"),//获取来自手机端传递经纬度
+            			sort: 'distance',
+            			start:0,
+            			limit:15,
+            			classify:2
+        			},
+					success:function(data) {
+						var list = data.list;
+						for(var i = 0;i < list.length;i++){
+						    var type = list[i].type;
+							var lineType = '';
+							switch(type){
+							case '外卖':
+								lineType = '<span>'+list[i].mode+'</span>';break;
+							case '美食':
+								lineType = '<span>人均:'+list[i].GDP+'</span>';break;
+							case 'KTV':
+								lineType = '<span>最低消费:'+list[i].miniConsume+'</span>';break;
+							case '酒店':
+								lineType = '<span>最低消费:'+list[i].miniConsume+'</span>';break;
+							default :
+								lineType = '<span></span>';break;
+							}
+							var isOpen1=list[i].isOpen1;
+							var isOpen2=list[i].isOpen2;
+							var isOpen3=list[i].isOpen3;
+							var isOpen4=list[i].isOpen4;
+							var jian='';
+							var ze='';
+							var juan='';
+							if(isOpen1==true || isOpen2==true){
+								if(isOpen2==true && isOpen1==true){
+									jian= '<p><span class="icon-minus">减</span><span>'+list[i].newUser+";"+list[i].subtraction+'</span></p>';
+								}else if(isOpen1==true){
+									jian= '<p><span class="icon-minus">减</span><span>'+list[i].subtraction+'</span></p>';
+								}else if(isOpen2==true){
+									jian= '<p><span class="icon-minus">减</span><span>'+list[i].newUser+'</span></p>';
+								}
+							}
+							if(isOpen3==true){
+								ze='<p><span class="icon-redpaper">折</span><span>'+list[i].svg+'</span></p>';
+							}
+							if(isOpen4==true){
+								juan='<p><span class="icon-coupon">卷</span><span>'+list[i].coupon+'</span></p>';
+							}
+							
+							var isBusiness=list[i].isBusiness;
+							var businessHtml='';
+							var businessHtml_2='';	
+							if(isBusiness==false){
+								businessHtml='<div  style="width:100%;position:relative;z-index:555;background-color: #fff;opacity:0.5;">';
+								businessHtml_2='</div><span style="text-align: center;z-index:10000;color:#ccc;left: 40%;position:relative;">本店已打烊</span>';
+							}
+							
+							var html = '<a href="javascript:valLink(\'foodDetail\','+list[i].id+')" class="clear">'+ businessHtml +'<div class="item"><div class="avatar-wrap">'+
+											' <img src="../common/img/defual.jpg" data-original='+list[i].logo+' style="display: inline;border-radius: 5px;border: 1px solid #eaeaea;">'+
+												'</div>'+
+												 '<div class="content">'+
+										                '<h4>'+list[i].name+'</h4>'+
+										                '<div class="rating-box">'+
+										                    '<img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iMTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IHgxPSIwJSIgeTE9IjUwJSIgeTI9IjUwJSIgaWQ9ImEiPjxzdG9wIHN0b3AtY29sb3I9IiNGRkRFMDAiIG9mZnNldD0iMCUiLz48c3RvcCBzdG9wLWNvbG9yPSIjRkZCMDAwIiBvZmZzZXQ9IjEwMCUiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cGF0aCBkPSJNNTQuMDE3IDguMDcybC0yLjU1MiAxLjU2MWMtLjQ3Ni4yOTEtLjc1OC4wOTYtLjYyNi0uNDU1bC42OTYtMi45MDktMi4yNzMtMS45NDRjLS40MjQtLjM2Mi0uMzI1LS42OTEuMjM5LS43MzZsMi45ODItLjIzN0w1My42My41ODljLjIxMy0uNTE1LjU1Ny0uNTIzLjc3NCAwbDEuMTQ2IDIuNzYzIDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2bC0yLjI3NCAxLjk0NC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6bS00OCAwTDMuNDY1IDkuNjMzYy0uNDc2LjI5MS0uNzU4LjA5Ni0uNjI2LS40NTVsLjY5Ni0yLjkwOS0yLjI3My0xLjk0NGMtLjQyNC0uMzYyLS4zMjUtLjY5MS4yMzktLjczNmwyLjk4Mi0uMjM3TDUuNjMuNTg5Yy4yMTMtLjUxNS41NTctLjUyMy43NzQgMEw3LjU1IDMuMzUybDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2TDguNDk3IDYuMjY5bC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6bTEyIDBsLTIuNTUyIDEuNTYxYy0uNDc2LjI5MS0uNzU4LjA5Ni0uNjI2LS40NTVsLjY5Ni0yLjkwOS0yLjI3My0xLjk0NGMtLjQyNC0uMzYyLS4zMjUtLjY5MS4yMzktLjczNmwyLjk4Mi0uMjM3TDE3LjYzLjU4OWMuMjEzLS41MTUuNTU3LS41MjMuNzc0IDBsMS4xNDYgMi43NjMgMi45ODIuMjM3Yy41NTYuMDQ0LjY3LjM2OC4yNC43MzZsLTIuMjc0IDEuOTQ0LjY5NiAyLjkxYy4xMy41NDItLjE0My43NS0uNjI2LjQ1NGwtMi41NTEtMS41NnptMTIgMGwtMi41NTIgMS41NjFjLS40NzYuMjkxLS43NTguMDk2LS42MjYtLjQ1NWwuNjk2LTIuOTA5LTIuMjczLTEuOTQ0Yy0uNDI0LS4zNjItLjMyNS0uNjkxLjIzOS0uNzM2bDIuOTgyLS4yMzdMMjkuNjMuNTg5Yy4yMTMtLjUxNS41NTctLjUyMy43NzQgMGwxLjE0NiAyLjc2MyAyLjk4Mi4yMzdjLjU1Ni4wNDQuNjcuMzY4LjI0LjczNmwtMi4yNzQgMS45NDQuNjk2IDIuOTFjLjEzLjU0Mi0uMTQzLjc1LS42MjYuNDU0bC0yLjU1MS0xLjU2em0xMiAwbC0yLjU1MiAxLjU2MWMtLjQ3Ni4yOTEtLjc1OC4wOTYtLjYyNi0uNDU1bC42OTYtMi45MDktMi4yNzMtMS45NDRjLS40MjQtLjM2Mi0uMzI1LS42OTEuMjM5LS43MzZsMi45ODItLjIzN0w0MS42My41ODljLjIxMy0uNTE1LjU1Ny0uNTIzLjc3NCAwbDEuMTQ2IDIuNzYzIDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2bC0yLjI3NCAxLjk0NC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6IiBmaWxsPSJ1cmwoI2EpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=" alt="">'+
+										                    '<span>'+list[i].assess+' | '+list[i].GDP+'元/人</span>'+
+										                '</div>'+
+										                '<div class="price">'+lineType+
+										                '<span class="separator">'+list[i].info+'  | 月销：'+list[i].monSales+'份</span>'+
+										                '</div>'+
+										                '<div class="coupon-wrap">'+jian+ze+juan+
+										               ' </div>'+
+										                '<div class="distance-wrap">'+list[i].distance+'</div>'+
+										            '</div>'+
+										'</div>'+ businessHtml_2 +'</a>';
+							$("#list-box").append(html);
+						}
+						
+						$("img").lazyload({ 
+						 	placeholder : "../common/img/defual.jpg",
+				            threshold : 200
+				        });  
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+			});
+			
+			
+			jiazai(); 	
+});
+		
+function jiazai(){
+	$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.GETDISTEIBUTION,
+				 	data: { 
+            			location: GetQueryString("lng"),//获取来自手机端传递经纬度
+            			start:0,
+            			limit:15,
+            			sort:'score',
+            			classify:2
+        			},
+					success:function(data) {
+						var list = data.list;
+						for(var i = 0;i < list.length;i++){
+						    var type = list[i].type;
+							var lineType = '';
+							switch(type){
+							case '外卖':
+								lineType = '<span>'+list[i].mode+'</span>';break;
+							case '美食':
+								lineType = '<span>人均:'+list[i].GDP+'</span>';break;
+							case 'KTV':
+								lineType = '<span>最低消费:'+list[i].miniConsume+'</span>';break;
+							case '酒店':
+								lineType = '<span>最低消费:'+list[i].miniConsume+'</span>';break;
+							default :
+								lineType = '<span></span>';break;
+							}
+							var isOpen1=list[i].isOpen1;
+							var isOpen2=list[i].isOpen2;
+							var isOpen3=list[i].isOpen3;
+							var isOpen4=list[i].isOpen4;
+							var jian='';
+							var ze='';
+							var juan='';
+							if(isOpen1==true || isOpen2==true){
+								if(isOpen2==true && isOpen1==true){
+									jian= '<p><span class="icon-minus">减</span><span>'+list[i].newUser+";"+list[i].subtraction+'</span></p>';
+								}else if(isOpen1==true){
+									jian= '<p><span class="icon-minus">减</span><span>'+list[i].subtraction+'</span></p>';
+								}else if(isOpen2==true){
+									jian= '<p><span class="icon-minus">减</span><span>'+list[i].newUser+'</span></p>';
+								}
+							}
+							if(isOpen3==true){
+								ze='<p><span class="icon-redpaper">折</span><span>'+list[i].svg+'</span></p>';
+							}
+							if(isOpen4==true){
+								juan='<p><span class="icon-coupon">卷</span><span>'+list[i].coupon+'</span></p>';
+							}
+							
+							var isBusiness=list[i].isBusiness;
+							var businessHtml='';
+							var businessHtml_2='';	
+							if(isBusiness==false){
+								businessHtml='<div  style="width:100%;position:relative;z-index:555;background-color: #fff;opacity:0.5;">';
+								businessHtml_2='</div><span style="text-align: center;z-index:10000;color:#ccc;left: 40%;position:relative;">本店已打烊</span>';
+							}
+							
+							var html = '<a href="javascript:valLink(\'foodDetail\','+list[i].id+')" class="clear">'+ businessHtml +'<div class="item"><div class="avatar-wrap">'+
+											' <img src="../common/img/defual.jpg" data-original='+list[i].logo+' style="display: inline;border-radius: 5px;border: 1px solid #eaeaea;">'+
+												'</div>'+
+												 '<div class="content">'+
+										                '<h4>'+list[i].name+'</h4>'+
+										                '<div class="rating-box">'+
+										                    '<img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iMTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IHgxPSIwJSIgeTE9IjUwJSIgeTI9IjUwJSIgaWQ9ImEiPjxzdG9wIHN0b3AtY29sb3I9IiNGRkRFMDAiIG9mZnNldD0iMCUiLz48c3RvcCBzdG9wLWNvbG9yPSIjRkZCMDAwIiBvZmZzZXQ9IjEwMCUiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cGF0aCBkPSJNNTQuMDE3IDguMDcybC0yLjU1MiAxLjU2MWMtLjQ3Ni4yOTEtLjc1OC4wOTYtLjYyNi0uNDU1bC42OTYtMi45MDktMi4yNzMtMS45NDRjLS40MjQtLjM2Mi0uMzI1LS42OTEuMjM5LS43MzZsMi45ODItLjIzN0w1My42My41ODljLjIxMy0uNTE1LjU1Ny0uNTIzLjc3NCAwbDEuMTQ2IDIuNzYzIDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2bC0yLjI3NCAxLjk0NC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6bS00OCAwTDMuNDY1IDkuNjMzYy0uNDc2LjI5MS0uNzU4LjA5Ni0uNjI2LS40NTVsLjY5Ni0yLjkwOS0yLjI3My0xLjk0NGMtLjQyNC0uMzYyLS4zMjUtLjY5MS4yMzktLjczNmwyLjk4Mi0uMjM3TDUuNjMuNTg5Yy4yMTMtLjUxNS41NTctLjUyMy43NzQgMEw3LjU1IDMuMzUybDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2TDguNDk3IDYuMjY5bC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6bTEyIDBsLTIuNTUyIDEuNTYxYy0uNDc2LjI5MS0uNzU4LjA5Ni0uNjI2LS40NTVsLjY5Ni0yLjkwOS0yLjI3My0xLjk0NGMtLjQyNC0uMzYyLS4zMjUtLjY5MS4yMzktLjczNmwyLjk4Mi0uMjM3TDE3LjYzLjU4OWMuMjEzLS41MTUuNTU3LS41MjMuNzc0IDBsMS4xNDYgMi43NjMgMi45ODIuMjM3Yy41NTYuMDQ0LjY3LjM2OC4yNC43MzZsLTIuMjc0IDEuOTQ0LjY5NiAyLjkxYy4xMy41NDItLjE0My43NS0uNjI2LjQ1NGwtMi41NTEtMS41NnptMTIgMGwtMi41NTIgMS41NjFjLS40NzYuMjkxLS43NTguMDk2LS42MjYtLjQ1NWwuNjk2LTIuOTA5LTIuMjczLTEuOTQ0Yy0uNDI0LS4zNjItLjMyNS0uNjkxLjIzOS0uNzM2bDIuOTgyLS4yMzdMMjkuNjMuNTg5Yy4yMTMtLjUxNS41NTctLjUyMy43NzQgMGwxLjE0NiAyLjc2MyAyLjk4Mi4yMzdjLjU1Ni4wNDQuNjcuMzY4LjI0LjczNmwtMi4yNzQgMS45NDQuNjk2IDIuOTFjLjEzLjU0Mi0uMTQzLjc1LS42MjYuNDU0bC0yLjU1MS0xLjU2em0xMiAwbC0yLjU1MiAxLjU2MWMtLjQ3Ni4yOTEtLjc1OC4wOTYtLjYyNi0uNDU1bC42OTYtMi45MDktMi4yNzMtMS45NDRjLS40MjQtLjM2Mi0uMzI1LS42OTEuMjM5LS43MzZsMi45ODItLjIzN0w0MS42My41ODljLjIxMy0uNTE1LjU1Ny0uNTIzLjc3NCAwbDEuMTQ2IDIuNzYzIDIuOTgyLjIzN2MuNTU2LjA0NC42Ny4zNjguMjQuNzM2bC0yLjI3NCAxLjk0NC42OTYgMi45MWMuMTMuNTQyLS4xNDMuNzUtLjYyNi40NTRsLTIuNTUxLTEuNTZ6IiBmaWxsPSJ1cmwoI2EpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=" alt="">'+
+										                    '<span>'+list[i].assess+' | '+list[i].GDP+'元/人</span>'+
+										                '</div>'+
+										                '<div class="price">'+lineType+
+										                '<span class="separator">'+list[i].info+'  | 月销：'+list[i].monSales+'份</span>'+
+										                '</div>'+
+										                '<div class="coupon-wrap">'+jian+ze+juan+
+										               '</div>'+
+										                '<div class="distance-wrap">'+list[i].distance+'</div>'+
+										            '</div>'+
+										'</div>'+ businessHtml_2 +'</a>';
+							$("#list-box").append(html);
+						}
+						
+						$("img").lazyload({ 
+						 	placeholder : "../common/img/defual.jpg",
+				            threshold : 200
+				        });  
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}
+		</script>
+		
+		<div class="filter-box">
+        <ul class="clearfix">
+            <li class="active" id="active">综合排序</li>
+            <li id="volume">销量最高</li>
+            <li id="sort">距离最近</li>
+        </ul>
+    </div>
+    <div class="list-box" id="list-box"></div>
+</body>
+</html>

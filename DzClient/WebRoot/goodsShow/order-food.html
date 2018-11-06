@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>点餐</title>
+    <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../common/js/baseUrl.js"></script>
+    <script type="text/javascript" src="../common/js/common.js"></script>
+    <script type="text/javascript" src="../common/js/jquery.fly.min.js"></script>
+    <script type="text/javascript" src="../common/js/jquery.lazyload.min.js"></script>
+    <script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../common/js/vue.min.js"></script>
+    <script type="text/javascript" src="../common/js/jquery.lazyload.min.js"></script>
+    <link rel="stylesheet" href="./order-food.css">
+</head>
+<body>
+<script type="text/javascript">
+    var totailFood = 0;
+    $(document).ready(function () {
+        $.cookie('cid', GetQueryString("cid"));
+
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.CTOGOODSMS,
+            data: {
+                id: GetQueryString("cid")
+            },
+            success: function (data) {
+                var list = data.list;
+                totailFood = list.length;
+                var changer = '';
+                for (var i = 0; i < list.length; i++) {
+                    var line = '';
+                    var className = '';
+                    if (changer == list[i].ificationName) {
+                        changer = list[i].ificationName;
+                    } else {
+                        className = list[i].ificationName;
+                        changer = list[i].ificationName;
+                    }
+                    if (list[i].recommend == true) {
+                        line = '<img src="../common/images/top.png" style="width: 58px;position: absolute;left: 172px;top: 14px;">';
+                    } else {
+                        line = '';
+                    }
+
+                    var oldprice = '';
+
+                    var price = list[i].price;
+                    if (list[i].svg_price != null) {
+                        if (list[i].svg_price != 0) {
+                            oldprice = '<p style="color:#ccc">原价:¥' + list[i].price + '</p>';
+                            price = list[i].svg_price;
+                        }
+                    }
+
+                    var html = '<p id="' + list[i].ificationId + '" style="line-height: 37px;margin-left: 5px;">' + className + '</p>' +
+                        '<li class="clearfix">' +
+                        '<div class="food-img f-left"><img src="../common/img/defual.png" data-original="' + list[i].zoom_url + '" style="height:73px"></div>' +
+                        '<div class="food-info">' +
+                        '<p class="title">' + list[i].name + '</p>' +
+                        '<p class="sale-number">月售' + list[i].mon_sales + '份</p>' +
+                        line +
+                        oldprice +
+                        '<p class="price">¥' + price + '</p>' +
+                        '<div class="btn-box">' +
+                        '<img class="btn" src="../common/img/minus.png" alt=""  style="display:none;" id="reduce' + i + '" onclick="reduce(' + i + ',' + parseFloat(price) + ',' + parseFloat(list[i].id) + ')">' +
+                        '<span class="num"  style="display:none;" id="num' + i + '">0</span>' +
+                        '</div>' +
+                        '</div>' +
+                        '</li>';
+
+                    $.cookie('cid', 1);
+                    $("#goodslist").append(html);
+                }
+
+                $("img").lazyload({
+                    placeholder: "../common/img/defual.jpg",
+                    threshold: 200
+                });
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.GETFICATION,
+            data: {
+                id: GetQueryString("cid")
+            },
+            success: function (data) {
+                var list = data.list;
+                for (var i = 0; i < list.length; i++) {
+                    if (i == 0) {
+                        var html = '<a href="#' + list[i].id + '" style="text-decoration:none;color:#000" onclick="position(' + list[i].id + ')"><li class="active" id="tang' + list[i].id + '">' + list[i].name + '</li></a>';
+                        $("#classes").append(html);
+                    } else {
+                        var html = '<a href="#' + list[i].id + '" style="text-decoration:none;color:#000" onclick="position(' + list[i].id + ')"><li class="none" id="tang' + list[i].id + '">' + list[i].name + '</li></a>';
+                        $("#classes").append(html);
+                    }
+
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+
+        $('#shop-coupon').click(function () {
+
+            if ($(this).next().css('display') == "none") {
+
+                // $('#shop-coupon').children('ul').slideUp(300);
+
+                // $(this).next('ul').slideDown(300);
+
+                // $(this).parent('li').addClass('nav-show').siblings('li').removeClass('nav-show');
+            } else {
+                //收缩已展开
+                $(this).next('ul').slideUp(300);
+                $('.nav-item.nav-show').removeClass('nav-show');
+            }
+
+        });
+
+    });
+
+    function position(j) {
+        var ulOne = document.getElementById("classes");
+        var lis = ulOne.getElementsByTagName("li");
+        for (var i = 0; i < lis.length; i++) {
+            $("#" + lis[i].id).attr("class", "none");
+        }
+        $("#tang" + j).attr("class", "active");
+    }
+
+    //商品点击添加
+    function add(i, price, id) {
+        var num = document.getElementById("num" + i).innerText;
+        var totail = document.getElementById("totail").innerText;
+        totail = parseFloat(totail) + price;
+        $("#totail").html(parseFloat(totail));
+        $("#reduce" + i).attr("style", "display:;");
+        $("#num" + i).html(parseInt(num) + 1);
+        $("#num" + i).attr("style", "display:;");
+        status(i);
+        addcontent(i, id);
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.SAVE,
+            data: {
+                comId: GetQueryString("cid"),
+                token: GetQueryString("token"),
+                goodId: id,
+                natrue: '0'
+            },
+            success: function (data) {
+
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+
+    }
+
+    //减少商品数量
+    function reduce(i, price, id) {
+        var num = document.getElementById("num" + i).innerText;
+        var totail = document.getElementById("totail").innerText;
+        if (parseInt(num) > 0) {
+            $("#num" + i).html(parseInt(num) - 1);
+            totail = parseFloat(totail) - price;
+            $("#totail").html(parseFloat(totail));
+            $("#reduce" + i).attr("style", "display:;");
+        } else {
+            $("#reduce" + i).attr("style", "display:none;");
+        }
+        status(i);
+        reducecontent(i);
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.SUB,
+            data: {
+                comId: GetQueryString("cid"),
+                token: GetQueryString("token"),
+                goodId: id,
+                natrue: '0'
+            },
+            success: function (data) {
+
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    //改变数字状态
+    function status(i) {
+        var num = document.getElementById("num" + i).innerText;
+        if (parseInt(num) == 0) {
+            $("#reduce" + i).attr("style", "display:none;");
+            $("#num" + i).attr("style", "display:none;");
+        }
+    }
+
+    var foodsId = "";
+
+    //添加购物车内容
+    function addcontent(i, id) {
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.GETGOOD,
+            data: {
+                id: id//GetQueryString("goodsId")
+            },
+            success: function (data) {
+                var foodid = i + ",";
+                var status = new RegExp(foodid).test(foodsId);
+                if (status === false) {
+                    var html = '';
+                    html = html + '<li class="food" id="cardFood' + i + '">' +
+                        '<div>' +
+                        '<span class="accountName" data-icon="01">' + data.name + '</span>' +
+                        '<span></span>' +
+                        '</div>' +
+                        '<div>' +
+                        '<span>￥</span>' +
+                        '<span class="accountPrice">' + data.price + '</span>' +
+                        '</div>' +
+                        '<div class="btn">' +
+                        '<button id="ms' + i + '" class="ms2" style="display: inline-block;" onclick="ms(' + i + ',' + parseFloat(data.price) + ')">' +
+                        '<strong  onclick="reduce(' + i + ',' + parseFloat(data.price) + ',' + parseFloat(data.id) + ')"></strong>' +
+                        '</button>' +
+                        '<i style="display: inline-block;"><span class="num" id="cartNum' + i + '">1</span></i>' +
+                        '<button id="ad' + i + '" class="ad2"  onclick="ad(' + i + ',' + parseFloat(data.price) + ',' + parseFloat(data.id) + ')">' +
+                        '<strong></strong>' +
+                        '</button>' +
+                        '<i style="display: none;">25</i>' +
+                        '</div>' +
+                        '</li>';
+                    $("#food").append(html);
+                    foodsId = foodsId + foodid;
+                } else {
+                    var cartNum = document.getElementById("cartNum" + i).innerText;
+                    $("#cartNum" + i).html(parseInt(cartNum) + 1);
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+        var totailNum = document.getElementById("totailNum").innerText;
+        $("#totailNum").html(parseInt(totailNum) + 1);
+        $("#totailNum").attr("style", "display:;");
+    }
+
+    //减少购物车内容
+    function reducecontent(i) {
+        var cartNum = document.getElementById("cartNum" + i).innerText;
+        $("#cartNum" + i).html(parseInt(cartNum) - 1);
+        var totailNum = document.getElementById("totailNum").innerText;
+        $("#totailNum").html(parseInt(totailNum) - 1);
+        if (document.getElementById("totailNum").innerText === '0') {
+            $("#totailNum").attr("style", "display:none;");
+        }
+        if (document.getElementById("cartNum" + i).innerText === '0') {
+            $("#cardFood" + i).remove();
+            foodsId = foodsId.replace(i + ",", "");
+        }
+
+    }
+
+    //购物车点击添加
+    function ad(i, price, id) {
+        var cartNum = document.getElementById("cartNum" + i).innerText;
+        var totail = document.getElementById("totail").innerText;
+        totail = parseFloat(totail) + price;
+        $("#ms" + i).attr("style", "display:;");
+        $("#cartNum" + i).html(parseInt(cartNum) + 1);
+        $("#cartNum" + i).attr("style", "display:;");
+        $("#totail").html(parseFloat(totail));
+        var totailNum = document.getElementById("totailNum").innerText;
+        $("#totailNum").html(parseInt(totailNum) + 1);
+        $("#totailNum").attr("style", "display:;");
+        var num = document.getElementById("num" + i).innerText;
+        $("#num" + i).html(parseInt(num) + 1);
+        status(i);
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.SAVE,
+            data: {
+                comId: GetQueryString("cid"),
+                token: GetQueryString("token"),
+                goodId: id,
+                natrue: '0'
+            },
+            success: function (data) {
+                alert(data.message);
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    //购物车点击减少
+    function ms(i, price, id) {
+        var cartNum = document.getElementById("cartNum" + i).innerText;
+        var totail = document.getElementById("totail").innerText;
+        totail = parseFloat(totail) - price;
+        $("#ms" + i).attr("style", "display:;");
+        $("#cartNum" + i).html(parseInt(cartNum) - 1);
+        $("#cartNum" + i).attr("style", "display:;");
+        $("#totail").html(parseFloat(totail));
+        var totailNum = document.getElementById("totailNum").innerText;
+        $("#totailNum").html(parseInt(totailNum) - 1);
+        $("#totailNum").attr("style", "display:;");
+        var num = document.getElementById("num" + i).innerText;
+        $("#num" + i).html(parseInt(num) - 1);
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.SUB,
+            data: {
+                comId: GetQueryString("cid"),
+                token: GetQueryString("token"),
+                goodId: id,
+                natrue: '0'
+            },
+            success: function (data) {
+                alert(data.message);
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    //清空购物车
+    function empty() {
+        foodsId = "";
+        $(".num").html(0);
+        $(".num").attr("style", "display:none;");
+        $(".reduce").attr("style", "display:none;");
+        $("#totailNum").html(0);
+        $("#totailNum").attr("style", "display:none;");
+        $("#totail").html(0);
+        $("#food").empty();
+        for (var j = 0; j < parseInt(totailFood); j++) {
+            status(j);
+        }
+
+    }
+
+    //弹出购物车
+    function shop() {
+        var shop = document.getElementById("shop");
+        var display = shop.style.display;
+        if (display == 'none') {
+            $("#shop").attr("style", "display:block;");
+        } else {
+            $("#shop").attr("style", "display:none;");
+        }
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var list = document.getElementById("goodslist");
+        var classid = list.getElementsByTagName("p");
+        for (var i = 0; i < classid.length; i++) {
+            $("#" + lis[i].id).change(function () {
+                var ulOne = document.getElementById("classes");
+                var lis = ulOne.getElementsByTagName("li");
+                for (var j = 0; j < lis.length; j++) {
+                    $("#" + lis[j].id).attr("class", "none");
+                }
+                $("#tang" + lis[i].id).attr("class", "active");
+            });
+        }
+
+
+        $("#userView").click(function () {
+            $.ajax({
+                type: 'POST',
+                url: BASE_URL + LOGIN_ACTION.ORDER_DESTINE,
+                data: {
+                    token: GetQueryString("token"),
+                    orderNo: GetQueryString("orderNo")
+                },
+                success: function (data) {
+                    link('mspay')
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+        });
+
+    });
+</script>
+<div class="box clearfix" style="background-color: #fff;">
+    <ul class="type-meat" id="classes">
+
+    </ul>
+    <ul class="meat-detail f-right" id="goodslist">
+
+    </ul>
+</div>
+</body>
+</html>

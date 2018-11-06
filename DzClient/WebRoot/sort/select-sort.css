@@ -1,0 +1,89 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    font-family: '微软雅黑';
+    font-size: 15px;
+    background: #f6f6f6;
+}
+
+a {
+    text-decoration: none;
+}
+
+li {
+    list-style: none;
+}
+
+p {
+    display: block;
+}
+
+.attr {
+    margin: 10px 0;
+    padding: 0 17px;
+    background: #fff;
+}
+
+.attr li {
+    border-bottom: 2px solid #f7f7f7;
+    display: block;
+    overflow: hidden;
+    padding: 10px 0;
+}
+
+.attr li:last-child {
+    border-bottom: 2px solid transparent;
+}
+
+.attr li p {
+    float: left;
+    color: #333;
+    font-size: 15px;
+    margin-top: 5px;
+}
+
+.attr li p span {
+    display: block;
+    font-size: 14px;
+    color: #666;
+}
+
+.attr li button {
+    float: right;
+    border: 1px solid #FF7E00;
+    color: #FF7E00;
+    font-size: 14px;
+    background: transparent;
+    padding: 8px 0;
+    width: 85px;
+    margin-left: 10px;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.sort li p {
+    margin-top: 0;
+    margin-left: 30px;
+}
+
+.sort li p span {
+    margin-top: 4px;
+}
+
+.sort li button {
+    margin-top: 6px;
+    margin-left: 30px;
+}
+
+@media (min-width:0px) and (max-width:360px) {
+    .idx-head div img {
+        width: 16px;
+        position: absolute;
+        bottom: 1px;
+        right: 5%;
+    }
+}
+

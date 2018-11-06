@@ -1,0 +1,212 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Editor Grid Example</title>
+
+</head>
+<body>
+	<script type="text/javascript">
+
+var gradeRJ = [['RKRQ','入库时间'],['SJSJ','上解时间'],['SBSJ','申报时间']]
+var clumStoreSJ = new Ext.data.SimpleStore({fields:['value','text'],data:gradeRJ})
+var startTime = '';
+var endTime = '';
+ Ext.onReady(function(){
+  	   var fm = Ext.form;
+  	   
+  	    function formatDate(value){
+        	return value ? value.dateFormat('Y-m-d') : '';
+    	};
+  	   
+	    statisticsStroe= new Ext.data.GroupingStore({
+			  proxy: new Ext.data.HttpProxy({url:'/GXDS/queryStatistics'}),
+			  reader: new Ext.data.JsonReader({totalProperty:'totalCount', root:'list',id:'id',
+			  successProperty :'@success',
+			  fields:[{name:'area'},{name:'column'},{name:'conditions'},{name:'table'} ,{name:'database'},{name:'id'},{name:'queryDate'},{name:'sort'}]
+			  })
+		});
+		
+		 var cbsm=new Ext.grid.CheckboxSelectionModel();
+		 var cm = new Ext.grid.ColumnModel([new Ext.grid.RowNumberer(),cbsm,{
+	           id:'area',
+	           header: "计算列描述",
+	           dataIndex: 'area',
+	           width: 120,
+	           editor: new fm.TextField({
+	               allowBlank: false
+	           })
+	        },{
+	           header: "计算列",
+	           dataIndex: 'column',
+	           width: 120,
+	           editor: new fm.TextField({
+	               allowBlank: false
+	           })
+	        },{
+	           header: "数据筛选条件",
+	           dataIndex: 'conditions',
+	           width: 120,
+	           align: 'right',
+	           editor: new fm.TextField({
+	               allowBlank: false
+	           })
+	        },{
+	           header: "顺序",
+	           dataIndex: 'sort',
+	           width: 120,
+	           align: 'right',
+	           editor: new fm.TextField({
+	               allowBlank: false
+	           })
+	        },{
+	           header: "查询时间方式",
+	           dataIndex: 'queryDate',
+	           width: 120,
+	           align: 'right',
+	           editor:new Ext.form.ComboBox({
+				   valueField :"value",
+				   displayField: "text",
+				   id:'kind2', 
+				   hiddenName:'impLevel',
+				   store: clumStoreSJ,
+				   mode: 'local',
+				   forceSelection: true,
+				   allowBlank:true,
+				   editable: false,
+				   width:273,
+				   triggerAction:'all'
+		       })
+	        },{
+	           header: "计算列来源表格",
+	           dataIndex: 'table',
+	           width: 120,
+	           align: 'right',
+	           editor: new fm.TextField({
+	               allowBlank: false
+	           })
+	        },{
+	           header: "数据库",
+	           dataIndex: 'database',
+	           width: 120,
+	           align: 'right',
+	           editor: new fm.TextField({
+	               allowBlank: false
+	           })
+	        },{
+	           header: "id",
+	           dataIndex: 'id',
+	           width: 120,
+	           align: 'right',
+	           editor: false,
+	           hidden:true
+	        }
+	    ]);
+
+    	 cm.defaultSortable = true;
+
+		 statisitcGrid =new Ext.grid.EditorGridPanel({
+					ds:statisticsStroe,
+					height:document.body.clientHeight-124,
+					width:document.body.clientWidth-193,
+					cm: cm,
+					sm:cbsm,
+					closable:true,
+					stripeRows:true,
+					tbar:[{   
+				        text: '增加',   
+				        handler: function() {   
+					          statisitcGrid.stopEditing();   
+					          statisticsStroe.insert(0, new Ext.data.Record({   
+					            area: '新增一行',   
+					            column: '新增一行',   
+					            conditions:  '新增一行', 
+					            table:  '新增一行',  
+					            database: '新增一行'
+					          }));   
+					          statisitcGrid.startEditing(0, 0);   
+				        }   
+				    },{
+				        text: '删除',   
+				        handler: function() { 
+				        Ext.MessageBox.confirm('消息', '确定删除吗?', deletes);
+					   
+					        }
+				    }]  
+		});
+		 
+		 		 
+		   var deletes  =  function(btn){
+ 					if(btn=='yes'){
+  							var b = "";
+							var rends = statisitcGrid.getSelections();
+							if(rends.length>0){
+							for(var i = 0 ; i<rends.length ; i++)
+							{
+							  var rend = rends[i];
+							  if(i==rends.length-1)
+							  {
+							     b = b + rend.get("id");
+							  }else
+							  {
+							     b = b + rend.get("id")+",";
+							  }
+							}
+
+					      Ext.Ajax.request({         
+					           url: '/GXDS/deleteStatistics',  
+					           waitMsg : '正在处理......', 
+					           params :{
+								  statid:b
+							   },
+					           success:function(form,action)
+					           {
+					        	statisticsStroe.reload();
+					        		Ext.Msg.alert('温馨提示','删除成功');
+					           },failure: function(form,action){
+					           			Ext.Msg.alert('错误','后端异常');
+					           } 
+						});
+					}else{
+						Ext.Msg.alert('错误','请选择需要删除的数据!');
+					}
+		}
+ }   
+
+			statisitcGrid.render('editor-grid');
+			
+			var updateDate = function (obj){
+			    var r = obj.record;//获取被修改的行
+				if( r.data.area !='新增一行' &&r.data.column !='新增一行' && r.data.conditions !='新增一行'&& r.data.table !='新增一行' && r.data.database !='新增一行' ){
+					Ext.Ajax.request({
+						url: '/GXDS/statistics',
+						waitMsg : '处理中，请稍等..',
+						waitTitle: '请稍等',
+						params :{
+							area:r.data.area,
+							column:r.data.column,
+							conditions:r.data.conditions,
+							startTime:startTime.value,
+							endTime:endTime.value,
+							table:r.data.table,
+							database:r.data.database,
+							queryDate:r.data.queryDate,
+							id:r.data.id,
+							sort:r.data.sort
+						},
+						success:function(response, options){
+							Ext.Msg.alert('温馨提示','修改成功');
+						},failure: function(form,action){
+							Ext.Msg.alert('错误','后端异常');
+						}
+					});
+				}
+			}
+			statisticsStroe.load();
+			statisitcGrid.addListener('afteredit', updateDate);//给editgrid的''afteredit''事件增加回调函数3. });
+
+	});
+
+	</script>
+	<div id="editor-grid"></div>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>经营数据</title>
+    <link href="./managementData.css" type="text/css"  rel="stylesheet">
+    <script type="text/javascript" src="../../common/js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="../../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../../common/js/jquery.timers.js"></script>
+	<script type="text/javascript" src="../../common/js/common.js"></script>
+	<script type="text/javascript" src="../../common/js/jquery.timers.js"></script>
+	<link rel="stylesheet" type="text/css" href="./iconfont.css">
+    <link href="./bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="./daterangepicker.css" />
+	<script type="text/javascript" src="./moment.js"></script>
+    <script type="text/javascript" src="./daterangepicker.js"></script>
+    <!-- 增加浏览器小图标 -->
+<link rel="icon" href="../../common/images/logo.jpg" type="image/x-icon">
+</head>
+<body>
+<script type="text/javascript">
+	var companyId = getCookie("companyId");
+	var token = getCookie("token");
+	$(document).ready(function() {//页面加载
+		init();
+		 $('body').everyTime('10s','ds1',function (){
+             init();
+        }); 
+	})	
+	
+	function playSound(soundSrl){
+	   var strAudio = '<audio id="audioPlay" src='+soundSrl+' hidden="true">';
+	   if ( $( "body" ).find( "audio" ).length <= 0 )
+		 $( "body" ).append(strAudio );
+	   var audio = document.getElementById( "audioPlay" );
+	   audio.play();			 
+	}
+	function init(){
+		$.ajax({
+			type : 'POST',
+			url : BASE_URL + LOGIN_ACTION.NEWORDER,
+			data : {
+				companyId : companyId
+			},
+			success : function(data) {
+				if(data.length>0){
+					var soundSrl="../../common/new.mp3";
+					playSound(soundSrl);
+				}
+			},
+			error : function(error) {
+				console.log(error);
+			}
+		});
+	}
+	
+	
+	function exit() { //点击退出系统
+	
+			var msg = "确定要退出系统吗？";
+	
+			$(".promptContent").text(msg);
+			$(".backgroundPrompt").show();
+			$("#PromptCancel").click(function() {
+				$(".backgroundPrompt").hide();
+			});
+			$("#PromptOk").click(function() {
+				$(".backgroundPrompt").hide();
+				window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html"; //跳转到登录页面
+			});
+		}
+	
+		function gotoInventory() { //点击沽清
+			window.location.href = BASE_URL + "/DzClient/serviceUser/inventory/inventory.html";
+		}
+	
+		function gotoNetReserve() { //点击网络订单	
+			window.location.href = BASE_URL + "/DzClient/serviceUser/netWorkReservation/netWorkReservation.html?";
+		}
+	
+		function gotoMSreceive() { //点击美食接单
+			//window.location.href = BASE_URL + "/DzClient/serviceUser/computer_order/computer_order.html?companyId="+companyId+"&token="+token;
+			window.location.href = BASE_URL + "/DzClient/serviceUser/computer_order/computer_order.html";
+	
+		}
+	
+		function gotoIndex() { //回到首页
+			if (companyId == null || token == null) {
+				window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";
+			} else {
+				//window.location.href=BASE_URL+"/DzClient/serviceUser/index/index.html?companyId="+companyId+"&token="+token;
+				window.location.href = BASE_URL + "/DzClient/serviceUser/index/index.html";
+			}
+		}
+	
+		function gotoData() { //点击经营数据
+			window.location.href = BASE_URL + "/DzClient/serviceUser/managementData/managementData.html";
+		}
+	
+	
+		function isLogin() { //Token失效登录跳转
+			if (companyId == "null" || token == "null" || companyId == '' || token == '' || token == null || companyId == null) {
+				window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";
+			}
+		}
+	
+		function getLoginOfCookie() { //判断用户是否有Cookie信息并检测登录
+			var loginCookie = new String(document.cookie);
+			if (loginCookie.length == 0 || loginCookie.replace(/(^s*)|(s*$)/g, "").length == 0 || loginCookie == null || loginCookie == undefined || loginCookie == '') {
+				alert("请您登录后再进行操作!!!");
+				window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";
+			}
+		}
+	
+	
+	
+	
+	$('.ranges_1 ul').remove();
+    $('#daterange-btn').daterangepicker({
+            ranges: {
+                '全部': [moment(), moment().subtract(-1, 'days')],
+                '今天': [moment(), moment()],
+                '明天': [moment().subtract(-1, 'days'), moment().subtract(-1, 'days')],
+                '未来七天': [moment(),moment().subtract(-6, 'days')],
+                '未来30天': [moment(),moment().subtract(-29, 'days')]
+            },
+            startDate: moment(),
+            endDate: moment()
+        },
+        function(start, end,label) {
+            //label:通过它来知道用户选择的是什么，传给后台进行相应的展示
+            console.log(label)
+            if(label=='全部'){
+                $('#daterange-btn span').html('全部');
+            }else if(label=='今天'){
+                $('#daterange-btn span').html(start.format('YYYY/MM/DD'));
+            }else if(label=='明天'){
+                $('#daterange-btn span').html(start.format('YYYY/MM/DD'));
+            }else if(label=='未来七天'){
+                $('#daterange-btn span').html(start.format('YYYY/MM/DD')+'-'+end.format('YYYY/MM/DD'));
+            }else if(label=='未来30天'){
+                $('#daterange-btn span').html(start.format('YYYY/MM/DD')+'-'+end.format('YYYY/MM/DD'));
+            }
+
+        }
+    );
+</script>
+
+
+<div id="body">
+    <div id="left_div">
+        <ul class="left_ul">
+            <li onclick="gotoIndex()">首页</li>
+            <li onclick="gotoInventory()">沽清</li>
+            <li onclick="gotoNetReserve()">网络订单</li>
+            <li onclick="gotoMSreceive()" style="position: relative">美食接单<span class="deliciousFoodOrderNum">0</span></li>
+            <li class="click" onclick="gotoData()">经营数据</li>
+        </ul>
+        <div class="exit" onclick="exit()"><i></i></div>
+    </div>
+
+
+    <div id="right_div">
+        
+        <div class="bjui-pageContent">
+		    <div class="form-group d_t_dater">
+		        <label class="col-sm-3 control-label"></label>
+		        <div class="col-sm-12">
+		            <div class="input-group">
+		                <button type="button" class="btn btn-default" id="daterange-btn">
+		                    <span>
+		                    <i class="icon iconfont icon-calendar1"></i> 日期选择
+		                    </span>
+		                    <i class="icon iconfont icon-danxian-youjiantou-copy"></i>
+		                </button>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+        
+        <div class="right">
+
+
+
+            <div class="data_div">
+                <p class="data_title"><i></i>堂食订单</p>
+                <div class="order_div">
+                    <div class="order">
+                        <div class="orderAbove">
+                            <h1>已完成</h1>
+                            <p><i>0</i>单</p>
+                        </div>
+                        <p class="orderMoney">实收金额：0 元</p>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="data_div">
+                <p class="data_title"><i></i>线上订单</p>
+                <div class="order_div">
+                    <div class="order">
+                        <div class="orderAbove">
+                            <h1>美食已完成订单</h1>
+                            <p><i>0</i>单</p>
+                        </div>
+                        <p class="orderMoney">实收金额：0 元</p>
+                    </div>
+                    <div class="order">
+                        <div class="orderAbove">
+                            <h1>外卖已完成订单</h1>
+                            <p><i>0</i>单</p>
+                        </div>
+                        <p class="orderMoney">已收金额：0 元</p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+
+</body>
+</html>
+

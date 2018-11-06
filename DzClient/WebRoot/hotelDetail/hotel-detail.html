@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>酒店详情</title>
+		<link rel="stylesheet" href="./hotel-detail.css">
+		<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+		<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript"
+			src="../common/js/jquery.lazyload.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+	</head>
+	<body>
+		<script type="text/javascript">
+	$.ajax( {
+		type : 'POST',
+		url : BASE_URL + LOGIN_ACTION.FIND,
+		data : {
+			location : '25.2560978214,110.2188938856',
+			id : '3'
+		},
+		success : function(data) {
+			var html='<img class="poster" src="'+data.img+'" alt="">'+
+					'<p class="name">'+data.name+
+					'</p>'+
+						'<div class="comment">'+
+							'<span><i class="grade-number">'+data.assess+'</i>分</span><span>非常好</span>'+
+							'<p class="f-right">'+
+								'<span>13条点评</span>'+
+								'<img src="../common/img/arrow.png" alt="">'+
+							'</p>'+
+						'</div>';
+					$("#hotelIfo").append(html);
+		},
+		error : function(error) {
+			console.log(error);
+		}
+	});
+	
+	$.ajax( {
+		type : 'POST',
+		url : BASE_URL + LOGIN_ACTION.GETGOOD,
+		data : {
+			id : '3'
+		},
+		success : function(data) {
+			var list=data.list;
+			var label='';
+			var count=0;
+			for(var i = 0;i < list.length;i++){
+				count=count+1;
+					if(count < list.length){
+						if(count == 3){
+							label=label+'<span>'+list[i].label+'</span>';
+						}else if(count == 4){
+							label=label+'</p><p><span>'+list[i].label+'</span>'+'|';
+						}else{
+							label=label+'<span>'+list[i].label+'</span>'+'|';
+						}
+					}else{
+						label=label+'<span>'+list[i].label+'</span>';
+					}
+			}
+			var html='<p class="name">'+
+						data.name+
+					'</p>'+
+					'<div class="rule-info">'+
+						'<p>'+
+						label+
+						'</p>'+
+						'<p>'+
+							data.status+
+						'</p>'+
+					'</div>'+
+					'<p class="price-number">'+
+						'￥'+data.price+
+					'</p>';
+				$("#rules").append(html);
+		},
+		error : function(error) {
+			console.log(error);
+		}
+	});
+	
+	$.ajax( {
+		type : 'POST',
+		url : BASE_URL + LOGIN_ACTION.FIND,
+		data : {
+			location : '25.2560978214,110.2188938856',
+			id : '3'
+		},
+		success : function(data) {
+			var html='<p class="distance">'+
+							data.place+'，距我'+data.range+
+						'</p>'+
+						'<div class="address-wrap">'+
+							'<p class="address">'+
+								data.address+
+							'</p>'+
+							'<p class="nav-map">'+
+								'<span>地图／导航</span>'+
+								'<img src="../common/img/arrow.png" alt="">'+
+							'</p>';
+					$("#address").append(html);
+		},
+		error : function(error) {
+			console.log(error);
+		}
+	});
+	
+	$.ajax( {
+		type : 'POST',
+		url : BASE_URL + LOGIN_ACTION.GETGOOD,
+		data : {
+			id : '3'
+		},
+		success : function(data) {
+			var totalPrice=parseFloat(data.days)*parseFloat(data.price);
+			var html='<div class="date">'+
+						'<span>入住<i>'+data.intoTime+'</i>今天</span>'+
+						'<span>离店<i>'+data.leaveTime+'</i>明天</span>'+
+						'<p class="f-right">'+
+							'<span><i>共'+data.days+'晚</i> </span>'+
+							'<img src="../common/img/arrow.png" alt="">'+
+						'</p>'+
+					'</div>';
+				$("#hotel-book-date").append(html);
+				$("#totalPrice").html("¥"+totalPrice);
+		},
+		error : function(error) {
+			console.log(error);
+		}
+	});
+</script>
+		<div class="hotel-detail-box">
+			<div class="hotel-comment" id="hotelIfo">
+			</div>
+			<div class="hotel-rules" id="rules">
+			</div>
+			<div class="hotel-addr" id="address">
+			</div>
+		</div>
+		<div class="hotel-book-date" id="hotel-book-date">
+		</div>
+		<div class="submit-book">
+			<span>合计：</span>
+			<i id="totalPrice"></i>
+			<span class="f-right submit-btn">预定</span>
+		</div>
+	</body>
+</html>

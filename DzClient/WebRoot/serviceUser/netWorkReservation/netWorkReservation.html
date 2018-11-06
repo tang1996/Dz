@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>网络订单</title>
+<METAHTTP-EQUIV ="Pragma"CONTENT="no-cache"> <METAHTTP-EQUIV
+	="Cache-Control"CONTENT="no-cache"> <METAHTTP-EQUIV
+	="Expires"CONTENT="0">
+<link href="./netWorkReservation.css" type="text/css" rel="stylesheet">
+<link href="../keyboard.css" type="text/css" rel="stylesheet">
+<script type="text/javascript" src="../../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../../common/js/jquery.lazyload.min.js"></script> 
+	<script type="text/javascript" src="../../common/js/baseUrl.js"></script> 
+	<script	type="text/javascript" src="../../common/js/common.js"></script> 
+	<script	type="text/javascript" src="../../common/js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="../../common/js/jquery.timers.js"></script>
+	<!-- 增加浏览器小图标 -->
+<link rel="icon" href="../../common/images/logo.jpg" type="image/x-icon">
+</head>
+
+<script type="text/javascript">
+
+	/* 	companyId = GetQueryString("companyId");
+		token = GetQueryString("token"); */
+	companyId = getCookie("companyId");
+	token = getCookie("token");
+	dataCount = 0;
+	var pageIndex_no = 1; //未订菜的初始页面数
+	var pageIndex = 0; //已订菜的初始页面数
+
+	$(document).ready(function() { //页面初始化
+		loginCookie();
+		getNoRealting(pageIndex_no, ''); //得到未点菜的
+		getRealting(pageIndex, ''); //得到已点菜的
+		$("#searchOrderBut").attr("onclick", "searchOrder()"); //已订单的搜索订单按钮
+		$("#searchOrderBut_no").attr("onclick", "searchOrder_no()"); //未订单的搜索订单按钮
+		//$(".searchOrderInput")
+
+		init();
+		$('body').everyTime('10s','ds1',function (){
+             init();
+        }); 
+	});
+	
+	function playSound(soundSrl){
+		var strAudio = '<audio id="audioPlay" src='+soundSrl+' hidden="true">';
+		if ( $( "body" ).find( "audio" ).length <= 0 )
+		$( "body" ).append(strAudio );
+		var audio = document.getElementById( "audioPlay" );
+		audio.play();			 
+	}
+	
+	function init(){
+		$.ajax({
+			type : 'POST',
+			url : BASE_URL + LOGIN_ACTION.NEWORDER,
+			data : {
+				companyId : companyId
+			},
+			success : function(data) {
+				var html = '';
+				$(".deliciousFoodOrderNum").html(data.length);
+				if(data.length>0){
+					var soundSrl="../../common/new.mp3";
+					playSound(soundSrl);
+				}
+			},
+			error : function(error) {
+				console.log(error);
+			}
+		});
+	}
+
+	function getNoRealting(pageIndex_no, content) { //查询商家未点菜的网络预约
+		$.ajax({
+			type : 'post',
+			url : BASE_URL + LOGIN_ACTION.BOOKTIMEINSIDENORESERVEVIEW,
+			data : {
+				companyId : companyId,
+				pageIndex : pageIndex_no,
+				content : content
+			},
+			success : function(data) {
+				showBooktimeNoRData(data); //未订菜的展示方法
+				pageNo($(".no_page"), pageIndex_no, data.pagetotal, content); //未订菜的页数码	
+
+				$(".no_page .previous").click(function() { //未订菜的上一页
+					if (pageIndex_no > 1) {
+						pageIndex_no--;
+					} else {
+						pageIndex_no = 1;
+					}
+					getNoRealting(pageIndex_no, content);
+				});
+
+				$(".no_page .next").click(function() { //未订菜的下一页
+					if (pageIndex_no == data.pagetotal) {
+						pageIndex_no = data.pagetotal;
+					} else {
+						pageIndex_no++;
+					}
+					getNoRealting(pageIndex_no, content);
+				});
+			},
+			error : function(error) {
+				console.log(error);
+			}
+		});
+	}
+
+	function getRealting(pageIndex, content) { //查询商家已点菜的网络预约
+		$.ajax({
+			type : 'post',
+			url : BASE_URL + LOGIN_ACTION.BOOKTIMEINSIDERESERVEVIEW,
+			data : {
+				companyId : companyId,
+				pageIndex : pageIndex,
+				content : content
+			},
+			success : function(data) {
+				showBooktimeData(data); //订菜的展示方法
+				page($(".page_end"), pageIndex, data.pagetotal, content); //已订菜的页数码	
+
+				$(".page_end .previous").click(function() { //已订菜的上一页
+					if (pageIndex > 1) {
+						pageIndex--;
+					} else {
+						pageIndex = 1;
+					}
+					getRealting(pageIndex, content);
+				});
+
+				$(".page_end .next").click(function() { //已订菜的下一页
+					if (pageIndex == data.pagetotal) {
+						pageIndex = data.pagetotal;
+					} else {
+						pageIndex++;
+					}
+					getRealting(pageIndex, content);
+				});
+			},
+			error : function(error) {
+				console.log(error);
+			}
+		});
+	}
+	/*
+	function exit(){	//点击退出系统
+	
+	    var msg = "确定要退出系统吗？";
+	    
+	    $(".promptContent").text(msg);				
+		$(".backgroundPrompt").show();
+		$("#PromptCancel").click(function(){
+			$(".backgroundPrompt").hide();
+		});
+		$("#PromptOk").click(function(){
+			$(".backgroundPrompt").hide();
+	    	window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";//跳转到登录页面
+		});
+	}
+	*/
+	function showBooktimeNoRData(data) { //得到返回数据进行展示(未订菜)
+		var appenHtml = '';
+		var htmlNavigation = '<tr><th width="20%">订单号</th>' +
+			'<th width="13%">联系方式</th>' +
+			'<th width="10%">桌号</th>' +
+			'<th width="18%">下单时间</th>' +
+			'<th width="18%">预约时间</th>' +
+			'<th width="10%">押金</th>' +
+			'<th width="11%">操作</th></tr>';
+		if (parseInt(data.pagetotal) == 0 || data == null) {
+			appenHtml = '<tr><td colspan="7">暂无网络订单</td></tr>';
+		} else {
+			for (var i = 0; i < data.list.length; i++) {
+				var table = escape(data.list[i].tableNo);
+				appenHtml = appenHtml + '<tr><td>' + data.list[i].orderNo + '</td>' +
+					'<td>' + data.list[i].userPhone + '</td>' +
+					'<td>' + data.list[i].tableNo + '</td>' +
+					'<td>' + data.list[i].creatTime + '</td>' +
+					'<td>' + data.list[i].reserveTime + '</td>' +
+					'<td>' + data.list[i].deposit + '</td>' +
+					//'<td><a href="javascript:gotoAddMenus('+data.list[i].orderid+','+data.list[i].tableNo+')">去点菜</a></td></tr>';	
+					'<td><a href=javascript:gotoAddMenus(\'' + data.list[i].orderid + '\',"' + table + '",\'' + data.list[i].people + '\',\'' + data.list[i].orderNo + '\')>去点菜</a></td></tr>';
+			}
+		}
+		htmlNavigation = htmlNavigation + appenHtml;
+		$("#showNorealting").html(htmlNavigation);
+	}
+
+	function showBooktimeData(data) { //得到返回数据进行展示(已订菜)
+		var appenHtml = '';
+		/*	var htmlNavigation = '<tr><th width="20%">订单号</th>'+
+								'<th width="13%">联系方式</th>'+
+								'<th width="10%">桌号</th>'+
+								'<th width="18%">下单时间</th>'+
+								'<th width="18%">预约时间</th>'+
+								'<th width="10%">押金</th>'+
+								'<th width="11%">操作</th></tr>';*/
+		var htmlNavigation = '<tr>' +
+			'<th width="24%">订单号</th>' +
+			'<th width="17%">联系方式</th>' +
+			'<th width="14%">桌号</th>' +
+			'<th width="26%">下单/预约时间</th>' +
+			'<th width="15%">操作</th>' +
+			'</tr>';
+		if (parseInt(data.totalCount) == 0 || data == null) {
+			appenHtml = '<tr><td colspan="7">暂无网络订单</td></tr>';
+		} else {
+			for (var i = 0; i < data.list.length; i++) {
+
+				var table = escape(data.list[i].tableNo);
+
+				var pay_status = ''; //订单状态
+
+				var dicount = ''; //优惠折扣
+				if (data.list[i].discount == null) {
+					dicount = '';
+				} else {
+					dicount = data.list[i].discount ;
+				}
+
+				if (data.list[i].isPay == '2') { //判断石否交押金
+					pay_status = '已付款(且已点菜)';
+				} else {
+					pay_status = '已交押金';
+				}
+
+
+
+				/*	1appenHtml = appenHtml + '<tr><td>'+data.list[i].orderNo+'</td>'+
+											'<td>'+data.list[i].userPhone+'</td>'+
+											'<td>'+data.list[i].tableNo+'</td>'+
+											'<td>'+data.list[i].creatTime+'</td>'+
+											'<td>'+data.list[i].reserveTime+'</td>'+
+											'<td>'+data.list[i].deposit+'</td>'+
+											'<td><a href=javascript:getRealtingFood('+data.list[i].tableNo+','+data.list[i].orderid+',"'+data.list[i].orderNo+'")>查看菜品</a></td></tr>';	*/
+
+				var option = '';
+
+				if (data.list[i].isDost == 1) {
+					option = '<td><a href=javascript:gotoAddMenus(' + data.list[i].orderId + ',\'' + table + '\',' + data.list[i].people + ',\'' + data.list[i].orderNo + '\')>操作菜品</a></td></tr>';
+				} else {
+					option = '<td><a href="#" onclick="getTableId('+data.list[i].orderId+')">开台</a><a href=javascript:gotoAddInsideMenus(' + data.list[i].orderId + ',\'' + table + '\',' + data.list[i].people + ',\'' + data.list[i].orderNo + '\')>操作菜品</a></td></tr>';
+				}
+
+				appenHtml = appenHtml + '<tr>' +
+					'<td>' + data.list[i].orderNo + '</td>' +
+					'<td>' + data.list[i].userPhone + '</td>' +
+					'<td>' + data.list[i].tableNo + '</td>' +
+					'<td>下单：' + data.list[i].creatTime + '<p style="color: #ff0;">预约：' + data.list[i].reserveTime + '</p></td>' + option;
+
+					//'<td><a href=javascript:gotoAddInsideMenus('+data.list[i].orderId+',\''+table+'\','+data.list[i].people+',\''+data.list[i].orderNo+'\')>操作菜品</a></td></tr>'; 	
+
+			}
+		}
+		htmlNavigation = htmlNavigation + appenHtml;
+		$("#showrealting").html(htmlNavigation);
+	}
+
+	//2018-10-14 @Tyy 开台按钮  start
+	function getTableId(orderid){//修改餐桌状态，并打印菜品到厨房
+			$.ajax({
+			 type:'post',
+			 url:BASE_URL + LOGIN_ACTION.CHANGE_STATUS,
+			 data:{
+			 	orderId : orderid,
+			 	status:2
+			 },
+			 success:function(data){
+				 if(data.success == true){
+				 	onlyOKPrompt("该桌已开启就餐中","2");
+				 	
+				 /* 	$.ajax({//添加菜品到厨房打印机
+						 type:'post',
+						 url:BASE_URL + LOGIN_ACTION.JOB_OPEN,
+						 data:{
+						 	orderId : orderid
+						 },
+						 success:function(data){
+						 	var table=escape(data.list[i].tableNo);
+						 	gotoAddInsideMenus(orderid,table,meals,orderNo);
+						 },
+						 error: function (error) {
+					          console.log(error);
+					       }
+					}); */
+				 } else {
+				 	onlyOKPrompt("该桌正在就餐中，请先结算该餐桌","2");
+				 }
+			 },
+			 error: function (error) {
+		          console.log(error);
+		       }
+			});	
+	}
+	//end
+	
+	function getRealtingFood(tableno, orderId, orderno) { //查看已订菜的菜品
+		$.ajax({
+			type : 'post',
+			url : BASE_URL + LOGIN_ACTION.RELATING_GETONSIDE,
+			data : {
+				companyid : companyId,
+				tableNo : tableno,
+				orderId : orderId
+			},
+			success : function(data) {
+				var list = data.list;
+				var html = '';
+				var num = 1;
+				if (list.length > 0) {
+					for (var i = 0; i < list.length; i++) {
+						html = html + '<tr><td>' + num + '</td>' +
+							'<td style="text-align: left">' + list[i].name + '</td>' +
+							'<td>X' + list[i].numb + '</td>' +
+							'<td>￥' + (list[i].price * list[i].numb).toFixed(2) + '</td></tr>';
+					}
+				}
+				$("#realtingFood").html(html);
+				$("#insideOrderTitle").html(orderno + " 账单详情");
+				$(".lookOneOrder_background").show();
+				$("#NetOrderAddGoods").click(function() {
+					gotoAddMenus(orderId, tableno); //已订菜的跳转加菜页面
+				});
+			},
+			error : function(error) {
+				console.log(error);
+			}
+		});
+	}
+
+	function gotoAddInsideMenus(orderid, tableNo, meals, orderNo) { //跳转到线下点菜页面	/Dz/		未改
+		$.ajax({
+			type : 'post',
+			url : BASE_URL + LOGIN_ACTION.CATA_ONSIDEANDINSIDE,
+			data : {
+				orderId : orderid
+			},
+			success : function(data) {
+				window.location.href = './insideOrderaddMenus/insideOrderaddMenus.html?netOrder=' + orderNo + '&companyId=' + companyId + '&tableNo=' + tableNo + '&meals=' + data.doingMeals + '&orderId=' + orderid + '&insideOrderId=' + data.insideOrderId;
+			},
+			error : function(error) {
+				console.log(error);
+			}
+		});
+	}
+
+	function gotoAddMenus(orderid, tableNo, meals) { //跳转到点菜页面	/Dz/cate?netView
+		$.ajax({
+			type : 'post',
+			url : BASE_URL + LOGIN_ACTION.CATEVIEW,
+			data : {
+				/* 		 	companyid:companyId,
+						 	tableNo:tableNo, */
+				orderId : orderid
+			},
+			success : function(data) {
+				if (data.status == '2') {
+					onlyOKPrompt("餐桌就餐中,请先结算餐桌", "2");
+				} else {
+					$.cookie("insideOrderId", null);
+					window.location.href = './OrderaddMenus/OrderaddMenus.html?companyId=' + companyId + '&tableNo=' + tableNo + '&meals=' + meals + '&orderId=' + orderid;
+				}
+
+			/*var meals = data.meals;
+			if (data.status == '2') {
+				onlyOKPrompt("餐桌就餐中,请先结算餐桌", "2");
+			} else {
+				$.ajax({
+					type : 'post',
+					url : BASE_URL + LOGIN_ACTION.RESERVEUPDATESTATUS,
+					data : {
+						id : data.reserveId,
+						status : '2'
+					},
+					success : function(datas) {
+						$.cookie("insideOrderId", null);
+						window.location.href = './OrderaddMenus/OrderaddMenus.html?companyId=' + companyId + '&tableNo=' + tableNo + '&meals=' + meals + '&orderId=' + orderid;
+					},
+					error : function(errors) {
+						console.log(errors);
+					}
+				});
+			}*/
+			},
+			error : function(error) {
+				console.log(error);
+			}
+		});
+
+	}
+
+	function searchOrder() { //点击已订菜订单搜索栏
+		var InputContent = '';
+		InputContent = $("#searchOrderInput").val();
+		getRealting(pageIndex, InputContent);
+	//$("#searchOrderInput").val('');
+	}
+
+	function searchOrder_no() { //点击未订菜订单搜索栏
+		InputContent = '';
+		InputContent = $("#searchOrderInput_no").val();
+		getNoRealting(pageIndex_no, InputContent);
+	//$("#searchOrderInput_no").val('');
+	}
+
+	function gotoInventory() { //点击沽清
+		//window.location.href = BASE_URL + "/DzClient/serviceUser/inventory/inventory.html?companyId="+companyId+"&token="+token;
+		window.location.href = BASE_URL + "/DzClient/serviceUser/inventory/inventory.html";
+	}
+
+	function gotoNetReserve() { //点击网络订单	
+		//window.location.href = BASE_URL + "/DzClient/serviceUser/netWorkReservation/netWorkReservation.html?companyId="+companyId+"&token="+token;
+		window.location.href = BASE_URL + "/DzClient/serviceUser/netWorkReservation/netWorkReservation.html";
+	}
+
+	function gotoMSreceive() { //点击美食接单
+		//window.location.href = BASE_URL + "/DzClient/serviceUser/computer_order/computer_order.html?companyId="+companyId+"&token="+token;
+		window.location.href = BASE_URL + "/DzClient/serviceUser/computer_order/computer_order.html";
+	}
+
+	function gotoIndex() { //回到首页
+		if (companyId == null || token == null) {
+			window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";
+		} else {
+			window.location.href = BASE_URL + "/DzClient/serviceUser/index/index.html";
+		}
+	}
+
+	function gotoData() { //点击经营数据
+		window.location.href = BASE_URL + "/DzClient/serviceUser/data/data.html";
+	}
+
+
+	function isLogin() { //Token失效登录跳转
+		if (companyId == "null" || token == "null" || companyId == '' || token == '' || token == null || companyId == null) {
+			window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";
+		}
+	}
+
+	function exit() { //点击退出系统
+		var msg = "确定要退出系统吗？";
+		$(".promptContent").text(msg);
+		$(".backgroundPrompt").show();
+		$("#PromptCancel").click(function() {
+			$(".backgroundPrompt").hide();
+		});
+		$("#PromptOk").click(function() {
+			$(".backgroundPrompt").hide();
+			window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html"; //跳转到登录页面
+		});
+	}
+
+	function onlyOKPrompt(msg, status) { //弹出确认框	刷新当前页面
+		$(".onlyOKPrompt_content").text(msg);
+		$(".background_onlyOKPrompt").show();
+		$(".onlyOKPrompt_button p").click(function() { //确认框的确认事件
+			$(".background_onlyOKPrompt").hide();
+			switch (status) {
+			case '0': //跳转到登录页面
+				window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";
+				break
+			case '1': //当前页面刷新
+				window.location.reload();
+				break
+			case '2': //不做反应
+				break
+			}
+		});
+	}
+</script>
+<body>
+
+	<div id="body">
+
+		<div class="left">
+			<ul class="left_ul">
+				<li onclick="gotoIndex()">首页</li>
+				<li onclick="gotoInventory()">沽清</li>
+				<li class="click" onclick="gotoNetReserve()">网络订单</li>
+				<li onclick="gotoMSreceive()" style="position: relative">今日网络接单<span
+					class="deliciousFoodOrderNum">0</span></li>
+				<li onclick="gotoData()">经营数据</li>
+			</ul>
+			<div class="exit" onclick="exit()">
+				<i></i>
+			</div>
+		</div>
+
+		<div class="right" id="right_div">
+			<div class="choose">
+				<p class="noAddFood_p click">未点菜</p>
+				<p class="addFoodEnd_p">已点菜</p>
+			</div>
+
+			<!-- 未点菜 -->
+			<div class="noAddFood">
+				<div class="noSearch_div Search_div">
+					<div class="noSearch Search">
+						<input type="text" placeholder="输入订单号或联系方式"
+							id="searchOrderInput_no">
+						<p id="searchOrderBut_no">搜索</p>
+					</div>
+				</div>
+
+				<div class="AddFoodList">
+					<table cellpadding="0" cellspacing="0" id="showNorealting">
+
+					</table>
+				</div>
+				<div class="page no_page">
+					<a href="javascript:(0)">上一页</a> <span>1</span> <a
+						href="javascript:(0)">2</a> <a href="javascript:(0)">3</a> <a
+						href="javascript:(0)">下一页</a>
+				</div>
+			</div>
+
+
+			<!-- 已点菜 -->
+			<div class="addFoodEnd" style="display: none">
+				<div class="Search_div">
+					<div class="Search">
+						<input type="text" placeholder="输入订单号或联系方式" id="searchOrderInput">
+						<p id="searchOrderBut">搜索</p>
+					</div>
+				</div>
+
+				<div class="AddFoodList">
+					<table cellpadding="0" cellspacing="0" id="showrealting">
+					</table>
+				</div>
+				<div class="page page_end">
+					<a href="javascript:(0)">上一页</a> <span>1</span> <a
+						href="javascript:(0)">2</a> <a href="javascript:(0)">3</a> <a
+						href="javascript:(0)">下一页</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+	<div class="lookOneOrder_background" style="display:none">
+		<div class="lookOneOrder">
+			<div class="oneOrderTitle" id="insideOrderTitle"></div>
+			<div class="oneOrder">
+				<table cellspacing="0" cellpadding="0" id="realtingFood">
+				</table>
+			</div>
+			<div class="oneOrder_bottom">
+				<p id="NetOrderAddGoods">加菜</p>
+				<p class="cancel">取消</p>
+			</div>
+		</div>
+	</div>
+</body>
+<!-- 弹窗 -->
+<div class="backgroundPrompt" style="display: none;">
+	<div class="promptBox">
+		<div class="promptContent">提示内容</div>
+		<div class="promptButton">
+			<p class="cancel" id="PromptCancel">取消</p>
+			<p class="ok" id="PromptOk">确认</p>
+		</div>
+	</div>
+</div>
+<!-- 提示  跳转-->
+<div class="background_onlyOKPrompt" style="display: none;">
+	<div class="onlyOKPrompt">
+		<div class="onlyOKPrompt_content">提示内容</div>
+		<div class="onlyOKPrompt_button">
+			<p>确认</p>
+		</div>
+	</div>
+</div>
+
+<!-- 键盘  -->
+<div id="container">
+	<!-- <textarea id="write" rows="6" cols="60"></textarea> -->
+	<div class="close"></div>
+	<ul id="keyboard">
+		<li class="symbol"><span class="off">`</span><span class="on">~</span></li>
+		<li class="symbol"><span class="off">1</span><span class="on">!</span></li>
+		<li class="symbol"><span class="off">2</span><span class="on">@</span></li>
+		<li class="symbol"><span class="off">3</span><span class="on">#</span></li>
+		<li class="symbol"><span class="off">4</span><span class="on">$</span></li>
+		<li class="symbol"><span class="off">5</span><span class="on">%</span></li>
+		<li class="symbol"><span class="off">6</span><span class="on">^</span></li>
+		<li class="symbol"><span class="off">7</span><span class="on">&amp;</span></li>
+		<li class="symbol"><span class="off">8</span><span class="on">*</span></li>
+		<li class="symbol"><span class="off">9</span><span class="on">(</span></li>
+		<li class="symbol"><span class="off">0</span><span class="on">)</span></li>
+		<li class="symbol"><span class="off">-</span><span class="on">_</span></li>
+		<li class="symbol"><span class="off">=</span><span class="on">+</span></li>
+		<li class="delete lastitem">delete</li>
+		<li class="tab">tab</li>
+		<li class="letter">q</li>
+		<li class="letter">w</li>
+		<li class="letter">e</li>
+		<li class="letter">r</li>
+		<li class="letter">t</li>
+		<li class="letter">y</li>
+		<li class="letter">u</li>
+		<li class="letter">i</li>
+		<li class="letter">o</li>
+		<li class="letter">p</li>
+		<li class="symbol"><span class="off">[</span><span class="on">{</span></li>
+		<li class="symbol"><span class="off">]</span><span class="on">}</span></li>
+		<li class="symbol lastitem"><span class="off">\</span><span
+			class="on">|</span></li>
+		<li class="capslock">caps lock</li>
+		<li class="letter">a</li>
+		<li class="letter">s</li>
+		<li class="letter">d</li>
+		<li class="letter">f</li>
+		<li class="letter">g</li>
+		<li class="letter">h</li>
+		<li class="letter">j</li>
+		<li class="letter">k</li>
+		<li class="letter">l</li>
+		<li class="symbol"><span class="off">;</span><span class="on">:</span></li>
+		<li class="symbol"><span class="off">'</span><span class="on">&quot;</span></li>
+		<li class="return lastitem">return</li>
+		<li class="left-shift">shift</li>
+		<li class="letter">z</li>
+		<li class="letter">x</li>
+		<li class="letter">c</li>
+		<li class="letter">v</li>
+		<li class="letter">b</li>
+		<li class="letter">n</li>
+		<li class="letter">m</li>
+		<li class="symbol"><span class="off">,</span><span class="on">&lt;</span></li>
+		<li class="symbol"><span class="off">.</span><span class="on">&gt;</span></li>
+		<li class="symbol"><span class="off">/</span><span class="on">?</span></li>
+		<li class="right-shift lastitem">shift</li>
+		<li class="space lastitem">&nbsp;</li>
+	</ul>
+</div>
+
+<script>
+
+
+
+	$(function() {
+		//选择
+		$(".choose p").click(function() {
+			$(this).addClass("click");
+			$(this).siblings().removeClass("click");
+			if ($(this).hasClass("noAddFood_p")) {
+				$(".noAddFood").show();
+				$(".addFoodEnd").hide();
+			} else if ($(this).hasClass("addFoodEnd_p")) {
+				$(".addFoodEnd").show();
+				$(".noAddFood").hide();
+			}
+		});
+
+		//取消
+		$(".oneOrder_bottom .cancel").click(function() {
+			$(".lookOneOrder_background").hide();
+		})
+	})
+
+	//currentPage 当前页面  totalPage 总页数 ,obj 标签
+	function page(obj, currentPage, totalPage, content) { //已订菜的页码
+		obj.html("");
+		var htmlVal = '';
+		htmlVal += '<a href="javascript:(0)" class="previous">上一页</a>';
+		for (var i = 1; i <= totalPage; i++) {
+			if (i == currentPage) {
+				htmlVal += '<span>' + i + '</span>';
+			} else {
+				htmlVal += '<a onclick=getRealting(' + i + ',"' + content + '")>' + i + '</a>';
+			}
+		}
+		htmlVal += '<a href="javascript:(0)" class="next">下一页</a>';
+
+		obj.html(htmlVal);
+	}
+
+	//currentPage 当前页面  totalPage 总页数 ,obj 标签
+	function pageNo(obj, currentPage, totalPage, content) { //未订菜的页码
+		obj.html("");
+		var htmlVal = '';
+		htmlVal += '<a href="javascript:(0)" class="previous">上一页</a>';
+		for (var i = 1; i <= totalPage; i++) {
+			if (i == currentPage) {
+				htmlVal += '<span>' + i + '</span>';
+			} else {
+				htmlVal += '<a onclick=getNoRealting(' + i + ',"' + content + '")>' + i + '</a>';
+			}
+		}
+		htmlVal += '<a href="javascript:(0)" class="next">下一页</a>';
+
+		obj.html(htmlVal);
+	}
+	$(".close").click(function() {
+		$("#container").css("display", "none");
+	});
+	var $write = "";
+	$("input").click(function() {
+		var write = "#" + $(this).attr("id");
+		$write = $(write);
+		$("#container").css("display", "block");
+	});
+	var shift = false,
+		capslock = false;
+	$('#keyboard li').click(function() {
+		var $this = $(this),
+			character = $this.html();
+		if ($this.hasClass('left-shift') || $this.hasClass('right-shift')) {
+			$('.letter').toggleClass('uppercase');
+			$('.symbol span').toggle();
+			shift = (shift === true) ? false : true;
+			capslock = false;
+			return false;
+		}
+		if ($this.hasClass('capslock')) {
+			$('.letter').toggleClass('uppercase');
+			capslock = true;
+			return false;
+		}
+		if ($this.hasClass('delete')) {
+			var html = $write.val();
+			$write.val(html.substr(0, html.length - 1));
+			$write.focus();
+			return false;
+		}
+		if ($this.hasClass('symbol'))
+			character = $('span:visible', $this).html();
+		if ($this.hasClass('space'))
+			character = ' ';
+		if ($this.hasClass('tab'))
+			character = "\t";
+		if ($this.hasClass('return'))
+			character = "\n";
+		if ($this.hasClass('uppercase'))
+			character = character.toUpperCase();
+		if (shift === true) {
+			$('.symbol span').toggle();
+			if (capslock === false) $('.letter').toggleClass('uppercase');
+			shift = false;
+		}
+		$write.focus();
+		$write.val($write.val() + character);
+	});
+</script>
+
+</html>

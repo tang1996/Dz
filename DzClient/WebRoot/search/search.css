@@ -1,0 +1,349 @@
+body,
+div,
+h1,
+h4,
+html,
+li,
+p,
+ul {
+    margin: 0;
+    padding: 0
+}
+
+li {
+    list-style: none
+}
+
+input {
+    border: none
+}
+
+body {
+    background-color: #f5f5f5
+}
+
+.clearfix {
+    zoom: 1;
+    clear: both
+}
+
+.clearfix::after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0
+}
+
+.search-box {
+    position: relative;
+    height: 44px;
+    line-height: 44px;
+    padding: 0 12px;
+    background-color: #ff7e00
+}
+
+.search-box .search-input-wrap {
+    background-color: #fff;
+    margin-left: 19px;
+    height: 30px;
+    border-radius: 30px;
+    line-height: 30px;
+    width: 65vw;
+    padding-left: 35px;
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.search-box .search-input-wrap .search-icon {
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+    left: 15px;
+    width: 15px
+}
+
+.search-box .search-input-wrap input {
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+    width: 50vw
+}
+
+.search-box .search-input-wrap input:focus {
+    outline: 0
+}
+
+.search-box .search-input-wrap .search-clear {
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+    right: 10px;
+    width: 15px
+}
+
+.search-box .search-input-wrap ::-webkit-input-placeholder {
+    font-size: 12px;
+    color: #999
+}
+
+.search-box .right {
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.search-box .right img {
+    width: 6px;
+    height: 12px
+}
+
+.search-box .location {
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+    right: 0
+}
+
+.search-box .location img {
+    width: 17px;
+    height: 22px;
+    right: 12px;
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.filter-box {
+    position: fixed;
+    width: 100%;
+    top: 0px;
+    height: 45px;
+    line-height: 45px;
+    background-color: #fff;
+    z-index: 99999
+}
+
+.filter-box::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background: #eee;
+    bottom: 0;
+    -webkit-transform: scaleY(.5);
+    transform: scaleY(.5)
+}
+
+.filter-box li {
+    float: left;
+    width: 25%;
+    font-size: 14px;
+    color: #666;
+    text-align: center
+}
+
+.filter-box li.active {
+    color: #333;
+    font-weight: 700
+}
+
+.filter-box li.active::after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #333;
+    margin-left: 4px;
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.filter-box li:last-child {
+    position: relative
+}
+
+.filter-box li:last-child::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+    -webkit-transform: scaleX(.5) translateY(-50%);
+    transform: scaleX(.5) translateY(-50%);
+    left: 0;
+    width: 1px;
+    height: 13px;
+    background-color: #e6e6e6
+}
+
+.filter-box li:last-child img {
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    margin-left: 4px
+}
+
+.list-box {
+    background-color: #fff;
+    padding: 0 12px;
+    padding-top: 43px;
+}
+
+.list-box .item {
+    position: relative;
+    padding: 10px 0
+}
+
+.list-box .item::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background: #eee;
+    bottom: 0;
+    -webkit-transform: scaleY(.5);
+    transform: scaleY(.5)
+}
+
+.list-box .item:last-child::after {
+    width: 0
+}
+
+.list-box .avatar-wrap {
+    float: left;
+    margin-right: 10px
+}
+
+.list-box .avatar-wrap img {
+    width: 90px;
+    height: 81px
+}
+
+.list-box .content {
+    position: relative;
+    overflow: hidden
+}
+
+.list-box .content h4 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 4px;
+    font-weight: 700;
+    width: 80%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap
+}
+
+.list-box .content .rating-box {
+    font-size: 12px;
+    color: #666
+}
+
+.list-box .content .price {
+    margin-bottom: 15px;
+    color: #666;
+    font-size: 12px
+}
+
+.list-box .content .price span {
+    position: relative
+}
+
+.list-box .content .price span:last-child {
+    margin-left: 5px
+}
+
+.list-box .content .price span:last-child::after {
+    content: ' ';
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+    left: -5px;
+    width: 1px;
+    height: 7px;
+    -webkit-transform: scaleX(.5) translateY(-50%);
+    transform: scaleX(.5) translateY(-50%);
+    background-color: #999
+}
+
+.list-box .content .coupon-wrap {
+    color: #999;
+    font-size: 12px
+}
+
+.list-box .content .coupon-wrap p {
+    height: 18px;
+    line-height: 18px;
+    margin-bottom: 6px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap
+}
+
+.list-box .content .coupon-wrap p:last-child {
+    margin-bottom: 0
+}
+
+.list-box .content .coupon-wrap .icon-minus {
+    display: inline-block;
+    margin-right: 5px;
+    color: #fff;
+    font-size: 12px;
+    text-align: center;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    background-color: #f55b23
+}
+
+.list-box .content .coupon-wrap .icon-redpaper {
+    display: inline-block;
+    margin-right: 5px;
+    color: #fff;
+    font-size: 12px;
+    text-align: center;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    background-color:#186fed
+    
+   
+}
+
+.list-box .content .coupon-wrap .icon-coupon {
+    display: inline-block;
+    margin-right: 5px;
+    color: #fff;
+    font-size: 12px;
+    text-align: center;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    background-color: #186fed
+}
+
+.list-box .content .distance-wrap {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 12px;
+    color: #666
+}

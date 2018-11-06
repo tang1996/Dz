@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>属性列表</title>
+<link rel="stylesheet" href="./attribute_list_food.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+
+</head>
+
+<body>
+<script type="text/javascript">
+			$(document).ready(function(){ 
+					var goodsId=GetQueryString("goodsId");
+					var sid=GetQueryString("sid");
+$("#h-div").html('<a class="h-l" href="../sp_food/sp_food.html?cid='+sid+'"><img class="jt" src="../common/img/iconjt.png" alt=""></a><p>属性列表</p>');
+					$("#active").html('<a href="../attribute_food/attribute_food.html?goodsId='+goodsId+'&sid='+sid+'"><img src="../common/img/sp33.png" ><span>添加属性名称</span></a>');
+						load();
+ 
+		    });
+function edit(cid,goodsId,sid){
+	var url="../attribute_edit_food/attribute_edit_food.html";
+	window.location.href=url+"?"+"cid="+cid+"&goodsId="+goodsId+"&sid="+sid;
+}
+
+function add(cid,goodsId,sid){
+			var url="../attribute_value_food/attribute_value_food.html";
+	window.location.href=url+"?"+"cid="+cid+"&goodsId="+goodsId+"&sid="+sid;
+}
+
+function del(sid){
+	$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.NATUREDELETE,
+				 	data: { 
+            			id:sid,
+            			
+        			},
+					success:function(data) {
+						if(data.success){
+							load();
+						}
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}
+
+function load(){
+	var goodsId=GetQueryString("goodsId");
+	var sid=GetQueryString("sid");
+		$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.ATTRIBUTEGETVIEW,
+					data: { 
+            			goodId:goodsId
+        			},
+					success:function(data) {
+						 var list = data;						
+						 var html='';
+						for(var i = 0;i < list.length;i++){
+							 var children=list[i].children;
+							  var tt='';
+							  if(children  != null){
+								 for(var y=0;y< children.length;y++){
+									tt=tt+'<h3>属性值:'+children[y].content+'<img src="../common/img/down.png" style="float:right; width:20px; height:20px;"   onclick="del('+children[y].id+');"/></h3>';
+								 }
+							}
+							html=html+'<li>'+
+							'<a href="#">'+
+								'<div class="top">'+
+									'<h3>属性名称:'+list[i].name+'</h3>'+tt+
+								'</div>'+
+								'<div class="bottom">'+
+									'<button type="button" onclick="edit('+list[i].id+','+goodsId+','+sid+');" >编辑属性</button><button type="button" onclick="add('+list[i].id+','+goodsId+','+sid+')">添加属性值</button>'+
+								'</div>'+
+							'</a>'+
+						    '</li>';
+					
+										
+						}
+							$("#sp-right").html(html);
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+}
+		
+		</script>
+
+
+<div class="head">
+		<div class="h-div" id="h-div">
+			
+		</div>
+	</div>
+    <div class="wrap sp">
+        <div class="sp-left">
+			<ul id="sp-left">
+			
+			</ul>
+		</div>
+		<div class="sp-right">
+			<ul id="sp-right">
+				
+			</ul>
+		</div>
+    </div>
+  <ul class="foot-nav">
+		<li class="active" id="active">
+			
+		</li>
+		
+	</ul>
+
+</body>
+
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>用户信息</title>
+    <link rel="stylesheet" href="./shop_usermessage.css">
+    <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+    		<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../common/js/common.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+</head>
+<body>
+	<script type="text/javascript">	
+		var start = 0;
+		$(document).ready(function(){
+			
+			show(start);
+			
+			$(window).scroll(function () {	 
+				var bot = 10; 
+				console.log((bot + $(window).scrollTop()) >= ($(document).height() - $(window).height()))
+				if ((bot + $(window).scrollTop()) >= ($(document).height() - $(window).height())) {	
+					start = start + 20; 
+					show(start);
+				}
+			});
+		});
+
+		
+		
+		
+		function show(start){
+			$.ajax({
+				type:'POST',
+				url: BASE_URL + LOGIN_ACTION.LUSERCOUNT,
+			 	data: { 
+           			companyId: getCookie('cid'),
+           			start :start,
+         			limit : 20
+       			},
+				success:function(data) {
+				var list=data.list;
+				if(list.length == 0){
+					start = start - 2;
+				}
+				var html="";
+				//alert(list.length)
+				for ( var i = 0; i < list.length; i++) {
+					$("#userList").append(
+						'<tr><td>' + list[i].phone + '</td>'+
+	                    '<td>' + list[i].createTime + '</td>'+
+	                    '<td>' + list[i].num + '</td>'+
+	                    '<td>￥' + list[i].pay + '</td></tr>');
+				}
+				
+
+				},
+				error:function(error) {
+					console.log(error);
+				}
+			});
+		}
+
+
+
+	</script>
+
+    <div id="big_div">
+        <div class="hear">
+            <a class="return" href="../admin_index/admin_index.html"></a>
+            <p>用户信息</p>
+        </div>
+
+        <div id="body">
+            <table cellspacing="0" cellpadding="0" id="userList">
+                <tr>
+                    <td>手机号码</td>
+                    <td>注册时间</td>
+                    <td>购买次数</td>
+                    <td>消费金额</td>
+                </tr>
+            </table>
+
+
+
+        </div>
+    </div>
+</body>
+</html>

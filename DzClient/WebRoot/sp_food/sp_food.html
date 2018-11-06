@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>美食商品管理</title>
+<link rel="stylesheet" href="./sp_food.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+
+</head>
+
+<body>
+<script type="text/javascript">
+			$(document).ready(function(){ 					
+					init();
+		     });
+
+function down(id){//商品下架
+			$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.GOODSDOWN,
+				 	data: { 
+            			id:id,
+						status:0
+        			},
+					success:function(data) {
+						if(data.success){
+							valLink("alert","商品下架成功");	
+							init();
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+	
+}
+
+function up(id){//商品上架
+			$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.GOODSDOWN,
+				 	data: { 
+            			id:id,
+						status:1
+        			},
+					success:function(data) {
+						if(data.success){
+							valLink("alert","商品上架成功");
+							init();
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}
+
+
+function addAttribute(id,cid){
+	var url="../attribute_food/attribute_food.html";
+	window.location.href=url+"?"+"goodsId="+id+'&sid='+cid;
+}
+
+function list(id,cid){
+	var url="../attribute_list_food/attribute_list_food.html";
+	window.location.href=url+"?"+"goodsId="+id+"&sid="+cid;
+}
+
+function edit(id,fid){
+	var url="../edit_sp_food/edit_sp_food.html";
+	window.location.href=url+"?"+"goodsId="+id+"&fid="+fid;
+
+}
+
+function init(){
+	var cid=GetQueryString("cid");
+	$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.GOCOMPANYGOODSMS,
+				 	data: { 
+            			id: getCookie('cid'),
+            			ifiId:cid
+        			},
+					success:function(data) {
+						 var list = data.list;
+						 var html='';
+						for(var i = 0;i < list.length;i++){
+							var shelves=list[i].shelves;
+							var buton='';
+							if(shelves==0){
+								buton='<button type="button" id='+list[i].id+' onclick="up('+list[i].id+')">上架</button>';
+							}else if(shelves==1){
+								buton='<button type="button" id='+list[i].id+' onclick="down('+list[i].id+')">下架</button>';
+							}
+							var html_2='';
+							if(list[i].svg_price==0){
+								html_1='';
+								html_2='';
+							}else{
+								html_2='<p>促销价:￥'+list[i].svg_price+'</p>';
+				
+									
+								}
+						var type=list[i].type;
+							var ku = list[i].stock;
+							
+							if(ku == -1){
+								ku = '无限库存';
+							}
+						
+							html=html+'<li><a href="#">'+
+								'<div class="top">'+
+									'<img src="'+list[i].zoom_url+'" width=120 height=121>'+
+									'<h3>'+list[i].name+'<p class="xin" style="color:#FF7E00;">美食</p></h3>'+
+									'<p>价&nbsp;&nbsp;&nbsp;格:￥'+list[i].price+'</p>'+html_2+
+									'<p style="color:#666;">库存:'+ku+'</p>'+
+									'<span class="del" onclick="del(' + list[i].id + ')"></span>' +
+								'</div>'+
+								'<div class="bottom">'+
+									'<button type="button" onclick="edit('+list[i].id+','+cid+');">编辑</button>'+buton+
+								'</div>'+
+								'<div class="bottom">'+
+									'<button type="button" onclick="addAttribute('+list[i].id+','+cid+')" >添加属性</button><button type="button" onclick="list('+list[i].id+','+cid+',2)" >属性列表</button>'+
+								'</div>'+
+							'</a>'+
+						    '</li>';
+						
+										
+						}
+						$("#sp-right").html(html);
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}		
+	function del(id){
+    	$.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.GOODSDELETE,//GOODSDELETE:'/Dz/goods?delete',
+            data: {
+                id: id
+            },
+            success: function (data) {
+            	valLink("alert", data.message);
+           		if(data.success){
+            		init();
+            	}
+                
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+		</script>
+
+
+<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="../sort_food/sort_food.html"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>商品管理</p>
+			<!--<a class="h-r" href="#"><img class="sp-ss" src="../common/img/sp-ss.png" alt=""></a>-->
+		</div>
+	</div>
+    <div class="wrap sp">
+		<div class="sp-right">
+			<ul id="sp-right">
+				
+			</ul>
+		</div>
+    </div>
+</body>
+
+</html>

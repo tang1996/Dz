@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>催单</title>
+<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+<link rel="stylesheet" href="./dingdan_cd.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+<body>
+<script type="text/javascript">		
+			$(document).ready(function(){ 
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.REMINDER,
+				 	data: { 
+            			companyId:getCookie('cid'),
+	           			start : 0,
+	           			limit : 1000
+        			},
+					success:function(data) {
+					 var list = data.list;
+					 var html = '';
+					 $("#dd-li").html('');
+					 for(var i = 0;i < list.length;i++){
+						html = '<ul>'+
+								'<li>'+
+								'<div class="n-li">'+
+								'<p>'+list[i].userName+'</p>'+
+								'<span>'+list[i].userPhone+'</span>'+
+								'</div>'+
+								'<div class="n-li n-li1">'+
+								'<p class="p-hs">下单时间：'+list[i].time+'</p>'+
+								'</div>'+
+								'</li>'+
+								'<li>'+
+								'<a class="hs-a" href="#">'+list[i].content+'</a>'+
+								'</li>'+
+								'</ul>';
+							$("#dd-li").append(html);
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+		});
+		
+		</script>
+		<div class="head">
+			<ul class="dd-ul">
+				<li>
+					<a href="../dingdan_new/dingdan_new.html">
+						<img src="../common/img/dd1.png" >
+						<p>新订单</p>
+					</a>
+				</li>
+				<li>
+					<a href="../dingdan_yc/dingdan_yc.html">
+						<img src="../common/img/dd2.png" >
+						<p>异常配送</p>
+					</a>
+				</li>
+				<li class="active">
+					<a href="../dingdan_cd/dingdan_cd.html">
+						<img src="../common/img/dd3.png" >
+						<p>催单</p>
+					</a>
+				</li>
+				<li>
+					<a href="../dingdan_tk/dingdan_tk.html">
+						<img src="../common/img/dd4.png" >
+						<p>退款</p>
+					</a>
+				</li>
+			</ul>
+	</div>
+    <div class="wrap top70">
+        <div class="dd">
+            <div class="dd-li" id="dd-li">
+				
+			</div>
+			
+        </div>
+    </div>
+			<ul class="foot-ul">
+		<li>
+				<a href="../dingdan_list/dingdan_list.html">
+					<img src="../common/img/f1.png" >
+					待处理
+				</a>
+			</li>
+			<li class="active">
+				<a href="#">
+					<img src="../common/img/f2.png" >
+					订单管理
+				</a>
+			</li>
+			<li>
+				<a href="../admin_index/admin_index.html">
+					<img src="../common/img/f3.png" >
+					我的
+				</a>
+			</li>
+	</ul>
+</body>
+
+</html>

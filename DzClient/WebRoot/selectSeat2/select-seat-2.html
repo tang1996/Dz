@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>选座-02</title>
+    <link rel="stylesheet" href="./select-seat-2.css">
+    <link rel="stylesheet" type="text/css" href="../common/css/common.css" /> 
+	<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="../common/js/jquery.lazyload.min.js" ></script>
+	<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../common/js/common.js"></script>
+	<style type="text/css">
+			.footer{display:block;position:fixed;height:50px;filter:alpha(opacity:90); opacity:0.9;width:100%;z-index:3;bottom:0px;color:#f03c03;background:#FFF;line-height:35px;font-size:15px;border-top:1px solid #e2e2e2;}
+			.footer .left{float:left;margin:5px 10px;}
+			.footer .right{float:right; }
+			.footer .right .disable{background:#818181;font-size:16px}
+			.footer .xhlbtn{background:#ff7e00;display:block;text-align:center;line-height:50px;padding:0 15px;color:#fff;}
+			.shop{position: relative; top: -19px;height: 50px;left: 16px;}	
+			.pay{ position: relative; top: -58px;left: 77px;color: #fff;}	
+			.u-flyer {display: block;width: 50px;height: 50px;border-radius: 50px;position: fixed;z-index: 9999;}
+		</style>
+		
+		<link rel="stylesheet" href="../common/css/lCalendar.css">
+		<link rel="stylesheet" href="../pay/pay-deposit.css">
+</head>
+<body>
+<script type="text/javascript">
+			
+			$(document).ready(function(){ 
+					common();
+			});
+		
+function common(){
+
+		 		$("img").lazyload({ 
+				 	placeholder : "../common/img/defual.jpg",
+		            threshold : 200
+		        });  
+			
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RESERVEVIEW,
+				 	data: { 
+            			companyId : '2',//GetQueryString("companyId"),
+            			seat:'大厅'
+        			},
+					success:function(data) {
+						var list = data.list;
+						for(var i = 0;i < list.length;i++){
+						  var line='';
+						  var comon='';
+						  var status=list[i].status;
+											if(status==1){//已预定
+												line='<img src="../common/img/tableware03.png" alt="">';
+												comon='class="book-seat"';
+											}else if(status==2){//用餐中
+												line='<img src="../common/img/tableware01.png" alt="">';
+												comon='';
+											}else{
+												line='<span onClick="aopen('+list[i].tableNo+');" style="#ddd;display:block;text-align:center;height:100px;">'+
+												'<img src="../common/img/tableware02.png" alt=""></span>';
+												comon='class="empty-seat"';
+											}
+											var html='<li '+comon+'">'+
+						                     '<div class="out-circle">'+
+						                     '<span class="inner-circle">'+line+'<span class="number-people">'+list[i].meals+'人</span>'+
+							                 '</div>'+
+							                 '<span class="seat-number">'+list[i].name+'</span>'+
+							           		 '</li>';
+							   $("#clearfix").append(html);
+						}
+						
+						 $("img").lazyload({ 
+					 		 placeholder : "../common/img/defual.jpg",
+			                 effect: "fadeIn"
+			           });  
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}
+</script>
+<div id="selectSeat" style="display:;">
+    <div class="tips clearfix">
+        <div class="right">
+            <span class="eating">就餐中</span>
+            <span class="empty-seat">空桌</span>
+            <span class="book">预定</span>
+        </div>
+    </div>
+    <div class="seat-box">
+        <ul class="clearfix" id="clearfix">
+        
+        </ul>
+    </div>
+		</div>
+		<script type="text/javascript">
+	$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.CATEVIEW,
+				 	data: { 
+            			orderId : '7',//GetQueryString("orderId")
+            			cateId : '8'
+        			},
+					success:function(data) {
+											var html='<img src="'+data.logo+'" alt="">'+
+					'<p class="price">'+
+						'¥'+data.price+
+					'</p>'+
+					'<p class="deposit">'+
+						'押金'+
+					'</p>'+
+					'<p>'+
+						'已选：“'+data.seat+data.tableNo+'”'+
+					'</p>';
+							   				$("#info").append(html);
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+				
+				$.ajax({
+				
+					success:function(data) {
+						var hour = 0;
+						for(var h =0;h<24;h++){
+							hour = h;
+							if(hour.toString().length ===1){
+								hour = '0' + hour;
+								$("#hour").append('<option value="1">'+hour+'</option>');
+							}else{
+								hour = h;
+								$("#hour").append('<option value="1">'+hour+'</option>');
+							}
+						}
+						
+						var minute = 0;
+						for(var m =0;m<60;m++){
+							minute = m;
+							if(minute.toString().length ===1){
+								minute = '0' + minute;
+								$("#minute").append('<option value="1">'+minute+'</option>');
+							}else{
+								minute = m;
+								$("#minute").append('<option value="1">'+minute+'</option>');
+							}
+						}
+						
+						var second = 0;
+						for(var s =0;s<60;s++){
+							second = s;
+							if(second.toString().length ===1){
+								second = '0' + second;
+								$("#second").append('<option value="1">'+second+'</option>');
+							}else{
+								second = s;
+								$("#second").append('<option value="1">'+second+'</option>');
+							}
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+				
+</script>
+		<div class="mask" style="display:none;">
+			<div class="container">
+				<div class="info" id="info">
+
+				</div>
+				<div class="date-box">
+					<p class="title">
+						预约时间
+					</p>
+					<p class="date">
+					<input class="select-time-button" id="demo" type="text" style=" text-align:center;" name="input_date" readonly="true" placeholder="选择到达时间" />
+			<script src="../common/js/lCalendar.min.js"></script>
+			<script>
+   				var calendartime = new lCalendar();
+    			calendartime.init({
+        		'trigger': '#demo',
+        		'type': 'time'
+    			});
+    		</script>
+					</p>
+				</div>
+				<div class="eat-number clearfix">
+					<span class="title">就餐人数</span>
+					<div class="btn-box">
+						<img id="reduce" src="./../common/img/minus.png" alt="" style="display:none;">
+						<span id="num">1</span>
+						<img id="add" src="./../common/img/plus.png" alt="">
+					</div>
+				</div>
+				<div class="tel-box">
+					<p class="title">
+						手机号码
+					</p>
+					<div class="input-box">
+					<p>
+				<textarea id="phone" rows="1" cols="41" placeholder="请输入手机号码接受预定短信" style="background-color:#f5f5f5;overflow-y:hidden;overflow-x:hidden;border:0"></textarea>
+				</p>
+					</div>
+				</div>
+				<div class="tips-box">
+					<p>
+						提示：
+					</p>
+					<p>
+						1，点击支付押金，预定桌位，支付押金便可，到店再点菜。
+					</p>
+					<p>
+						2，点击直接点菜，桌位可预订，同时可直接点菜，只需交点菜的相关费用，无需交押金。
+					</p>
+				</div>
+				<div class="footer-box clearfix">
+					<span onclick="window.location.href='http://118.190.149.109:8081/DzClient/goodsList/order-food.html'">直接点餐</span>
+					<span onclick="window.location.href='http://118.190.149.109:8081/DzClient/pay/pay.html'" id="left">支付押金</span>
+				</div>
+				<span onclick="aclose();">
+				<img class="close-btn" src="./../common/img/close.png" alt="">
+				</span>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript">
+  				$("#left").click(function(){
+   				 $.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RESERVEORDER,
+				 	data: {
+            			token: 'cOZ6cjmF9NF',
+            			cid: '2',
+            			Remarks: '加儿童坐',
+            			tableNo: '2',
+            			endTime: document.getElementById("demo").value,
+            			seat: '包厢',
+            			meals: document.getElementById("num").innerText,
+            			phone: $('#phone').val()
+        			},
+					success:function(data) {
+					alert($('#phone').val());
+						alert(data.orderId);
+						alert(data.cateId);
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+   				})
+   				function aopen(tabelNo) {
+   				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.TABLEFIND,
+				 	data: { 
+            			tableNo : tabelNo
+        			},
+					success:function(data) {
+											var html='<img src="'+data.logo+'" alt="">'+
+					'<p class="price">'+
+						'¥'+data.price+
+					'</p>'+
+					'<p class="deposit">'+
+						'押金'+
+					'</p>'+
+					'<p>'+
+						'已选：“'+data.seat+data.name+'”'+
+					'</p>';
+							   				$("#info").html(html);
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+				
+				$.ajax({
+				
+					success:function(data) {
+						var hour = 0;
+						for(var h =0;h<24;h++){
+							hour = h;
+							if(hour.toString().length ===1){
+								hour = '0' + hour;
+								$("#hour").append('<option value="1">'+hour+'</option>');
+							}else{
+								hour = h;
+								$("#hour").append('<option value="1">'+hour+'</option>');
+							}
+						}
+						
+						var minute = 0;
+						for(var m =0;m<60;m++){
+							minute = m;
+							if(minute.toString().length ===1){
+								minute = '0' + minute;
+								$("#minute").append('<option value="1">'+minute+'</option>');
+							}else{
+								minute = m;
+								$("#minute").append('<option value="1">'+minute+'</option>');
+							}
+						}
+						
+						var second = 0;
+						for(var s =0;s<60;s++){
+							second = s;
+							if(second.toString().length ===1){
+								second = '0' + second;
+								$("#second").append('<option value="1">'+second+'</option>');
+							}else{
+								second = s;
+								$("#second").append('<option value="1">'+second+'</option>');
+							}
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+   					$(".mask").attr("style", "display:;");
+   					$("#selectSeat").attr("style", "display:none;");
+        		}
+       			function aclose() {
+   					$(".mask").attr("style", "display:none;");
+   					$("#selectSeat").attr("style", "display:;");
+        		}
+        		
+        //点击添加
+        $('#add').click(function () {
+        	var num = document.getElementById("num").innerText;
+            $("#reduce").attr("style", "display:;");
+            if(parseInt(num)<10){
+            	$("#num").html(parseInt(num)+1);
+            }else{
+            }
+        })
+
+        //减少数量
+        $('#reduce').click(function () {
+        	var num = document.getElementById("num").innerText;
+        	if(parseInt(num)>1){
+           		$("#num").html(parseInt(num)-1);
+           		$("#reduce").attr("style", "display:;");
+			} 
+			status();  
+        })
+        
+        //改变状态
+        function status(){
+			var num = document.getElementById("num").innerText;
+			if(parseInt(num)===1){
+				$("#reduce").attr("style", "display:none;");
+			}
+		}
+	</script>
+</html>

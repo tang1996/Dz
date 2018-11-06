@@ -1,0 +1,92 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+i{
+    font-style: normal;
+}
+.hidden{
+    display: none;
+}
+#main{
+    background: #eeeeee;
+    /*height: 1000px;*/
+}
+
+.clear:after{
+    clear: both;
+    content: " ";
+    display: block;
+}
+#head{
+    height: 40px;
+    /*border: 1px solid red;*/
+    line-height: 40px;
+    background: white;
+    margin-bottom: 10px;
+}
+#head p{
+    border-bottom: 2px solid white;
+    width: 50%;
+    font-size: 14px;
+    float: left;
+    text-align: center;
+}
+.h-div {
+	position: relative;
+	display: block;
+	padding: 12px 0;
+	overflow: hidden;
+	background: #ff7e00;
+}
+.h-div a{
+	float: left;
+	width: 35px;
+	text-align: center;
+}
+.h-div a img{
+	vertical-align: -2.5px;
+}
+.h-div p{
+	display: block;
+	overflow: hidden;
+	text-align: center;
+	font-size: 17px;
+	color: #fff;
+}
+.head .jt{
+	width: 8px;
+	height: 14px;
+}
+
+#head p.click{
+    color: #ff7e00;
+    border-bottom-color: #ff7e00;
+}
+.title p{
+    line-height:44px;
+    margin-left: 12px;
+    font-size: 16px;
+    font-weight: 600;
+}
+.title p .dingDan_em{
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #ff7e00;
+    margin: 0 5px;
+}
+.click_div{
+    padding: 0 15px;
+    height: 82px;
+    line-height: 82px;
+    float: left;
+    border: 1px solid #eeeeee;
+    border-radius: 10px;
+    margin-left: 12px;
+}
+.click{
+    border: 1px solid #ff7e00;
+    color: #ff7e00;
+}

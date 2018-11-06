@@ -1,0 +1,231 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+#body{
+	position: fixed;
+	height: 100%;
+	width: 100%;
+}
+.clear:after{
+	clear: both;
+	display: block;
+	content: " ";
+}
+ul{
+	list-style: none;
+}
+#left_div{
+	width: 11%;
+	height: 100%;
+	float: left;
+	position: relative;
+}
+#left_div .left_top{
+	height: 60px;
+}
+.left_ul{
+	line-height: 60px;
+	text-align: center;
+}
+.left_ul li{
+	background:#fff;
+	border-bottom: 1px solid #eee;
+}
+.left_ul li.click{
+	background: #373c40;
+	color: #fff;
+	border-bottom: 1px solid #373c40;
+}
+.deliciousFoodOrderNum{
+    display: block;
+    width: 22px;
+    position: absolute;
+    top: 5px;
+    right: 15%;
+    border-radius: 50%;
+    background:#f40;
+    color: #ffffff;
+    font-size: 12px;
+    font-style: normal;
+    line-height: 23px;
+    text-align: center;
+}
+.exit{
+	position: absolute;
+	bottom: 12px;
+	height: 60px;
+	text-align: center;
+	width: 100%;
+}
+.exit i{
+	background: url("../../common/img/efdbd5e6568464e86a04292696d26a5e.png") no-repeat center;
+	background-size: 100%;
+	width: 60px;
+	height: 60px; 
+	display: inline-block;
+}
+
+#right_div{
+	width:89%;
+	height: 100%;
+	float: right;
+	background: #dfcdbb;
+}
+#right_div .right{
+	padding: 12px;
+	position: relative;
+}
+.choose_div{
+	position: absolute;
+	z-index: 10;
+}
+.choose_div p{
+	width: 85px;
+    text-align: center;
+    float: left;
+    height: 45px;
+    line-height:45px;
+    border-radius: 7px;
+    font-size: 18px;
+    background: rgba(255,126,0,0.3);
+    color: #FF7E00;
+    font-weight: bold;
+}
+.choose_div p.action{
+	background: #ff7e00;
+	color: #fff;
+}
+.tableType_choose{
+	line-height: 45px;
+}
+.tableType_choose ul{
+	float: right;
+	list-style: none;
+}
+.tableType_choose li{
+	float: left;
+	width: 85px;
+	height: 45px;
+	line-height: 45px;
+	text-align: center;
+	background: #a6896b;
+	color: #fff;
+}
+.hall_choose li.click{
+	font-weight: bold;
+	font-size: 20px;
+}
+.box_choose li.click{
+	font-weight: bold;
+	font-size: 20px;
+}
+.tableType_choose .nullTable{
+	background: #fff;
+	color: #666;
+}
+.tableType_choose .reserve{
+	background: #f19841;
+}
+.tableType_choose .eatting{
+	background: #a6896b;
+}
+
+
+.allTable{
+	margin:30px 0; 
+	overflow:hidden;
+	position: relative;
+	min-height: 700px;
+}
+.allTable ul{
+	position: absolute;
+	width: 100%;
+}
+.oneTable{
+	width: 19%;
+	height:120px;
+	border-radius:10px;
+	overflow: hidden;
+	text-align: center;
+	margin: 0 1% 2% 0;
+	float: left;
+}
+
+
+.oneTable .icon_div{
+	height: 47px;
+	overflow: hidden;
+}
+.oneTable .icon_div i{
+	display: inline-block;
+	background: url("../../common/img/W_a1e561d893cbc0c6c2b45d4be88c517f.png") no-repeat center;
+	background-size:100% 100%;
+	width: 50px;
+	height: 31px;
+	margin-top: 8px;
+}
+.oneTable .peopleNum{
+	font-size: 13px;
+	line-height: 26px;
+}
+.oneTable .tableName{
+	line-height: 47px;
+}
+/*绌烘鏍峰紡*/
+.oneNullTable{
+	background: #fefefe;
+	color: #666;
+}
+.oneNullTable .peopleNum{
+	background: #999;
+	color: #fefefe;
+}
+.oneNullTable .icon_div i{
+	background: url("../../common/img/G_a1e561d893cbc0c6c2b45d4be88c517f.png") no-repeat center;
+	background-size:100% 100%;
+}
+/*棰勫畾鏍峰紡*/
+.oneReserve{
+	background: #f19841;
+	color: #fff;
+}
+.oneReserve .peopleNum{
+	background: #b26c27;
+}
+/*灏遍涓�*/
+.oneEatting{
+	background: #a6896b;
+	color: #fff;
+}
+.oneEatting .peopleNum{
+	background: #7b634a;
+}
+
+
+.upAndDown{
+	width: 100%;
+	height: 60px;
+	position: absolute;
+	bottom: 12px;
+	left: 0;
+	background:linear-gradient(#a6896b, #7b634a);
+}
+.upAndDown p{
+	width: 49.8%;
+	height: 60px;
+}
+.upAndDown p.up{
+	float: left;
+	background: url("../../common/img/U_d6a21e525d726b15eac6f21048f84224.png") no-repeat center;
+	background-size: 5%; 
+	border-right: 3px solid #dfcdbb;
+}
+.upAndDown p.down{
+	float: right;
+	background: url("../../common/img/D_d6a21e525d726b15eac6f21048f84224.png") no-repeat center;
+	background-size: 5%; 
+}
+
+
+

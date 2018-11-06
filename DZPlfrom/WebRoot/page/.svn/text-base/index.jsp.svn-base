@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<title>广西地税</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" type="text/css" href="resources/css/xtheme-olive.css" />
+		<link rel="stylesheet" type="text/css" href="resources/css/ext-all.css">
+		<link rel="stylesheet" type="text/css" href="resources/css/ext-patch.css" /><!-- FF字体美化 -->
+		<link rel="stylesheet" type="text/css" href="resources/css/statusbar.css" />
+		<link rel="stylesheet" type="text/css" href="resources/css/multiselect.css" />
+
+		<link rel="stylesheet" type="text/css" href="ext-core/column-tree.css" /> 
+
+		<link rel="stylesheet" type="text/css" href="js/TreeGrid.css" /> 
+		<script type="text/javascript" src="ext-core/ext-base.js"></script>
+		<script type="text/javascript" src="ext-core/ext-all.js"></script>
+		<script type="text/javascript" src="ext-core/ext-lang-zh_CN.js"></script>
+		<script type="text/javascript" src="ext-core/DDView.js"></script>
+		<script type="text/javascript" src="ext-core/ItemSelector.js"></script>
+		<script type="text/javascript" src="ext-core/MultiSelect.js"></script>
+	 	<script type='text/javascript' src='ext-core/RowExpander.js'></script>
+		<script type="text/javascript" src="ext-core/UpAndDownPanel.js"></script>
+	 	<script type="text/javascript" src="ext-core/ColumnNodeUI.js"></script> 
+
+	 	<script type="text/javascript" src="js/indexPage/TabCloseMenu.js"></script>
+		<script type="text/javascript" src="js/indexPage/CenterDate.js"></script>
+		<script type="text/javascript" src="js/indexPage/Logo.js"></script>
+		<script type="text/javascript" src="js/tree/DataGatherTree.js"></script>
+		<script type="text/javascript" src="js/tree/ReportTree.js"></script>
+		<script type="text/javascript" src="js/tree/incomeTree.js"></script>
+		<script type="text/javascript" src="js/tree/QueryTree.js"></script>
+		<script type="text/javascript" src="js/tree/GXTree.js"></script>
+		<script type="text/javascript" src="js/tree/faqTree.js"></script>
+		<script type="text/javascript" src="js/tree/janKon.js"></script>
+		<script type="text/javascript" src="js/tree/SystemTree.js"></script>
+		<script type="text/javascript" src="js/indexPage/index.js"></script>
+	    <script type='text/javascript' src='js/gather/TreeGrid.js'></script>
+		<script type="text/javascript">
+
+			var integrated = "";
+			var firstValue = "";
+			var fangshi = "";
+			var valueNa = "";
+			var binlie = "";
+			var trees = "";
+			var riname ="";
+			var nyeha = "";
+
+			var dN = "";
+			var type = "";
+			var enddt = "";
+			var admin = "";
+			var dm = "";
+			var nsName = "";
+			var ZType = "";
+
+			 isSystem = '<%=request.getSession().getAttribute("System")%>';
+		 	 if(isSystem == 'null'  ){
+				isSystem = true;
+			 }else{
+				isSystem = false;
+			 }
+		</script>
+	<style type="text/css">
+		html, body {
+        font:normal 12px verdana;
+        margin:0;
+        padding:0;
+        border:0 none;
+        overflow:hidden;
+        height:100%;
+    }
+    .x-grid3-header-offset {width: auto;}
+	p {
+	    margin:5px;
+	}
+	    .add-fredd {
+		 background-image: url(impg/user_add.png) !important;
+	}
+	.select-fredd{
+		 background-image: url(impg/user_comment.png) !important;
+	}
+	.fenpei-fredd{
+		 background-image: url(impg/comparison.png) !important;
+	}
+    .settings {
+	         background-image:url(impg/widget.png);
+    }
+    .nav {
+	         background-image:url(impg/folder_go.png);
+    }
+    .eclts-fr{
+		 background-image: url(impg/png-1071.png) !important;
+	}
+    .add-feed {
+		 background-image: url(impg/startT.png) !important;
+	}
+	.add-fredd {
+		 background-image: url(impg/png-1180.png) !important;
+	}
+	.delete-fredd {
+		 background-image: url(impg/png-1211.png) !important;
+	}
+	.edit-fredd {
+		 background-image: url(impg/png-1228.png) !important;
+	}
+	.delete-icon {
+		 background-image:url(impg/yield-1.png) !important;
+	}
+	.delete-db {
+		 background-image:url(impg/errorReport.png) !important;
+	}
+	 .add-db {
+		 background-image: url(impg/dbtable.png) !important;
+	}
+	.edit-db {
+		background-image: url(impg/scriptEditor.png) !important;
+	}
+	.execle {
+		 background-image: url(impg/excle.png) !important;
+	}
+	.select-db{
+		background-image: url(impg/systemInformationReport.png) !important;
+	}
+	.select-fredd {
+		 background-image: url(impg/fly.png) !important;
+	}
+	.data{
+		background-image:url(impg/monitor.png);
+	}
+	.about{
+		background-image:url(impg/business.png);
+	}
+	.help{
+		background-image:url(impg/help.png);
+	}
+	.home{
+		background-image:url(impg/png-0011.png);
+	}
+	.chart{
+		background-image:url(impg/png-1399.png);
+	}
+	.gather{
+		background-image:url(impg/scriptEditor.png);
+	}
+	.tongyong{
+		background-image:url(impg/home.png);
+	}
+	.system{
+		background-image:url(impg/tools.png);
+	}
+	.duiz{
+		background-image:url(impg/systemTel.png);
+	}
+    #loading-mask{
+        position:absolute;
+        left:0;
+        top:0;
+        width:100%;
+        height:100%;
+        z-index:20000;
+        background-color:white;
+    }
+    #loading{
+        position:absolute;
+        left:45%;
+        top:40%;
+        padding:2px;
+        z-index:20001;
+        height:auto;
+    }
+    #loading a {
+        color:#225588;
+    }
+    #loading .loading-indicator{
+        background:white;
+        color:#444;
+        font:bold 13px tahoma,arial,helvetica;
+        padding:10px;
+        margin:0;
+        height:auto;
+    }
+    #loading-msg {
+        font: normal 10px arial,tahoma,sans-serif;
+    }
+
+    #all-demos .x-panel-body {
+        background-color:#fff;
+        border:1px solid;
+        border-color:#fafafa #fafafa #fafafa #fafafa;
+    }
+		</style>
+
+	<script type="text/javascript">
+
+	function isUserName(){
+		 frm.submit();
+	}
+	function setTop(){
+		document.getElementById('tops').width = document.body.clientWidth-838
+	}
+</script>
+	</head>	
+	<body onload="">
+	<div id="loading-mask"></div>
+	<div id="loading">
+	    <div class="loading-indicator"><img src="impg/extanim32.gif" width="32" height="32" style="margin-right:8px;float:left;vertical-align:top;"/><span id="loading-msg">数据加载中....</span></div>
+	</div>
+	<div id="header">
+	   <table width="100%" height="20" border="0" cellpadding="0" cellspacing="0">
+		  <tr>
+			<td width="96" valign="top"><img src="impg/top1.bmp" /></td>
+			<td id="tops" style="background-image:url(impg/top2.bmp)"> <img src="impg/top2.bmp" /></td>
+			<td align="right" width="742" background="impg/top3.bmp" ><a href="#" onclick='frm.submit()'>退出</a></td>
+		  </tr>
+	   </table>
+	</div>
+	<form method="POST" action="/GXDS/logout" name="frm" id="frm"></form>
+	<div id="north"></div>
+	<div id="center1"></div>
+	<div id="centerdata"><img width="100%" height="100%"  src="impg/welcome_01.jpg" /></div>
+	<div id="log"></div>
+	<script type="text/javascript">
+         document.getElementById('loading-msg').innerHTML = '数据加载中....';
+    </script>
+	</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>动致客服后台管理系統</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=8" />
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta http-equiv="expires" content="Wed, 26 Feb 1997 08:21:57 GMT">
+<link rel="stylesheet" type="text/css"
+	href="./common/css/resources/css/ext-all.css">
+<link rel="stylesheet" type="text/css"
+	href="./common/css/resources/css/LockingGridView.css">
+<script type="text/javascript" src="./common/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="./common/jquery.cookie.js"></script>
+<script type="text/javascript">
+	var indexflg = false;
+	var tabchangeval = true;
+	var index = 0;
+	var width;
+	var height;
+	var mouseHeight;
+	var mouseWidth;
+	var logout = true;
+
+	if ($.cookie('url') == null) {
+		window.location.href = './login.html';
+	}
+
+	String.prototype.replaceAll = function(reallyDo, replaceWith, ignoreCase) {
+		if (!RegExp.prototype.isPrototypeOf(reallyDo)) {
+			return this.replace(
+				new RegExp(reallyDo, (ignoreCase ? "gi" : "g")),
+				replaceWith);
+		} else {
+			return this.replace(reallyDo, replaceWith);
+		}
+	};
+</script>
+<style type="text/css">
+html, body {
+	font: normal 12px verdana;
+	margin: 0;
+	padding: 0;
+	border: 0 none;
+	overflow: hidden;
+	height: 100%;
+}
+
+a {
+	TEXT-DECORATION: none;
+}
+
+#loading-mask {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 20000;
+	background-color: white;
+}
+
+#loading {
+	position: absolute;
+	left: 45%;
+	top: 40%;
+	padding: 2px;
+	z-index: 20001;
+	height: auto;
+}
+
+#loading a {
+	color: #225588;
+}
+
+#loading .loading-indicator {
+	background: white;
+	color: #444;
+	font: bold 13px tahoma, arial, helvetica;
+	padding: 10px;
+	margin: 0;
+	height: auto;
+}
+
+#loading-msg {
+	font: normal 10px arial, tahoma, sans-serif;
+}
+
+.home {
+	background-image: url(./common/images/home.png);
+}
+
+.system {
+	background-image: url(./common/images/png-1228.png);
+}
+
+.about {
+	background-image: url(./common/images/business.png);
+}
+
+.data {
+	background-image: url(./common/images/LibraryItems.png);
+}
+
+.addUser {
+	background-image: url(./common/images/user_add.png) !important;
+}
+
+.deleteUser {
+	background-image: url(./common/images/user_delete.png) !important;
+}
+
+.systemManager {
+	background-image: url(./common/images/png-0011.png);
+}
+
+.usestroe {
+	background-image: url(./common/images/startT.png) !important;
+}
+
+.channgerStroe {
+	background-image: url(./common/images/yield-2.png) !important;
+}
+
+.book {
+	background-image: url(./common/images/book.png) !important;
+}
+
+.bottle {
+	background-image: url(./common/images/bottle.png) !important;
+}
+
+.bulid {
+	background-image: url(./common/images/bulid.png) !important;
+}
+
+.cop {
+	background-image: url(./common/images/cop.png) !important;
+}
+
+.setting {
+	background-image: url(./common/images/setting.png) !important;
+}
+
+.gold {
+	background-image: url(./common/images/gold.png) !important;
+}
+
+.flag {
+	background-image: url(./common/images/flag.png) !important;
+}
+
+.house {
+	background-image: url(./common/images/house.png) !important;
+}
+
+.star {
+	background-image: url(./common/images/star.png) !important;
+}
+
+#all-demos .x-panel-body {
+	background-color: #fff;
+	border: 1px solid;
+	border-color: #fafafa #fafafa #fafafa #fafafa;
+}
+
+.my_clip_button {
+	position: absolute;
+	width: 60px;
+	text-align: center;
+	border: 1px solid black;
+	background-color: #ccc;
+	margin: 71px 119px;
+	padding: 5px;
+	cursor: default;
+	font-size: 9pt;
+}
+
+.my_clip_button1 {
+	position: absolute;
+	width: 60px;
+	text-align: center;
+	color: #fffff;
+	margin-top: 1%;
+	margin-left: 85%;
+	padding: 5px;
+	cursor: default;
+	font-size: 9pt;
+}
+
+.my_clip_button2 {
+	position: absolute;
+	width: 60px;
+	text-align: center;
+	margin-top: 1%;
+	color: #fffff;
+	margin-left: 92%;
+	padding: 5px;
+	cursor: default;
+	font-size: 9pt;
+}
+
+.my_clip_button3 {
+	position: absolute;
+	width: 60px;
+	text-align: center;
+	margin-top: 6px;
+	color: #fffff;
+	margin-left: 95%;
+	padding: 5px;
+	cursor: default;
+	font-size: 9pt;
+}
+
+.my_clip_button.hover {
+	background-color: #eee;
+}
+
+.my_clip_button.active {
+	background-color: #aaa;
+}
+</style>
+<script type="text/javascript">
+	function confirmAct() {
+		if (confirm('确定要执行此操作吗?')) {
+			window.location.href = "./login.html";
+		}
+
+		return false;
+	}
+</script>
+</head>
+<body>
+	<script type="text/javascript" src="./common/ext-core/ext-base.js"></script>
+	<script type="text/javascript" src="./common/ext-core/ext-all.js"></script>
+	<script type="text/javascript"
+		src="./common/ext-core/LockingGridView.js"></script>
+	<script type="text/javascript" src="./common/ext-core/StatusBar.js"></script>
+	<script type="text/javascript"
+		src="./common/ext-core/ext-lang-zh_TW.js"></script>
+	<script type="text/javascript" src="./common/ext-core/SearchField.js"></script>
+	<script type="text/javascript"
+		src="./common/ext-core/UpAndDownPanel.js"></script>
+	<script type="text/javascript"
+		src="./common/indexPage/TabCloseMenu.js"></script>
+	<script type="text/javascript" src="./common/indexPage/CenterDate.js"></script>
+	<script type="text/javascript" src="./common/indexPage/Logo.js"></script>
+	<script type="text/javascript" src="common/indexPage/index.js"></script>
+	<script type="text/javascript" src="./common/tree/companyManager.js"></script>
+	<script type="text/javascript" src="./common/tree/adwareManager.js"></script>
+	<script type="text/javascript" src="./common/tree/orderManager.js"></script>
+	<script type="text/javascript" src="./common/tree/userManager.js"></script>
+	<script type="text/javascript" src="./common/tree/riderManager.js"></script>
+	<script type="text/javascript" src="./common/tree/salerManager.js"></script>
+	<script type="text/javascript" src="./common/tree/feedbackManager.js"></script>
+	<div id="loading-mask"></div>
+	<div id="loading">
+		<div class="loading-indicator">
+			<img src="./common/images/extanim32.gif" width="32" height="32"
+				style="margin-right:8px;float:left;vertical-align:top;" /><span
+				id="loading-msg">数据加载中....</span>
+		</div>
+	</div>
+	<input id="biao1" type="hidden" />
+	<div id="header">
+		<table width="100%" height="20" border="0" cellpadding="0"
+			cellspacing="0">
+			<tr>
+				<td width="96" valign="top"><img
+					src="" /></td>
+				<td id="tops"
+					style="background-image:url(./common/images/top2.bmp)"></td>
+			</tr>
+		</table>
+	</div>
+	<form method="POST" action="./SecurityUser?type=logout" name="frm"
+		id="frm"></form>
+	<form method="POST"
+		action="http://www.mbo88.com/?controller=default&action=logout"
+		name="mblogout" id="mblogout"></form>
+	<div id="north"></div>
+	<div id="center1"></div>
+	<div id="centerdata"></div>
+	<div id="center2"></div>
+	<div id="centerdata1"></div>
+	<div id="log"></div>
+
+	<div id="d_clip_button3" class="my_clip_button3">
+		<img src="./common/images/out.png" style="width:24px;cursor:pointer"
+			onclick="confirmAct()">
+	</div>
+	<iframe id="changepassword_iframe" name="changepassword_iframe"
+		width="0" height="0" style="display:none"></iframe>
+	<form method="POST" action="http://www.mbo88.com/index.php"
+		name="changepassword" id="changepassword">
+		<input type="hidden" name="action" value="changeloginpass" /> <input
+			type="hidden" name="changetype" value="loginpass" /> <input
+			type="hidden" name="check" value="" /> <input type="hidden"
+			id="confirm_newpass" name="confirm_newpass" /> <input type="hidden"
+			name="controller" value="user" /> <input type="hidden" name="flag"
+			value="changepass" /> <input type="hidden" id="newpass"
+			name="newpass" /> <input type="hidden" id="oldpass" name="oldpass" />
+	</form>
+	<script type="text/javascript">
+		document.getElementById('loading-msg').innerHTML = '数据加载中....';
+	</script>
+</body>
+</html>

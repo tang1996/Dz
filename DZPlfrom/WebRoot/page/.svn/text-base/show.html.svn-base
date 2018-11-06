@@ -1,0 +1,209 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>录入界面</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  </head>
+  <body>
+  	<script type="text/javascript">
+var value = null;
+var selectPanl;
+var addUserForm;
+
+var dss= new Ext.data.GroupingStore({
+	  proxy: new Ext.data.HttpProxy({url:'/GXDS/listTAX'}),
+	  reader: new Ext.data.JsonReader({totalProperty:'totalCount', root:'list',id:'city',
+	  successProperty :'@success',
+	  fields:[,'city'
+	  		  ,'dates'
+	  		  ,'fendou'
+	  		  ,'bibao'
+	  		  ,'bibao1'
+	  		  ,'bibao2'
+	  		  ,'bibao3'
+	  		  ,'bibao4'
+	  		  ,'bibao5']
+	  })
+});
+
+var cbsm=new Ext.grid.CheckboxSelectionModel();
+var cm=new Ext.grid.ColumnModel(
+				[new Ext.grid.RowNumberer(),
+			     cbsm,
+				 {header: '单位', dataIndex: 'city', width:100,sortable: true},
+				 {header: '必保数初始值(万元)', dataIndex: 'bibao', width:100,sortable: true},
+				 {header: '必保调整1(万元)', dataIndex: 'bibao1', width:100,sortable: true},
+				 {header: '必保调整2(万元)', dataIndex: 'bibao2', width:100,sortable: true},
+				 {header: '必保调整3(万元)', dataIndex: 'bibao3', width:100,sortable: true},
+				 {header: '必保调整4(万元)', dataIndex: 'bibao4',width:100, sortable: true},
+				 {header: '必保调整5(万元)', dataIndex: 'bibao5',width:100, sortable: true},
+				 {header: '奋斗目标值(万元)', dataIndex: 'fendou',width:100, sortable: true},
+				 {header: '时间', dataIndex: 'dates',width:100, sortable: true}
+			]);
+
+Ext.onReady(function(){
+	var usergrid =new Ext.grid.GridPanel({
+			   ds:dss,
+			   cm:cm,
+			   sm:cbsm,
+			   	height:document.body.clientHeight-124,
+				width:document.body.clientWidth-193,
+			    bbar: new Ext.PagingToolbar({
+					pageSize: 15,
+					store: dss,
+					displayInfo: true,
+					displayMsg: '显示第 {0} 条到 {1} 条记录，一共 {2} 条',
+					emptyMsg:'没有记录'
+				}),
+			    tbar:[{
+				text:'增加',
+				iconCls:'add-fredd',
+				handler:function(){
+						if(Win){
+							Win.destroy();
+						}
+						
+						var bibao = new Ext.form.TextField({
+								fieldLabel: '必保初始值',
+								allowBlank: false,
+								width:200,
+								name:'bibao'
+						});
+						
+						var bibao1 = new Ext.form.TextField({
+								fieldLabel: '必保调整1',
+								width:200,
+								name:'bibao1'
+						});
+						
+						var bibao2 = new Ext.form.TextField({
+								fieldLabel: '必保调整2',
+								width:200,
+								name:'bibao2'
+						});
+						
+						var bibao3 = new Ext.form.TextField({
+								fieldLabel: '必保调整3',
+								width:200,
+								name:'bibao3'
+						});
+						
+						var bibao4 = new Ext.form.TextField({
+								fieldLabel: '必保调整4',
+								width:200,
+								name:'bibao4'
+						});
+						
+						var bibao5 = new Ext.form.TextField({
+								fieldLabel: '必保调整5',
+								width:200,
+								name:'bibao5'
+						});
+						
+						var fendou = new Ext.form.TextField({
+								fieldLabel: '奋斗目标值',
+								width:200,
+								name:'fendou'
+						});
+						
+						
+						var dates = new Ext.form.DateField({
+								fieldLabel: '年度选择',
+								allowBlank: false,
+								width:200,
+								name:'birthday',
+								format:"Y"
+						});
+
+						var grade = [['南宁'],['柳州'],['桂林'],['梧州'],['北海'],['防城港'],['钦州'],['贵港'],['玉林'],['崇左'],['来宾'],['贺州'],['百色'],['河池'],['直属']];
+						var gradeStore = new Ext.data.SimpleStore({fields:['text'],data:grade});
+						    
+						var city = new Ext.form.ComboBox({
+						 		store: gradeStore,
+								fieldLabel: '地市选择',
+								displayField: "text",
+							    name:'city',
+								mode: 'local',
+								emptyText:'选择...',
+								forceSelection: true,
+								allowBlank:true,
+								editable: false,
+								width:73,
+								triggerAction:'all'
+						});
+						
+						var Win = new Ext.Window({
+					        title: '年度设定和调整',
+					        width: 340,
+					        height:320,
+					        layout: 'fit',
+					        resizable:false,
+					        bodyStyle:'padding:5px;',
+					        closable :false,
+					        buttonAlign:'center',
+					        items: addUserForm =new Ext.form.FormPanel({
+								    baseCls: 'x-plain',
+							        labelWidth: 70,
+							        defaultType: 'textfield',
+							       	items:[dates,city,bibao,bibao1,bibao2,bibao3,bibao4,bibao5,fendou]
+							}),
+					        modal: true,
+					        buttons: [{
+					            text: '确定',
+					            handler:function(){
+							 	if(addUserForm.getForm().isValid()){
+						       		addUserForm.getForm().submit({
+						       			waitMsg : '处理中，请稍等...',
+										waitTitle:'请稍等',
+						       		    url:'/GXDS/addTax',
+										params :{ },
+						        		success :function(form,action)
+						        		{
+						        			 addUserForm.getForm().reset();
+						        			 dss.reload();
+						        		},
+						        		failure :function(form,action)
+						        		{
+						        			var msg = Ext.util.JSON.decode(action.response.responseText);
+						        			Ext.Msg.alert('温馨提示',msg.message);
+						        		}	
+						        	});
+						        	     Win.hide();
+						        		
+							       	} else {
+							       		Ext.MessageBox.alert("错误","不允许为空!" );
+							       	}
+					         	 }
+					        },{
+					            text: '取消',
+					            handler: function(){
+					            addUserForm.getForm().reset();
+					           		Win.hide();
+					           		Win.destroy();
+					            }
+					        }]
+					});
+						Win.show();
+				}}/*,"-",{
+				text:'删除',
+				iconCls:'delete-fredd',
+				handler:function(){
+				
+				}
+				},"-",{
+				text:'修改',
+				iconCls:'edit-fredd',
+				handler:function(){
+				
+				}
+				}*/]
+			});
+
+	dss.load({params:{start:0,limit:10}});
+	usergrid.render('grid-example');
+});
+  		
+  	</script>
+  <div id="grid-example" />
+  </body>
+</html>

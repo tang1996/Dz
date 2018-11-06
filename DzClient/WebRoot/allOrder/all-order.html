@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>全部订单</title>
+    <link rel="stylesheet" href="./all-order.css">
+    <link rel="stylesheet" type="text/css" href="../common/css/tip.css" />
+    <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../common/js/common.js"></script>
+	<script type="text/javascript">
+	var token = '';
+	$(document).ready(function(){  
+		  var start = 0;
+		
+		  $(window).scroll(function () {
+		        //$(window).scrollTop()这个方法是当前滚动条滚动的距离
+		        //$(window).height()获取当前窗体的高度
+		        //$(document).height()获取当前文档的高度
+		        var bot = 50; //bot是底部距离的高度
+		        if ((bot + $(window).scrollTop()) >= ($(document).height() - $(window).height())) {
+		           //当底部基本距离+滚动的高度〉=文档的高度-窗体的高度时；
+		            //我们需要去异步加载数据了
+		            start = start + 5;
+		            reload(start);
+		        }
+	    	});
+	
+			token = GetQueryString("token");
+			init();
+	
+	});
+	
+	function init(){
+	
+		$("#allOrder").attr("class","active");
+		$("#backBalance").attr("class","");
+		$("#isSend").attr("class","");
+		
+		$.ajax({
+			type:'POST',
+			url: BASE_URL + LOGIN_ACTION.ORDERVIEW,
+		 	data: { 
+          			token : GetQueryString("token"),
+          			start : '0',
+          			limit : '5'
+      			},
+			success:function(data) {
+			
+				$("#order").html('');
+				$("#order").html('<br/><br/><br/>');
+				
+				for(var i = 0; i < data.length; i++ ){
+						if(data[i].type == 1){
+						
+							var payStatus = '';
+								 var payBtn = '';	
+								 var line = '';
+								 var price = 0;
+								 var total = 0;
+								
+							     if(data[i].status==1){
+					         		payStatus='<span class="status">订单完成</span>';
+					         			
+						         	if(data[i].isSend =='0'){
+						         		payBtn='<a style="color:#FF7E00" href="javascript:comment(\''+data[i].id+'\',\''+data[i].cid+'\',1)"><span>去评价</span></a>';
+						         	}
+					         	
+					             }else if(data[i].status==0){
+					             	payStatus='<span class="status">商家已接单</span>';
+				             		payBtn='<a href="javascript:forword('+data[i].id+')"><span style="color:#FF7E00">订单跟踪</span></a><a href="javascript:refound(\''+data[i].id+'\')"><span style="color:#FF7E00">申请退款</span></a>';
+					             }else if(data[i].status==4){
+					                payStatus='<span class="status">无人接单,已自动退款</span>';
+					             }else if(data[i].status==3){
+					                payStatus='<span class="status">订单退款中</span>';
+					             }else if(data[i].status==6){
+					              	payStatus='<span class="status">已支付等待商家确认</span>';
+				             		payBtn='<a href="javascript:forword('+data[i].id+')"><span style="color:#FF7E00">订单跟踪</span></a><a href="javascript:refound(\''+data[i].id+'\')"><span style="color:#FF7E00">申请退款</span></a>';
+					             }
+					             
+					             var children = data[i].children;
+					             for(var t = 0; t < children.length; t++){
+					                line+= '<div class="item">'+children[t].name+'<span>x'+children[t].much+'</span></div>';
+					                price+= parseFloat(children[t].price);
+					                total+= parseFloat(children[t].much);
+					             }
+							
+								  var html ='<li>'+
+						            '<div class="left">'+
+						             '<img src='+data[i].logo+' alt="">'+
+							            '</div>'+
+							            '<div class="right">'+
+							                '<div class="title">'+
+							                    '<p><span class="shop-name">'+data[i].companyName+'</span>'+payStatus+'</p>'+
+							                      '<p class="datetime">外卖订单</p>'+
+							                      '<p class="datetime">订单号 :'+data[i].orderNo+'</p>'+
+							                      '<p class="datetime">取餐码 :'+data[i].code+'</p>'+
+							                '</div>'+line+'<div class="total">共'+total+'道菜&nbsp;&nbsp;<span>¥'+data[i].pay+'</span></div>'+
+											 '<div class="icon-wrap">'+payBtn+'</div>'+
+							            '</div>'+
+							         '</li>';
+							        
+							     $("#order").append(html);
+														
+						}else if(data[i].type == 2){
+							var isPay = data[i].count;
+							if(isPay == 0){//押金
+								 var payStatus = '';
+								 var payBtn = '';	
+								 var trecode = '';
+								
+							     if(data[i].status==1){
+					         		payStatus='<span class="status">订单完成</span>';
+					         		
+					         			
+						         	if(data[i].isSend =='0'){
+						         		payBtn='<a style="color:#FF7E00" href="javascript:comment(\''+data[i].id+'\',\''+data[i].cid+'\',2)"><span>去评价</span></a>';
+						         	}
+					         	
+					             }else if(data[i].status==0){
+					             	payStatus='<span class="status">商家已接单</span>';
+				             		payBtn='<a href="javascript:paysuccess('+data[i].id+')"><span style="color:#FF7E00">订单跟踪</span></a><a href="javascript:refound(\''+data[i].id+'\')"><span style="color:#FF7E00">申请退款</span></a>';
+					             	trecode = '<p class="datetime">收银码:'+data[i].recode+'</p>';
+					             }else if(data[i].status==4){
+					                payStatus='<span class="status">无人接单,已自动退款</span>';
+					             }else if(data[i].status==3){
+					                payStatus='<span class="status">订单退款中</span>';
+					             }else if(data[i].status==6){
+					              	payStatus='<span class="status">已支付等待商家确认</span>';
+				             		payBtn='<a href="javascript:paysuccess('+data[i].id+')"><span style="color:#FF7E00">订单跟踪</span></a><a href="javascript:refound(\''+data[i].id+'\')"><span style="color:#FF7E00">申请退款</span></a>';
+					             	trecode = '<p class="datetime">收银码:'+data[i].recode+'</p>';
+					             }
+							
+								 if(trecode ==''){
+								 	trecode = ' ';
+								 }
+							
+								  var html ='<li>'+
+						            '<div class="left">'+
+						             '<img src='+data[i].logo+' alt="">'+
+						            '</div>'+
+						            '<div class="right">'+
+						                '<div class="title">'+
+						                    '<p><span class="shop-name">'+data[i].companyName+'</span>'+payStatus+'</p>'+
+						                    '<p class="datetime">预约时间:'+data[i].addTime+'</p>'+
+						                    '<p class="datetime">预定桌位:'+data[i].tableNo+'</p>'+
+						                  		trecode +
+						                    '<p class="datetime">订单号 :'+data[i].orderNo+'</p>'+
+						                '</div><div class="total">押金&nbsp;&nbsp;&nbsp;<span>¥'+data[i].pay+'</span></div>'+
+										 '<div class="icon-wrap">'+payBtn+'</div>'+
+						            '</div>'+
+						         '</li>';
+
+							     $("#order").append(html);
+							     
+							}else{//点菜后
+								
+								 var payStatus = '';
+								 var payBtn = '';	
+								 var line = '';
+								 var price = 0;
+								 var total = 0;
+								 var recode = '';
+								
+							     if(data[i].status==1){
+					         		payStatus='<span class="status">订单完成</span>';
+					         		
+					         			
+						         	if(data[i].isSend =='0'){
+						         		payBtn='<a style="color:#FF7E00" href="javascript:comment(\''+data[i].id+'\',\''+data[i].cid+'\',2)"><span>去评价</span></a>';
+						         	}
+						         	
+					             }else if(data[i].status==0){
+					             	payStatus='<span class="status">商家已接单</span>';
+				             		payBtn='<a href="javascript:paysuccess('+data[i].id+')"><span style="color:#FF7E00">订单跟踪</span></a><a href="javascript:refound(\''+data[i].id+'\')"><span style="color:#FF7E00">申请退款</span></a>';
+					             	recode = '<p class="datetime">收银码:'+data[i].recode+'</p>';
+					             }else if(data[i].status==4){
+					                payStatus='<span class="status">无人接单,已自动退款</span>';
+					             }else if(data[i].status==3){
+					                payStatus='<span class="status">订单退款中</span>';
+					             }else if(data[i].status==6){
+					              	payStatus='<span class="status">已支付等待商家确认</span>';
+				             		payBtn='<a href="javascript:paysuccess('+data[i].id+')"><span style="color:#FF7E00">订单跟踪</span></a><a href="javascript:refound(\''+data[i].id+'\')"><span style="color:#FF7E00">申请退款</span></a>';
+					             	recode = '<p class="datetime">收银码:'+data[i].recode+'</p>';
+					             }
+					             
+					             var children = data[i].children;
+					             for(var t = 0; t < children.length; t++){
+					                line+= '<div class="item">'+children[t].name+'<span>x'+children[t].much+'</span></div>';
+					                price+= parseFloat(children[t].price);
+					                total+= parseFloat(children[t].much);
+					             }
+					             
+					             if(recode ==''){
+								 	recode = ' ';
+								 }
+								
+								  var html ='<li>'+
+						            '<div class="left">'+
+						             '<img src='+data[i].logo+' alt="">'+
+							            '</div>'+
+							            '<div class="right">'+
+							                '<div class="title">'+
+							                    '<p><span class="shop-name">'+data[i].companyName+'</span>'+payStatus+'</p>'+
+							                    '<p class="datetime">预约时间:'+data[i].addTime+'</p>'+
+							                    '<p class="datetime">预定桌位:'+data[i].tableNo+'</p>'+
+						                  		recode +
+						                  		'<p class="datetime">订单号 :'+data[i].orderNo+'</p>'+
+							                '</div>'+line+'<div class="total">共'+total+'道菜&nbsp;&nbsp;<span>¥'+data[i].pay+'</span></div>'+
+											 '<div class="icon-wrap">'+payBtn+'</div>'+
+							            '</div>'+
+							         '</li>';
+							        
+							     $("#order").append(html);
+							}
+						}
+				}
+			},
+			error:function(error) {
+				console.log(error);
+			}
+		});
+	}
+	
+	function reload(start){
+		$.ajax({
+			type:'POST',
+			url: BASE_URL + LOGIN_ACTION.ORDERVIEW,
+		 	data: { 
+          			token : GetQueryString("token"),
+          			start : start,
+          			limit : '5'
+      			},
+			success:function(data) {
+				if(data.length == 0)start = start - 5;
+			
+				for(var i = 0; i < data.length; i++ ){
+					if(data[i].type == 1){
+					
+							 var payStatus = '';
+							 var payBtn = '';	
+							 var line = '';
+							 var price = 0;
+							 var total = 0;
+							
+						     if(data[i].status==1){
+				         		payStatus='<span class="status">订单完成</span>';
+					         	
+					         	if(data[i].isSend =='0'){
+					         		payBtn='<a style="color:#FF7E00" href="javascript:comment(\''+data[i].id+'\',\''+data[i].cid+'\',1)"><span>去评价</span></a>';
+					         	}
+					         	
+				             }else if(data[i].status==0){
+				             	payStatus='<span class="status">商家已接单</span>';
+				             	payBtn='<a style="color:#FF7E00" href="javascript:forword('+data[i].id+')"><span>订单跟踪</span></a><a style="color:#FF7E00" href="javascript:refound(\''+data[i].id+'\')"><span>申请退款</span></a>';
+				             	recode = '<p class="datetime">收银码:'+data[i].recode+'</p>';
+				             }else if(data[i].status==4){
+				                payStatus='<span class="status">无人接单,已自动退款</span>';
+				             }else if(data[i].status==3){
+				                payStatus='<span class="status">订单退款中</span>';
+				             }else if(data[i].status==6){
+				              	payStatus='<span class="status">已支付等待商家确认</span>';
+				             	payBtn='<a style="color:#FF7E00" href="javascript:forword('+data[i].id+')"><span>订单跟踪</span></a><a style="color:#FF7E00" href="javascript:refound(\''+data[i].id+'\')"><span>申请退款</span></a>';
+				             }
+				             
+				             var children = data[i].children;
+				             for(var t = 0; t < children.length; t++){
+				                line+= '<div class="item">'+children[t].name+'<span>x'+children[t].much+'</span></div>';
+				                price+= parseFloat(children[t].price);
+				                total+= parseFloat(children[t].much);
+				             }
+						
+							  var html ='<li>'+
+					            '<div class="left">'+
+					             '<img src='+data[i].logo+' alt="">'+
+						            '</div>'+
+						            '<div class="right">'+
+						                '<div class="title">'+
+						                    '<p><span class="shop-name">'+data[i].companyName+'</span>'+payStatus+'</p>'+
+						                    '<p class="datetime">'+data[i].addTime+'</p>'+
+						                      '<p class="datetime">外卖订单</p>'+
+						                      '<p class="datetime">订单号 :'+data[i].orderNo+'</p>'+
+						                '</div>'+line+'<div class="total">共'+total+'道菜&nbsp;&nbsp;<span>¥'+data[i].pay+'</span></div>'+
+										 '<div class="icon-wrap">'+payBtn+'</div>'+
+						            '</div>'+
+						         '</li>';
+						        
+						     $("#order").append(html);
+													
+					}else if(data[i].type == 2){
+						var isPay = data[i].count;
+						if(isPay == 0){//押金
+							 var payStatus = '';
+							 var payBtn = '';	
+							
+						     if(data[i].status==1){
+				         		payStatus='<span class="status">订单完成</span>';
+					         	
+					         	if(data[i].isSend =='0'){
+					         		payBtn='<a style="color:#FF7E00" href="javascript:comment(\''+data[i].id+'\',\''+data[i].cid+'\',2)"><span>去评价</span></a>';
+					         	}
+					         	
+				             }else if(data[i].status==0){
+				             	payStatus='<span class="status">商家已接单</span>';
+				             	payBtn='<a style="color:#FF7E00" href="javascript:paysuccess('+data[i].id+')"><span>订单跟踪</span></a><a style="color:#FF7E00" href="javascript:refound(\''+data[i].id+'\')"><span>申请退款</span></a>';
+				             	recode = '<p class="datetime">收银码:'+data[i].recode+'</p>';
+				             }else if(data[i].status==4){
+				                payStatus='<span class="status">无人接单,已自动退款</span>';
+				             }else if(data[i].status==3){
+				                payStatus='<span class="status">订单退款中</span>';
+				             }else if(data[i].status==6){
+				              	payStatus='<span class="status">已支付等待商家确认</span>';
+				             	payBtn='<a style="color:#FF7E00" href="javascript:paysuccess('+data[i].id+')"><span>订单跟踪</span></a><a style="color:#FF7E00" href="javascript:refound(\''+data[i].id+'\')"><span>申请退款</span></a>';
+				             	recode = '<p class="datetime">收银码:'+data[i].recode+'</p>';
+				             }
+					
+							  var html ='<li>'+
+					            '<div class="left">'+
+					             '<img src='+data[i].logo+' alt="">'+
+					            '</div>'+
+					            '<div class="right">'+
+					                '<div class="title">'+
+					                    '<p><span class="shop-name">'+data[i].companyName+'</span>'+payStatus+'</p>'+
+					                    '<p class="datetime">预约时间:'+data[i].addTime+'</p>'+
+					                    '<p class="datetime">预定桌位:'+data[i].tableNo+'</p>'+
+					                    	recode+
+					                    '<p class="datetime">订单号:'+data[i].orderNo+'</p>'+
+					                '</div><div class="total">押金&nbsp;&nbsp;&nbsp;<span>¥'+data[i].pay+'</span></div>'+
+									 '<div class="icon-wrap">'+payBtn+'</div>'+
+					            '</div>'+
+					         '</li>';
+
+						     $("#order").append(html);
+						     
+						}else{//点菜后
+							
+							 var payStatus = '';
+							 var payBtn = '';	
+							 var line = '';
+							 var price = 0;
+							 var total = 0;
+							 var recode
+							
+						     if(data[i].status==1){
+				         		payStatus='<span class="status">订单完成</span>';
+					         		
+					         	if(data[i].isSend =='0'){
+					         		payBtn='<a style="color:#FF7E00" href="javascript:comment(\''+data[i].id+'\',\''+data[i].cid+'\',2)"><span>去评价</span></a>';
+					         	}
+					         	
+				             }else if(data[i].status==0){
+				             	payStatus='<span class="status">商家已接单</span>';
+				             	payBtn='<a  href="javascript:paysuccess('+data[i].id+')"><span style="color:#FF7E00">订单跟踪</span></a><a style="color:#FF7E00" href="javascript:refound('+data[i].id+')"><span>申请退款</span></a>';
+				             	recode = '<p class="datetime">收银码:'+data[i].recode+'</p>';
+				             }else if(data[i].status==4){
+				                payStatus='<span class="status">无人接单,已自动退款</span>';
+				             }else if(data[i].status==3){
+				                payStatus='<span class="status">订单退款中</span>';
+				             }else if(data[i].status==6){
+				              	payStatus='<span class="status">已支付等待商家确认</span>';
+				             	payBtn='<a  href="javascript:paysuccess('+data[i].id+')"><span style="color:#FF7E00">订单跟踪</span></a><a style="color:#FF7E00" href="javascript:refound('+data[i].id+')"><span>申请退款</span></a>';
+				            	recode = '<p class="datetime">收银码:'+data[i].recode+'</p>';
+				             }
+				             
+				             var children = data[i].children;
+				             for(var t = 0; t < children.length; t++){
+				                line+= '<div class="item">'+children[t].name+'<span>x'+children[t].much+'</span></div>';
+				                price+= parseFloat(children[t].price);
+				                total+= parseFloat(children[t].much);
+				             }
+								
+							 var html ='<li>'+
+					            '<div class="left">'+
+					             '<img src='+data[i].logo+' alt="">'+
+						            '</div>'+
+						            '<div class="right">'+
+						                '<div class="title">'+
+						                    '<p><span class="shop-name">'+data[i].companyName+'</span>'+payStatus+'</p>'+
+						                    '<p class="datetime">预约时间:'+data[i].addTime+'</p>'+
+						                    '<p class="datetime">预定桌位:'+data[i].tableNo+'</p>'+
+						                  		recode +
+						                  	 '<p class="datetime">订单号:'+data[i].orderNo+'</p>'+
+						                '</div>'+line+'<div class="total">共'+total+'道菜&nbsp;&nbsp;<span>¥'+data[i].pay+'</span></div>'+
+										 '<div class="icon-wrap">'+payBtn+'</div>'+
+						            '</div>'+
+						         '</li>';
+						        
+						     $("#order").append(html);
+						}
+					}
+				}
+			},error:function(error) {
+				console.log(error);
+			}
+		});
+	}
+	
+	function comment(orderId, cid, status){
+		orderCheck('sComment', cid, orderId, status);
+	}
+	
+	function forword(id){
+		valLink("forword",id);
+	}
+	
+	function paysuccess(id){
+		valLink("paysuccess",id);
+	}
+	
+	
+	//待评价列表
+	function isSend(){
+		
+		$("#allOrder").attr("class","");
+		$("#isSend").attr("class","active");
+		$("#backBalance").attr("class","");
+	
+		$.ajax({
+			type:'POST',
+			url: BASE_URL + LOGIN_ACTION.ORDERVIEW,
+		 	data: { 
+         			token : GetQueryString("token"),
+          			start : '0',
+          			limit : '100',
+          			status: 'isSend'
+      		},
+			success:function(data) {
+			      
+				$("#order").html('');
+				$("#order").html('<br/><br/><br/>');
+				
+				for(var i = 0;i < data.length;i++){
+				
+					var children = data[i].children;
+					var menusLine = '';
+					var telService = '';
+					var price = 0;
+					var count = 0;
+					for(var x = 0; x < data[i].count; x++){
+		                menusLine += '<div class="item">'+children[x].name+'<span>x'+children[x].much+'</span></div>';
+		                price += parseFloat(children[x].price);
+		                count += parseFloat(children[x].much);
+		            }
+
+					if(data[i].isSend =='0'){
+		         		telService='<a style="color:#FF7E00" href="javascript:comment(\''+data[i].id+'\',\''+data[i].cid+'\',2)"><span>去评价</span></a>';
+		         	}
+					         	
+		            var html = '';
+		             
+		          	if(data[i].type == 1){
+		          	 html = html + '<li>'+
+				            '<div class="left">'+
+				             '<img src='+data[i].logo+' alt="">'+
+				            '</div>'+
+				            '<div class="right">'+
+				                '<div class="title">'+
+				                    '<p><span class="shop-name">'+data[i].companyName+'</span></p>'+
+				                    '<p class="datetime">'+data[i].addTime+'</p>'+
+						            '<p class="datetime">订单号 :'+data[i].orderNo+'</p>'+
+						             '<p class="datetime">外卖订单</p>'+
+				                '</div>'+menusLine+'<div class="total">共'+ count +'件商品 共计<span>¥'+  data[i].pay +'</span></div>'+
+								 '<div class="icon-wrap">'+telService+'</div>'+
+				            '</div>'+
+				        '</li>';
+			        
+		          	}else if(data[i].type == 2){
+			          	html = html + '<li>'+
+					            '<div class="left">'+
+					             '<img src='+data[i].logo+' alt="">'+
+					            '</div>'+
+					            '<div class="right">'+
+					                '<div class="title">'+
+					                    '<p><span class="shop-name">'+data[i].companyName+'</span></p>'+
+					                    '<p class="datetime">'+data[i].addTime+'</p>'+
+							            '<p class="datetime">订单号 :'+data[i].orderNo+'</p>'+
+							            '<p class="datetime">预约订单</p>'+
+					                '</div>'+menusLine+'<div class="total">押金金额:<span>¥'+ data[i].pay +'</span></div>'+
+									 '<div class="icon-wrap">'+telService+'</div>'+
+					            '</div>'+
+					        '</li>';
+		          	}else{
+	          			html = html + '<li>'+
+				            '<div class="left">'+
+				             '<img src='+data[i].logo+' alt="">'+
+				            '</div>'+
+				            '<div class="right">'+
+				                '<div class="title">'+
+				                    '<p><span class="shop-name">'+data[i].companyName+'</span></p>'+
+				                    '<p class="datetime">'+data[i].addTime+'</p>'+
+						            '<p class="datetime">订单号 :'+data[i].orderNo+'</p>'+
+						            '<p class="datetime">预约订单</p>'+
+				                '</div>'+menusLine+'<div class="total">共'+ count +'件商品 共计<span>¥'+  data[i].pay +'</span></div>'+
+								 '<div class="icon-wrap">'+telService+'</div>'+
+				            '</div>'+
+				        '</li>';
+		          	}
+		            
+			       	 $("#order").append(html);
+    				}
+    				
+			},error:function(error) {
+				console.log(error);
+			}
+		});
+	}
+	
+	
+	
+	//退款列表
+	function backBalance(){
+		
+		$("#allOrder").attr("class","");
+		$("#backBalance").attr("class","active");
+		$("#isSend").attr("class","");
+	
+		$.ajax({
+			type:'POST',
+			url: BASE_URL + LOGIN_ACTION.ORDERVIEW,
+		 	data: { 
+         			token : GetQueryString("token"),
+          			start : '0',
+          			limit : '100',
+          			status: 'backBalance'
+      		},
+			success:function(data) {
+			      
+				$("#order").html('');
+				$("#order").html('<br/><br/><br/>');
+				
+				for(var i = 0;i < data.length;i++){
+				
+					var children = data[i].children;
+					var menusLine = '';
+					var statusLabel = '';
+					var telService = '';
+					var price = 0;
+					var count = 0;
+					for(var x = 0; x < data[i].count; x++){
+		                menusLine += '<div class="item">'+children[x].name+'<span>x'+children[x].much+'</span></div>';
+		                price += parseFloat(children[x].price);
+		                count += parseFloat(children[x].much);
+		            }
+
+	             	statusLabel='<span class="status">退款中</span>';
+	             	telService='<span><a style="text-decoration: none;color: #ff7e00;" href=tel:4008333520>联系客服</a></span>';
+		            var html = '';
+		             
+		          	if(data[i].type == 1){
+		          	 html = html + '<li>'+
+				            '<div class="left">'+
+				             '<img src='+data[i].logo+' alt="">'+
+				            '</div>'+
+				            '<div class="right">'+
+				                '<div class="title">'+
+				                    '<p><span class="shop-name">'+data[i].companyName+'</span>'+statusLabel+'</p>'+
+				                    '<p class="datetime">'+data[i].addTime+'</p>'+
+						            '<p class="datetime">订单号 :'+data[i].orderNo+'</p>'+
+						             '<p class="datetime">外卖订单</p>'+
+				                '</div>'+menusLine+'<div class="total">共'+ count +'件商品 共计<span>¥'+  data[i].pay +'</span></div>'+
+								 '<div class="icon-wrap">'+telService+'</div>'+
+				            '</div>'+
+				        '</li>';
+			        
+		          	}else if(data[i].type == 2){
+			          	html = html + '<li>'+
+					            '<div class="left">'+
+					             '<img src='+data[i].logo+' alt="">'+
+					            '</div>'+
+					            '<div class="right">'+
+					                '<div class="title">'+
+					                    '<p><span class="shop-name">'+data[i].companyName+'</span>'+statusLabel+'</p>'+
+					                    '<p class="datetime">'+data[i].addTime+'</p>'+
+							            '<p class="datetime">订单号 :'+data[i].orderNo+'</p>'+
+							            '<p class="datetime">预约订单</p>'+
+					                '</div>'+menusLine+'<div class="total">押金金额:<span>¥'+ data[i].pay +'</span></div>'+
+									 '<div class="icon-wrap">'+telService+'</div>'+
+					            '</div>'+
+					        '</li>';
+		          	}else{
+	          			html = html + '<li>'+
+				            '<div class="left">'+
+				             '<img src='+data[i].logo+' alt="">'+
+				            '</div>'+
+				            '<div class="right">'+
+				                '<div class="title">'+
+				                    '<p><span class="shop-name">'+data[i].companyName+'</span>'+statusLabel+'</p>'+
+				                    '<p class="datetime">'+data[i].addTime+'</p>'+
+						            '<p class="datetime">订单号 :'+data[i].orderNo+'</p>'+
+						            '<p class="datetime">预约订单</p>'+
+				                '</div>'+menusLine+'<div class="total">共'+ count +'件商品 共计<span>¥'+  data[i].pay +'</span></div>'+
+								 '<div class="icon-wrap">'+telService+'</div>'+
+				            '</div>'+
+				        '</li>';
+		          	}
+		            
+			       	 $("#order").append(html);
+    				}
+    				
+			},error:function(error) {
+				console.log(error);
+			}
+		});
+	}
+	</script>
+</head>
+<body>
+<style type="text/css">
+#fd {
+width:100%;
+border-bottom: 2px solid #00CC00;
+background-color:#FFFFFF;
+font-size:14px; 
+position:fixed; 
+top:0;
+_position:relative; 
+z-index:100;
+_top:expression(offsetParent.scrollTop+0);
+ } 
+</style>
+</head>
+    <header>
+        <div class="active" id="allOrder"><a onclick="init()">全部订单</a></div>
+        <div id="isSend"><a onclick="isSend()">待评价</a></div>
+        <div id="backBalance"><a onclick="backBalance()">退款</a></div>
+    </header>
+    <ul id="order">
+      <br/><br/><br/>
+    </ul>
+    <!-- 确认框   2018-11-04 @Tyy  start  -->
+    <div id="tips_bg" style="display : none;">
+	    <div class="tips_bg_div">
+			<div class="tips_div">
+				<div class="tips_content">您真的确定要申请退款吗？</br>请确认！</div>
+				<p hidden id="tip_result"></p>
+				<div class="tips_button">
+					<button class="cancel" onclick="tip_cancel()">取消</button>
+					<button class="ok" onclick="tip_ok()">确定</button>
+				</div>
+			</div>
+		</div>
+    </div>
+    <script  type="text/javascript">
+	    function refound(id){
+	   		$("#tips_bg").attr("style", "display : block;");
+			var id = $("#tip_result").val(id);
+		}
+		function tip_ok(){
+			$("#tips_bg").attr("style", "display : none;");
+			var id = $("#tip_result").val();
+			$.ajax({
+				type:'POST',
+				url: BASE_URL + LOGIN_ACTION.ALL_ORDER_REFUND,
+			 	data: { 
+	          		orderId : id
+	      		},
+				success:function(data) {
+					if(data.success){
+						init();	
+					}
+					valLink('alert', data.message);		
+				},error:function(error) {
+					console.log(error);
+				}
+			});
+		}
+		function tip_cancel(){
+			$("#tips_bg").attr("style", "display : none;");
+		}
+	</script>
+	<!-- 确认框    end -->
+</body>
+</html>

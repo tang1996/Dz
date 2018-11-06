@@ -1,0 +1,126 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+.ser {
+    position:fixed;
+    /*text-align: center;*/
+    height: 100%;
+    width: 100%;
+    background: url("../../common/img/serbg.png") no-repeat center;
+    background-size: cover; 
+}
+
+ .ie{   
+       _position: absolute;  
+       _clear: both;   
+       _top:expression(eval(document.compatMode &&   
+               document.compatMode=='CSS1Compat') ?   
+               documentElement.scrollTop   
+               +(documentElement.clientHeight-this.clientHeight) - 1   
+               : document.body.scrollTop   
+               +(document.body.clientHeight-this.clientHeight) - 1); 
+}
+.ser img {
+    display: block;
+    margin: 0 auto;
+    width: 103px;
+    height: 103px;
+    border-radius: 50%;
+    margin-top: 60px;
+    margin-bottom: 12px;
+}
+
+.ser h3 {
+    position: relative;
+    font-size: 18px;
+    color: #fff;
+    text-align: center;
+    margin-top:25px;
+    margin-bottom: 50px;
+    font-weight: 500;
+    display: block;
+    width: 300px;
+    margin: 20px auto 10px;
+    
+}
+
+.ser h3:before {
+    width: 30px;
+    height: 1px;
+    content: "";
+    background: #fff;
+    position: absolute;
+    left: 0px;
+    top: 12px;
+    display: block;
+    overflow: hidden;
+    z-index: 999;
+}
+
+.ser h3:after {
+    width: 30px;
+    height: 1px;
+    content: "";
+    background: #fff;
+    position: absolute;
+    right:0;
+    top: 12px;
+    display: block;
+    overflow: hidden;
+    z-index: 999;
+}
+#login{
+	width: 400px;
+	margin: auto;
+	border: 1px solid transparent;
+	
+}
+#login .input_p{
+	margin-top:20px;
+	line-height: 37px;
+}
+#login .input_p label{
+	float:left;
+	color: #fff;
+	width: 90px;
+	display: inline-block;
+}
+#login .input_p input{
+	padding: 12px 20px;
+	border-radius: 5px;
+	border: 1px solid #fff;
+	width: 360px;
+	outline: none;
+	float: left;
+}
+#login #remember{
+	line-height: 65px;
+	color: #fff;
+	font-size: 14px;
+	/*margin-left: 90px;*/
+}
+#login #remember input{
+	display: inline-block;
+	margin: 0 15px 0 0px;
+	vertical-align: middle;
+	width:20px;height:20px;
+	
+}
+#login .sub{
+	width: 400px;
+	display: block;
+	padding: 30px;
+	border-radius: 5px;
+	background: #ff7e00;
+	border: 1px solid #ff7e00;
+	color: #fff;
+	outline: none;
+	margin: 0px auto;
+	font-size:20px;
+}
+.clear:after{
+	clear: both;
+	display: block;
+	content: " ";
+}

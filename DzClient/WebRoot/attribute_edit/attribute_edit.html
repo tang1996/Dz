@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>编辑属性名称</title>
+<link rel="stylesheet" href="./attribute_edit.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+
+<body>
+<script type="text/javascript">
+		$(document).ready(function(){ 
+			var goodsId=GetQueryString("goodsId");
+			var cid=GetQueryString("cid");
+			var sid=GetQueryString("sid");
+$('#h-div').html('<a class="h-l" href="../attribute_list/attribute_list.html?goodsId='+goodsId+'&sid='+sid+'"><img class="jt" src="../common/img/iconjt.png" alt=""></a><p>属性名称</p>');
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.GETATTRIBUTE,
+				 	data: { 
+            			id:cid
+            			
+        			},
+					success:function(data) {
+						$('#name').val(data.name);
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+		});
+	function add(){		
+			var name=$('#name').val();
+			if(name.length==0){
+				valLink("alert","请填写属性名称!");
+				return false;
+			}
+			var goodsId=GetQueryString("goodsId");
+				var cid=GetQueryString("cid");
+				var sid=GetQueryString("sid");
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.ATTRIBUTESAVE,
+				 	data: { 
+            			id:cid,
+            			name:name
+            			
+        			},
+					success:function(data) {
+						if(data.success){
+							var url="../attribute_list/attribute_list.html";
+							window.location.href=url+"?"+"goodsId="+goodsId+"&sid="+sid;
+						}
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+	}	
+function cancel(){
+	var goodsId=GetQueryString("goodsId");
+	var sid=GetQueryString("sid");
+	var url="../attribute_list/attribute_list.html";
+	window.location.href=url+"?goodsId="+goodsId+"&sid="+sid;
+}
+		</script>
+	<div class="head">
+		<div class="h-div" id="h-div">
+			
+			
+		</div>
+	</div>
+    <div class="wrap sort_add">
+        <p><font style="color:red;">*</font>属性名称</p>
+		<input type="text" name="name" id="name" placeholder="请填写属性名称,例如温度、规格、大小等" value="" />
+    </div>
+	<div class="foot_xg">
+		<button type="button" onclick="cancel();">取消</button>
+		<button type="button" onclick="add();">保存</button>
+	</div>
+</body>
+
+</html>

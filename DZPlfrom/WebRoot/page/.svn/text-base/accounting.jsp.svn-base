@@ -1,0 +1,357 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>国库对账</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+</head>
+<link rel="stylesheet" type="text/css" href="ext-2.2/resources/css/ext-all.css">
+<script type="text/javascript" src="ext-2.2/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="ext-2.2/ext-all.js"></script>
+
+<script type="text/javascript" src="seach.js" ></script>
+<script type="text/javascript" src="filtrate.js" ></script>
+<body>
+	<strong><script type="text/javascript">
+
+Ext.onReady(function(){
+
+var searchWin;
+var name  = new Array();
+var but = new Array();
+var bill ='';
+var push = '';
+var nesd;
+var isCounts = '';
+var array = '';
+var fields = '';
+var names = '';
+var coid = '';
+var columns = '';
+
+
+var start = new Date();
+start = start.format('Ymd');
+
+var text = '';
+var grade = [['RKRQ','入库时间'],['SJRQ','上解时间'],['SBSJ','申报时间'],['MRSJ','默认时间']]
+var clumStore = new Ext.data.SimpleStore({fields:['value','text'],data:grade})
+
+			var accountCm = new Ext.grid.ColumnModel(array);
+
+	        var accountDs = new Ext.data.GroupingStore({
+				  proxy: new Ext.data.HttpProxy({url:''}),
+				  reader: new Ext.data.JsonReader({totalProperty:'totalCount', root:'list',id:'id',
+				  successProperty :'@success',
+				  fields:fields
+				  })
+			});
+
+			this.pagingBar = new Ext.PagingToolbar({
+	            displayInfo:true,
+	            emptyMsg:"没有数据显示",
+	            displayMsg:"显示从{0}条数据到{1}条数据，共{2}条数据",
+	            store:accountDs,
+	            pageSize:400
+	        });
+
+			var accountGrid = new Ext.grid.GridPanel({
+				 	    ds:accountDs,
+						cm:accountCm,
+				        height:document.body.clientHeight-120,
+						width:document.body.clientWidth-193,
+						loadMask : true,// 载入遮罩动画
+				        stripeRows:true,
+				        frame : false,
+				        renderTo : 'page_man',
+				        autoShow : true,
+				        viewConfig : {
+				            forceFit : false
+				        },
+						 tbar : [{
+				            text : '查询',
+				            tooltip : '查询',
+				            iconCls : 'refresh',
+				            handler : function() { 
+				            	searchFN();
+				            }
+				        }, '-', {
+				            text : '转换Excel处理',
+				            tooltip : '转换Excel处理',
+				            iconCls : 'refresh',
+				            handler : function() {
+				            	 try{   
+										var xml = "";
+										var col = columns.toString().split(',');
+								        var ss = accountGrid.getStore();
+										ss.each(function(record) {
+										 var slit = columns.toString().split(',');
+								            for(var i = 0 ; i < slit.length ; i++ ){
+								            	if(i - slit.length == -1){
+								            		xml = xml +record.get(slit[i])+";";
+								            	}else{
+								            		xml = xml +record.get(slit[i])+"|";
+								            	}
+								            }
+										 });
+										if(xml){
+											var XLObj = new ActiveXObject("Excel.Application" );
+											var xlBook = XLObj.Workbooks.Add; //新增工作簿
+											var ExcelSheet =xlBook.Worksheets(1);  
+											var oSheet  = xlBook.ActiveSheet
+										    ExcelSheet.Cells(1,1).HorizontalAlignment = 3;
+										    ExcelSheet.Cells(1,1).VerticalAlignment = 2;
+											//垂直对齐方式枚举*(1-靠上，2-居中，3-靠下，4-两端对齐，5-分散对齐)
+										    ExcelSheet.Cells(1,1).Font.Size = 14;
+											 //设置为10号字*
+										    ExcelSheet.Cells(1,1).Font.Name = "宋体";
+												//设置字体
+										    ExcelSheet.Cells(1,1).Font.Bold = true;
+											//设置为粗体*
+										    ExcelSheet.cells(1,1)="    广西地税-主题查询   ";
+										    ExcelSheet.cells(1,1).Interior.ColorIndex =14 ;
+										    XLObj.Range("A1",XLObj.Cells(1, col.length)).MergeCells = true;
+										    ExcelSheet.Application.Visible = true;
+											var verhei = names.toString().split(',');
+								            for(var y = 0 ; y < verhei.length ; y++ ){
+								            	 ExcelSheet.cells(2,y+1)=verhei[y];
+								            }
+								            
+								            for(var n = 1 ; n <= verhei.length;n++){
+								              ExcelSheet.Columns(n).NumberFormatLocal="@";
+								            }
+											   var arr_row=xml.split(';');
+											   for(var i=0;i<arr_row.length;i++){
+											     var arr_clum=arr_row[i].split('|');
+											      for(var j=0;j<arr_clum.length;j++){
+											         oSheet.Columns.AutoFit;
+											      		if(arr_clum[j] != 'undefined'){
+											      			if(arr_clum[j] == 'null'){
+											      			 ExcelSheet.cells(i+3,j+1)= '';	
+											      			}else{
+											      			 ExcelSheet.cells(i+3,j+1)=arr_clum[j];	
+											      			}
+											      		}
+												     }
+											       }
+											    }
+						        }catch(e){   
+						            if(Ext){   
+						                Ext.Msg.show({   
+						                    title:'提示',   
+						                    msg:'请设置IE的菜单\'工具\'->Internet选项->安全->自定义级别->\'对未标记为可安全执行脚本ActiveX控件初始化并执行脚本\'->选择[启用]&nbsp;&nbsp;就可以生成Excel',   
+						                    buttons:Ext.Msg.OK,   
+						                    icon:Ext.Msg.INFO   
+						                });   
+						            }else{   
+						                alert('不支持ExtJs框架');   
+						                return;   
+						            }   
+						        }  
+				            }
+				        }],
+				        bbar: this.pagingBar
+			 });
+
+var searchFN = function() {
+	if(searchWin) searchWin.destroy();
+
+ 	var account = new Ext.form.ComboBox({
+		 store:new Ext.data.SimpleStore({fields:[],data:[[]]}),
+		 shadow:false,
+		 mode: 'local',
+		 editable :false,
+		 fieldLabel: '查询主题',
+		 id:'columnn',
+		 width:300,
+		 triggerAction:'all',
+		 tpl: '<tpl for="."><div style="height:200px"><div id="sss"></div></div></tpl>',
+		 allowBlank:false
+	});
+	 var columnTax = new Ext.tree.TreePanel({
+		  loader: new Ext.tree.TreeLoader({dataUrl:coid}),
+		  border:false,
+		  root:new Ext.tree.AsyncTreeNode({text: '请选择主题',id:'22112'})
+	 });
+		columnTax.on('click',function(node){
+			if(node.text=='请选择主题'){
+				return;
+			}
+			deptny = node.text;
+			text = node.id;
+	  		account.setValue(node.text);
+	  		account.collapse();
+	  	});
+		 account.on('expand',function(){
+		    columnTax.loader.dataUrl = '/GXDS/accountTree?coyong='+Ext.getCmp('coyong').getValue();
+		 	columnTax.render('sss');
+		 });
+	columnTax.on('checkchange', function(node, checked) {
+		 node.expand();
+		 node.attributes.checked = checked;
+		 node.eachChild(function(child) {
+		 child.ui.toggleCheck(checked);
+		 child.attributes.checked = checked;
+		 child.fireEvent('checkchange', child, checked);
+	 });
+	},columnTax);
+
+	var kind2 = new Ext.form.ComboBox({
+		   valueField :"value",
+		   displayField: "text",
+		   fieldLabel: '日期类别',
+		   id:'kind2', 
+		   hiddenName:'impLevel',
+		   store: clumStore,
+		   mode: 'local',
+		   forceSelection: true,
+		   allowBlank:false,
+		   editable: false,
+		   width:300,
+		   triggerAction:'all'
+     });
+
+      var startdt = new Ext.form.DateField({
+  				width:120,
+  				fieldLabel: '有效日期(起)',
+			    id: 'startdt',
+           		allowBlank:true,
+           		format:'Ymd',
+           		value:start
+	})
+
+	var enddt = new Ext.form.DateField({
+ 		 	  width:120,
+ 		      fieldLabel: '有效日期(止)',
+ 			  name: 'timeEnd',
+              allowBlank:true,
+              id: 'enddt',
+              showToday:true,
+              format:'Ymd',
+			  value:start
+	})
+
+	searchWin = new Ext.Window({
+              layout : 'fit',
+              width : 570,
+              height : 340,
+              autoScroll :true,
+		      title:"查询",
+              items : msForm = new Ext.form.FormPanel({
+					        autoScroll:true,//自动出现滚动条
+							id : "commentForm",
+					        labelWidth: 80,
+					        labelAlign:"right",
+					        bodyStyle:'padding:10px 10px 10px 10px',
+					        width : 700,
+			       			height : 400,
+					        border:false,
+					        defaultType : 'textfield',
+					        items:[{xtype:"panel",autoHeight:true,layout:"column",border:false,items:[{html:"查询主题:",width:70,border : false,bodyStyle:"padding:5px"},{ xtype:"panel",width:330,border:false,
+					        			items:account},
+					        			{xtype:"checkbox",name:"emergency2",id:'coyong',boxLabel:"",inputValue:"true"},
+			        				{html:"使用别人台帐",width:105,border:false,bodyStyle:"padding:0px 0px 0px 10px"}]},
+			        				{xtype:"panel",layout:"column",border:false,items:[{html:"日期类别:",width:70,border : false,bodyStyle:"padding:5px"},{ xtype:"panel",width:330,border:false,
+					        			items:kind2},
+					        			{xtype:"checkbox",name:"emergency",id:'counts',boxLabel:"",inputValue:"true",bodyStyle:"padding:0px 0px 0px 10px"},
+			        				{html:"显示合计数",width:105,border:false,bodyStyle:"padding:0px 0px 0px 10px"}]},
+				            		startdt
+				            	   ,enddt
+				            	   ,{xtype:"panel",height:10,border:false}
+		            				,{xtype:"panel",height:10,border:false},{xtype:"panel",layout:"column",border:false,items:[{
+            xtype:'fieldset',
+            title: '单位换算',
+            autoHeight: true,
+            width:440,
+            items: [{
+                xtype: 'radiogroup',
+                fieldLabel: '请选择单位',
+                allowBlank : true,      
+                horizontal:true,      
+                maxLength : 200,      
+                defaultValue:'true',      
+                name : "activity.ishavecare",    
+                items: [
+                    {boxLabel: '元',height:30, id:'rb-1',name: 'rb-auto', inputValue: 1, checked: true},
+                    {boxLabel: '千',height:30, id:'rb-2',name: 'rb-auto', inputValue: 2},
+                    {boxLabel: '万',height:30, id:'rb-3',name: 'rb-auto', inputValue: 3}
+                ]
+            }]}]}],
+					        buttons: [{
+					            text: '开始查询',
+					            handler: function(){
+					            	if(startdt.value == null||enddt.value == null){
+						           	  Ext.Msg.alert('警告','请选择时间!');
+						            	return;
+						            }
+
+						            isCounts = Ext.getCmp('counts').getValue();
+						            var rb = 1;
+						            if( Ext.getCmp('rb-2').getValue() == true ){
+						            	rb = 2;
+						            }else if( Ext.getCmp('rb-3').getValue() == true){
+						            	rb = 3;
+						            }
+
+					                if(msForm.getForm().isValid()){
+					                	Ext.Ajax.request({         
+									           url: '/GXDS/sQLqueryPath',  
+									           params:{conversion:rb,isColumn:'sss',accountID:text,isDes:kind2.getValue(), isCount:Ext.getCmp('counts').getValue()},
+									           success:function(response, options){
+									           var msg = Ext.util.JSON.decode(response.responseText);
+												   accountGrid.reconfigure(
+													   new Ext.data.GroupingStore({   
+													        reader: new Ext.data.JsonReader({   
+													            root:'list',   
+													            totalProperty:'totalCount',
+													            id:'id',   
+													            fields:msg.column
+													        }),
+													        proxy:new Ext.data.HttpProxy({   
+													            url:'/GXDS/sQLqueryPath',   
+													            autoAbort:true,   
+													            disableCaching:true,   
+													            timeout:18000000,   
+													            method:'POST'  
+													        })   
+													    }),
+													new Ext.grid.ColumnModel(msg.columnModel));    
+
+												names = msg.name;
+												columns = msg.columns
+
+												var accountDs = accountGrid.getStore();
+												this.pagingBar.bind(accountDs);
+												accountDs.load({params:{ conversion:rb,isCount:Ext.getCmp('counts').getValue(),isDes:kind2.getValue(),start:0, limit:400,startTime:startdt.value,endTime:enddt.value}});
+												
+												accountDs.on('beforeload',function(loader){
+													loader.baseParams = {conversion:rb,isCount:isCounts,isDes:kind2.getValue(),accountID:text,startTime:startdt.value,endTime:enddt.value };
+												});
+												
+										        searchWin.destroy();
+						                  		msForm.destroy();
+									           },failure: function(form,action){
+									        	Ext.Msg.alert('温馨提示','后端异常');
+									        	 searchWin.destroy();
+						                  		 msForm.destroy();
+									           } 
+										 });
+					                }
+					            }
+					        },{
+				              text : '取消',
+				              handler : function() {
+						        searchWin.destroy();
+		                  		msForm.destroy();
+				              }
+				    	   }]
+					    })
+		   			 });
+	searchWin.show();
+};
+});
+	</script></strong>
+	<div id='page_man'></div>
+</body>
+</html>

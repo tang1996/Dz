@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>商家评价</title>
+    <link rel="stylesheet" href="./seller-comment.css">
+    <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../common/js/common.js"></script>
+	<script type="text/javascript" src="../common/js/jquery.lazyload.min.js" ></script>
+</head>
+<body>
+<script type="text/javascript">
+$(document).ready(function(){ 
+					//获取的数据
+				    var customId=GetQueryString("cid");
+					var start = 0;
+					var start1=0;
+					var start_img=0;
+					var start_good=0;
+					var start_difference=0;
+					var n=0;
+					
+					$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.COMPANYCOUNT,
+				 	data: { 
+            			customId:customId,
+        			},
+					success:function(data) {
+					var html='';
+					$('#totalcount').html('全部'+data.total);
+					$('#imgcount').html('有图'+data.imgCount);
+					//$('#good').html('好评'+data.praiseCount);
+					//$('#difference').html('差评'+data.negativeCount);
+					$('#fen').html(data.totalCount);
+					var taste=data.taste;
+					var quality=data.quality;
+					var lineType='';
+					var lineType1='';
+								if(taste>0 && taste<1){
+										lineType = '<img src="../common/img/null.png" alt="">';
+								}else if(taste==1){
+									   lineType = '<img src="../common/img/favourable.png" alt="">';
+								}else if(taste>1 && taste<2){
+										lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else  if(taste==2){
+										lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>2 && taste<3){
+										lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==3){
+										lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>3 && taste< 4 ){
+		 							    lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==4){
+										lineType ='<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>4 && taste<5){
+										lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==5){
+										lineType = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}	
+								if(quality>0 && quality<1){
+										lineType1 = '<img src="../common/img/null.png" alt="">';
+								}else if(quality==1){
+									   lineType1 = '<img src="../common/img/favourable.png" alt="">';
+								}else if(quality>1 && quality<2){
+										lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else  if(quality==2){
+										lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(quality>2 && quality<3){
+										lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(quality==3){
+										lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(quality>3 && quality< 4 ){
+		 							    lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(quality==4){
+										lineType1 ='<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(quality>4 && quality<5){
+										lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(quality==5){
+										lineType1 = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+										
+								}	
+					html='<p>'+
+		                    '<span>菜品口味</span>'+lineType+
+		                    '<span class="num">'+taste+'</span>'+
+			                '</p>'+
+			                '<p>'+
+		                    '<span>服务质量</span>'+lineType1+		                   
+		                    '<span class="num">'+quality+'</span>'+
+                			'</p>';
+                			 $("#desc").html(html); //将此处的 append 改成了 html
+                			 $("img").lazyload({ 
+								 	placeholder : "../common/img/defual.png",
+						            threshold : 200
+						        });  
+						 if(data.total == 0){
+						 	$("#noData").show();
+						 }
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+				//图片懒加载
+					$("img").lazyload({ 
+				 	placeholder : "../common/img/defual.png",
+		            threshold : 200
+					  });  	
+				//获得全部数据
+					$("#list").html(''); 
+					 whole(start);
+					 
+					$(window).scroll(function () {	 
+						var bot = 50; 
+						if ((bot + $(window).scrollTop()) >= ($(document).height() - $(window).height())) {	
+							if(n==0){
+								  start = start + 5;
+								  whole(start);
+							  }else if(n==1){
+								  start1 = start1 + 5;
+								  whole1(start1);
+							  }else if(n==2){
+								  start_img = start_img + 5;
+								  graph(start_img);
+							  }else if(n==3){
+								  start_good = start_good + 5;
+									good(start_good);
+							 }else if(n==4){
+								 start_difference=start_difference+5;
+								 difference(start_difference);
+							}
+						}
+					 });
+
+					//总切换
+					 $("#totalcount").click(function(){	
+					    $(".active").removeClass('active');
+						$("#totalcount").addClass('active');
+							 $("#list").html(''); 
+						 	 whole1(0);
+							 n=1;
+							 start1 = 0;
+					  });
+					  //有图切换
+					$("#imgcount").click(function(){	
+					    $(".active").removeClass('active');
+						$("#imgcount").addClass('active');
+						 $("#list").html(''); 
+							graph(0);
+							n=2;
+							start_img = 0;
+					});
+					//好评切换
+					$("#good").click(function(){	
+					    $(".active").removeClass('active');
+						$("#good").addClass('active');
+						$("#list").html(''); 
+						good(0);
+						n=3;
+						start_good=0;
+					});
+					//差评切换
+					$("#difference").click(function(){	
+					    $(".active").removeClass('active');
+						$("#difference").addClass('active');
+						$("#list").html('');
+						difference(0);
+						n=4;
+						start_difference=0;
+					});
+
+
+
+//全部数据
+function whole(start){
+	$(".loading").css("visibility","visible");
+		var customId=GetQueryString("cid");
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.EVALUATETYPE,
+				 	data: { 
+            			customId:customId,
+            			status:'total',
+            			start :start,
+          				limit : 5
+        			},
+					success:function(data) {
+					
+						var list=data.list;
+						if(list.length == 0){
+							start = start - 5;
+						}
+						var html='';
+						for(var i = 0; i < list.length; i++){
+						var taste=list[i].taste;
+						var lineTypeNew='';
+								if(taste>0 && taste<1){
+										lineTypeNew = '<img src="../common/img/null.png" alt="">';
+								}else if(taste==1){
+									   lineTypeNew = '<img src="../common/img/favourable.png" alt="">';
+								}else if(taste>1 && taste<2){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else  if(taste==2){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>2 && taste<3){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==3){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>3 && taste< 4 ){
+		 							    lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==4){
+										lineTypeNew ='<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>4 && taste<5){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==5){
+										lineTypeNew= '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}	
+							var imgtotal=parseInt(list[i].imgtotal);
+							var img='';
+							switch(imgtotal){
+								case 1:
+								  		img='<p class="img-list"><img src="'+list[i].images0+'" alt=""></p>';
+								 		 					break;
+								case 2:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""></p>';
+								 		 					break;
+								case 3:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""></p>';
+								 		 					break;
+								case 4:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""><img src="'+list[i].images3+'" alt=""></p>';
+								 		 					break;
+								case 5:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""><img src="'+list[i].images3+'" alt=""><img src="'+list[i].images4+'" alt=""></p>';
+								 		 					break;
+							}
+							var label=list[i].label;
+							var str='';
+							if(label!=''){
+								str='<p class="label-box">'+label+'</p>';
+							}
+							var reply=list[i].reply;
+							var lian='';
+							if(reply!=null){
+								lian='<p class="seller-reply"><span>商家回复：</span>'+list[i].reply+'</p>';
+							}
+								html='<li class="item">'+
+					                       '<div class="left"><img src="../common/img/tou.png" alt=""></div>'+
+					                       '<div class="right">'+
+					                       '<p class="nick-name">'+list[i].nickName+'</p>'+
+					                       '<p class="level">'+
+					                       '<span>评分</span>'+lineTypeNew+					                   
+					                       '</p>'+
+					                       '<p class="user-comment">'+list[i].content+'</p>'+img+lian+
+					                       '<p class="date">'+list[i].createTime+'</p>'+str+
+					                       '</div>'+
+					                       '</li>';
+							$("#list").append(html);
+						}
+						$("img").lazyload({ 
+							placeholder : "../common/img/defual.png",
+							threshold : 200
+						});  
+						
+						$(".loading").css("visibility","hidden");
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}	
+
+function whole1(start1){
+		$(".loading").css("visibility","visible");
+		var customId=GetQueryString("cid");
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.EVALUATETYPE,
+				 	data: { 
+            			customId:customId,
+            			status:'total',
+            			start :start1,
+          				limit : 5
+        			},
+					success:function(data) {
+					
+						var list=data.list;
+						if(list.length == 0){
+							start1 = start1 - 5;
+						}
+						var html='';
+						for(var i = 0; i < list.length; i++){
+						var taste=list[i].taste;
+						var lineTypeNew='';
+								if(taste>0 && taste<1){
+										lineTypeNew = '<img src="../common/img/null.png" alt="">';
+								}else if(taste==1){
+									   lineTypeNew = '<img src="../common/img/favourable.png" alt="">';
+								}else if(taste>1 && taste<2){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else  if(taste==2){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>2 && taste<3){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==3){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>3 && taste< 4 ){
+		 							    lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==4){
+										lineTypeNew ='<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>4 && taste<5){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==5){
+										lineTypeNew= '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}	
+							var imgtotal=parseInt(list[i].imgtotal);
+							var img='';
+							switch(imgtotal){
+								case 1:
+								  		img='<p class="img-list"><img src="'+list[i].images0+'" alt=""></p>';
+								 		 					break;
+								case 2:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""></p>';
+								 		 					break;
+								case 3:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""></p>';
+								 		 					break;
+								case 4:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""><img src="'+list[i].images3+'" alt=""></p>';
+								 		 					break;
+								case 5:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""><img src="'+list[i].images3+'" alt=""><img src="'+list[i].images4+'" alt=""></p>';
+								 		 					break;
+							}
+							var label=list[i].label;
+							var str='';
+							if(label!=''){
+								str='<p class="label-box">'+label+'</p>';
+							}
+							var reply=list[i].reply;
+							var lian='';
+							if(reply!=null){
+								lian='<p class="seller-reply"><span>商家回复：</span>'+list[i].reply+'</p>';
+							}
+								html='<li class="item">'+
+					                       '<div class="left"><img src="../common/img/tou.png" alt=""></div>'+
+					                       '<div class="right">'+
+					                       '<p class="nick-name">'+list[i].nickName+'</p>'+
+					                       '<p class="level">'+
+					                       '<span>评分</span>'+lineTypeNew+					                   
+					                       '</p>'+
+					                       '<p class="user-comment">'+list[i].content+'</p>'+img+lian+
+					                       '<p class="date">'+list[i].createTime+'</p>'+str+
+					                       '</div>'+
+					                       '</li>';
+							$("#list").append(html);
+						}
+					
+						$("img").lazyload({ 
+							placeholder : "../common/img/defual.png",
+							threshold : 200
+						});  
+						
+						$(".loading").css("visibility","hidden");
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}	
+
+
+
+//有图
+function graph(start_img){
+			$(".loading").css("visibility","visible");
+			var customId=GetQueryString("cid");
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.EVALUATETYPE,
+				 	data: { 
+            			customId:customId,
+            			status:'img',
+            			start :start_img,
+          				limit : 5
+        			},
+					success:function(data) {
+					
+						var list=data.list;
+						if(list.length == 0){
+							start_img = start_img - 5;
+							}
+						var html='';
+						for(var i = 0; i < list.length; i++){
+						var taste=list[i].taste;
+						var lineTypeNew='';
+								if(taste>0 && taste<1){
+										lineTypeNew = '<img src="../common/img/null.png" alt="">';
+								}else if(taste==1){
+									   lineTypeNew = '<img src="../common/img/favourable.png" alt="">';
+								}else if(taste>1 && taste<2){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else  if(taste==2){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>2 && taste<3){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==3){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>3 && taste< 4 ){
+		 							    lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==4){
+										lineTypeNew ='<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>4 && taste<5){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==5){
+										lineTypeNew= '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}	
+							var imgtotal=parseInt(list[i].imgtotal);
+							var img='';
+							switch(imgtotal){
+								case 1:
+								  		img='<p class="img-list"><img src="'+list[i].images0+'" alt=""></p>';
+								 		 					break;
+								case 2:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""></p>';
+								 		 					break;
+								case 3:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""></p>';
+								 		 					break;
+								case 4:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""><img src="'+list[i].images3+'" alt=""></p>';
+								 		 					break;
+								case 5:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""><img src="'+list[i].images3+'" alt=""><img src="'+list[i].images4+'" alt=""></p>';
+								 		 					break;
+							}
+							var label=list[i].label;
+							var str='';
+							if(label!=''){
+								str='<p class="label-box">'+label+'</p>';
+							}
+							var reply=list[i].reply;
+							var lian='';
+							if(reply!=null){
+								lian='<p class="seller-reply"><span>商家回复：</span>'+list[i].reply+'</p>';
+							}
+								html='<li class="item">'+
+					                       '<div class="left"><img src="../common/img/tou.png" alt=""></div>'+
+					                       '<div class="right">'+
+					                       '<p class="nick-name">'+list[i].nickName+'</p>'+
+					                       '<p class="level">'+
+					                       '<span>评分</span>'+lineTypeNew+					                   
+					                       '</p>'+
+					                       '<p class="user-comment">'+list[i].content+'</p>'+img+lian+
+					                       '<p class="date">'+list[i].createTime+'</p>'+str+
+					                       '</div>'+
+					                       '</li>';
+							$("#list").append(html);
+							
+						}
+					
+						$("img").lazyload({ 
+						 	placeholder : "../common/img/defual.png",
+				            threshold : 200
+				        }); 
+				        $(".loading").css("visibility","hidden"); 
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}
+
+//好评
+function good(start_good){
+	$(".loading").css("visibility","visible");
+			var customId=GetQueryString("cid");
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.EVALUATETYPE,
+				 	data: { 
+            			customId:customId,
+            			status:'praise',
+            			start :start_good,
+          				limit : 5
+        			},
+					success:function(data) {
+					
+						var list=data.list;
+						if(list.length == 0){
+							start_good = start_good - 5;
+						  }
+						var html='';
+						for(var i = 0; i < list.length; i++){
+						var taste=list[i].taste;
+						var lineTypeNew='';
+								if(taste>0 && taste<1){
+										lineTypeNew = '<img src="../common/img/null.png" alt="">';
+								}else if(taste==1){
+									   lineTypeNew = '<img src="../common/img/favourable.png" alt="">';
+								}else if(taste>1 && taste<2){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else  if(taste==2){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>2 && taste<3){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==3){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>3 && taste< 4 ){
+		 							    lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==4){
+										lineTypeNew ='<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>4 && taste<5){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==5){
+										lineTypeNew= '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}	
+							var imgtotal=parseInt(list[i].imgtotal);
+							var img='';
+							switch(imgtotal){
+								case 1:
+								  		img='<p class="img-list"><img src="'+list[i].images0+'" alt=""></p>';
+								 		 					break;
+								case 2:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""></p>';
+								 		 					break;
+								case 3:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""></p>';
+								 		 					break;
+								case 4:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""><img src="'+list[i].images3+'" alt=""></p>';
+								 		 					break;
+								case 5:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""><img src="'+list[i].images3+'" alt=""><img src="'+list[i].images4+'" alt=""></p>';
+								 		 					break;
+							}
+							var label=list[i].label;
+							var str='';
+							if(label!=''){
+								str='<p class="label-box">'+label+'</p>';
+							}
+							var reply=list[i].reply;
+							var lian='';
+							if(reply!=null){
+								lian='<p class="seller-reply"><span>商家回复：</span>'+list[i].reply+'</p>';
+							}
+								html='<li class="item">'+
+					                       '<div class="left"><img src="../common/img/tou.png" alt=""></div>'+
+					                       '<div class="right">'+
+					                       '<p class="nick-name">'+list[i].nickName+'</p>'+
+					                       '<p class="level">'+
+					                       '<span>评分</span>'+lineTypeNew+					                   
+					                       '</p>'+
+					                       '<p class="user-comment">'+list[i].content+'</p>'+img+lian+
+					                       '<p class="date">'+list[i].createTime+'</p>'+str+
+					                       '</div>'+
+					                       '</li>';
+						$("#list").append(html);
+						}
+						
+						 $("img").lazyload({ 
+							 	placeholder : "../common/img/defual.png",
+					            threshold : 200
+					        });  
+					     $(".loading").css("visibility","hidden");
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}	
+//差评
+function difference(start_difference){
+	$(".loading").css("visibility","visible");
+			var customId=GetQueryString("cid");
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.EVALUATETYPE,
+				 	data: { 
+            			customId:customId,
+            			status:'negative',
+            			start :start_difference,
+          				limit :5
+        			},
+					success:function(data) {
+						var list=data.list;
+						if(list.length == 0){
+							start_difference = start_difference -5;
+						}
+						var html='';
+						for(var i = 0; i < list.length; i++){
+						var taste=list[i].taste;
+						var lineTypeNew='';
+								if(taste>0 && taste<1){
+										lineTypeNew = '<img src="../common/img/null.png" alt="">';
+								}else if(taste==1){
+									   lineTypeNew = '<img src="../common/img/favourable.png" alt="">';
+								}else if(taste>1 && taste<2){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else  if(taste==2){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>2 && taste<3){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==3){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>3 && taste< 4 ){
+		 							    lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==4){
+										lineTypeNew ='<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}else if(taste>4 && taste<5){
+										lineTypeNew = '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/faban.png" alt="">';
+								}else if(taste==5){
+										lineTypeNew= '<img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt=""><img src="../common/img/favourable.png" alt="">';
+								}	
+							var imgtotal=parseInt(list[i].imgtotal);
+							var img='';
+							switch(imgtotal){
+								case 1:
+								  		img='<p class="img-list"><img src="'+list[i].images0+'" alt=""></p>';
+								 		 					break;
+								case 2:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""></p>';
+								 		 					break;
+								case 3:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""></p>';
+								 		 					break;
+								case 4:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""><img src="'+list[i].images3+'" alt=""></p>';
+								 		 					break;
+								case 5:
+										img='<p class="img-list"><img src="'+list[i].images0+'" alt=""><img src="'+list[i].images1+'" alt=""><img src="'+list[i].images2+'" alt=""><img src="'+list[i].images3+'" alt=""><img src="'+list[i].images4+'" alt=""></p>';
+								 		 					break;
+							}
+							var label=list[i].label;
+							var str='';
+							if(label!=''){
+								str='<p class="label-box">'+label+'</p>';
+							}
+							var reply=list[i].reply;
+							var lian='';
+							if(reply!=null){
+								lian='<p class="seller-reply"><span>商家回复：</span>'+list[i].reply+'</p>';
+							}
+								html='<li class="item">'+
+					                       '<div class="left"><img src="../common/img/tou.png" alt=""></div>'+
+					                       '<div class="right">'+
+					                       '<p class="nick-name">'+list[i].nickName+'</p>'+
+					                       '<p class="level">'+
+					                       '<span>评分</span>'+lineTypeNew+					                   
+					                       '</p>'+
+					                       '<p class="user-comment">'+list[i].content+'</p>'+img+lian+
+					                       '<p class="date">'+list[i].createTime+'</p>'+str+
+					                       '</div>'+
+					                       '</li>';
+							$("#list").append(html);
+						}
+						$("img").lazyload({ 
+						 	placeholder : "../common/img/defual.png",
+				            threshold : 200
+				        });  
+				        $(".loading").css("visibility","hidden");
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+}
+	});
+	
+</script>
+    <header>
+        <div class="seller-comment">
+            <div class="level">
+                <p id="fen"><i></i></p>
+                <p>商家评分</p>
+            </div>
+            <div class="desc" id="desc">
+              <i></i>
+            </div>
+        </div> 
+    </header>
+    <div class="comment-box">
+        <div class="title">
+            <span class="label active"  id="totalcount"></span>
+            <span class="label" id="imgcount"></span>
+            <!-- <span class="label" id="good"></span>
+            <span class="label" id="difference"></span> -->
+        </div>
+        
+        <div class="list_div">
+        	<ul class="list" id="list">
+         		
+        	</ul>
+        	<div class="loading"></div>
+        </div>
+        <div id="noData">
+			<img src="../common/images/null.png">
+			<p>没有评论内容</p>
+		</div>
+        <br/><br/><br/><br/><br/><br/><br/><br/><br/>
+    </div>
+</body>
+</html>

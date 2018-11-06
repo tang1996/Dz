@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>外卖活动列表</title>
+<link rel="stylesheet" href="./activity_list.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+
+<body>
+<script type="text/javascript">
+			$(document).ready(function(){ 
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.ACTIVITYVIEW,
+					success:function(data) {
+						 var list = data.list;
+						 var html='';
+						for(var i = 0;i < list.length;i++){
+							if(i!=2){
+								html='<li>'+
+								'<a href="#">'+
+									'<div class="top">'+
+										'<img src="'+list[i].logo+'" style="width:30px;height:31px;">'+
+										'<h3>'+list[i].name+'</h3>'+
+									'</div>'+
+									'<div class="bottom">'+
+										'<button type="button" onclick="add('+list[i].id+','+i+');" >添加活动</button><button type="button" onclick="view('+list[i].id+','+i+')">查看活动</button>'+
+									'</div>'+
+								'</a>'+
+							    '</li>';
+							$("#sp-right").append(html);
+							}			
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+		});
+function add(fid,n){
+			if(n==0){
+				var url="../activity/activity.html";
+			 }else if(n==1){
+				var url="../activity/new.html";	
+			 }else if(n==3){
+				var url="../activity/cashCoupon.html";	
+			}
+window.location.href=url+"?"+"fid="+fid;
+}
+
+function view(fid,n){
+			if(n==0){
+				var url="../activity_new_list/activity_new_list.html";
+			 }else if(n==1){
+				var url="../activity_new_list/activity_list_we.html";	
+			 }else if(n==3){
+				var url="../activity_new_list/activity_list_yu.html";	
+			 }
+window.location.href=url+"?"+"fid="+fid;
+}
+
+		
+		</script>
+
+
+<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="../activity_management/activity_management.html?m=1"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>外卖活动列表</p>
+			<!--<a class="h-r" href="#"><img class="sp-ss" src="../common/img/sp-ss.png" alt=""></a>-->
+		</div>
+	</div>
+    <div class="wrap sp">
+   
+		<div class="sp-right">
+			<ul id="sp-right">
+				
+			</ul>
+		</div>
+    </div>
+
+</body>
+
+</html>

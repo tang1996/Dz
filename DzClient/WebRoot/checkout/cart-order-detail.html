@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>购物车订单详情</title>
+    <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../common/js/common.js"></script>
+    <link rel="stylesheet" href="./cart-order-detail.css">
+    <script type="text/javascript">
+    $.ajax( {
+								type : 'POST',
+								url : BASE_URL + LOGIN_ACTION.USER_VIEW,
+								data : {
+									token: GetQueryString("token"),
+									orderId: GetQueryString("orderId")
+								},
+								success:function(data) {
+									var goodslist = data.list;
+									alert(goodslist);
+									var totalCount=parseFloat("0");
+									for(var i = 0;i < goodslist.length; i++){
+									
+										totalCount = parseFloat(totalCount) + parseFloat(goodslist[i].price*goodslist[i].number);
+										$("#cart-list").append(
+											'<li class="clearfix">'+
+								                '<img class="f-left" src="'+goodslist[i].logo+'" alt="">'+
+								                '<div class="detail">'+
+								                    '<p class="sub-title">'+goodslist[i].name+'</p>'+
+								                    '<p class="extra">'+goodslist[i].natureinfo+'</p>'+
+								                '</div>'+
+								                '<p class="price" id="price'+i+'">¥'+goodslist[i].price+'</p>'+
+								                '<div class="btn-box">'+
+								                    '<img id="reduce'+i+'" src="./../common/img/minus.png" alt="" styel="display:;" onclick="reduce('+i+','+parseFloat(goodslist[i].price)+')">'+
+								                    '<span id="num'+i+'" styel="display:;">'+goodslist[i].number+'</span>'+
+								                    '<img id="add'+i+'" src="./../common/img/plus.png" alt="" onclick="add('+i+','+parseFloat(goodslist[i].price)+')">'+
+								                '</div>'+
+								            '</li>'
+										);
+									}
+									$("#total-money").html(totalCount);
+								},
+								error:function(error) {
+									console.log(error);
+								}
+							});
+							
+		//点击添加
+        function add(id,price) {
+        	var num = document.getElementById("num"+id).innerText;
+        	var totalCount = document.getElementById("total-money").innerText;
+            $("#reduce"+id).attr("style", "display:;");
+            $("#num"+id).attr("style", "display:;");
+            $("#num"+id).html(parseInt(num)+1);
+            var total = parseFloat(totalCount)+parseFloat(price);
+            $("#total-money").html(total);
+        }
+        
+        //减少数量
+        function reduce(id,price) {
+        	var num = document.getElementById("num"+id).innerText;
+        	var totalCount = document.getElementById("total-money").innerText;
+        	if(parseInt(num)>0){
+           		$("#num"+id).html(parseInt(num)-1);
+           		var total = parseFloat(totalCount)-parseFloat(price);
+           		$("#total-money").html(total);
+           		$("#reduce"+id).attr("style", "display:;");
+           	}else{
+           		$("#reduce"+id).attr("style", "display:none;");
+			}           	
+       		status(id);
+		}
+		function status(id){
+			var num = document.getElementById("num"+id).innerText;
+			if(parseInt(num)===0){
+				$("#reduce"+id).attr("style", "display:none;");
+				$("#num"+id).attr("style", "display:none;");
+			}
+		}
+    </script>
+</head>
+<body>
+    <div class="menu-box">
+        <p class="title"><img src="./../common/img/order-menu.png" alt=""><span>点购菜单</span></p>
+        <ul id="cart-list">
+            
+        </ul>
+    </div>
+    <div class="footer-box">
+        <span class="label">合计：¥</span>
+        <span class="price" id="total-money">0</span>
+        <span class="checkout f-right" onclick="javascript:link('pay')">立即支付</span>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>点菜</title>
+    <link href="./insideOrderaddMenus.css" type="text/css"
+          rel="stylesheet">
+    <script type="text/javascript"
+            src="../../../common/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript"
+            src="../../../common/js/jquery.lazyload.min.js"></script>
+    <script type="text/javascript" src="../../../common/js/baseUrl.js"></script>
+    <script type="text/javascript" src="../../../common/js/common.js"></script>
+    <script type="text/javascript" src="../../../common/js/jquery.timers.js"></script>
+    <!-- 增加浏览器小图标 -->
+<link rel="icon" href="../../../common/images/logo.jpg" type="image/x-icon">
+</head>
+
+<body>
+<script type="text/javascript">
+
+    var companyId = GetQueryString("companyId");
+    var netOrder = GetQueryString("netOrder");
+    var tableNo = GetQueryString("tableNo");
+    var OrderId = GetQueryString("orderId");	//2
+    var meals = GetQueryString("meals");
+    var insideOrderId = GetQueryString("insideOrderId");
+    var orderNo = GetQueryString("netOrder");
+    var numbId = '';	//单个商品退菜框的id前缀
+    var maxnumId = '';	//获得单个商品退菜的最大值
+    var tea = 0;
+
+    $(document).ready(function () {
+        loginCookie();
+        $("#tableNoToTab").text(tableNo);
+        $("#MealsToTab").text("人数" + meals);
+        menuInit();	//菜单初始化
+        getGoodsToTable();	//得到线上打印菜品
+        $(".changesPeople input").val(meals);	//人数输入栏初始化
+
+        $(".box_background").click(function () {
+            $(this).hide();
+            $("#box").hide();
+        });
+
+        init();
+        $('body').everyTime('10s', 'ds1', function () {
+            init();
+        });
+    });
+
+    function playSound(soundSrl) {
+        var strAudio = '<audio id="audioPlay" src=' + soundSrl + ' hidden="true">';
+        if ($("body").find("audio").length <= 0)
+            $("body").append(strAudio);
+        var audio = document.getElementById("audioPlay");
+        audio.play();
+    }
+
+    function init() {
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.NEWORDER,
+            data: {
+                companyId: companyId
+            },
+            success: function (data) {
+                if (data.length > 0) {
+                    var soundSrl = "../../../common/new.mp3";
+                    playSound(soundSrl);
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function menuInit() {
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.GETFICATION,
+            data: {
+                id: companyId
+            },
+            success: function (data) {
+                var list = data.list;
+                var html = '';
+                for (var i = 0; i < list.length; i++) {
+                    if (i == 0) {
+                        html = html + '<li class="active" onclick="add(' + list[i].id + ')">' + list[i].name + '</li>';
+                        add(list[i].id);
+                    } else if (i == list.length - 1) {
+                        html = html + '<li onclick="add(' + list[i].id + ')">' + list[i].name + '</li>';
+                    } else {
+                        html = html + '<li onclick="add(' + list[i].id + ')">' + list[i].name + '</li>';
+
+                    }
+                }
+                tea = data.mealFee;
+                $("#typeName").html(html);
+                $("#typeName").css("width", 121 * (list.length + 1) + "px")   //这个要放在 循环菜品类型中
+
+                $("#typeName li").click(function () {
+                    $(this).addClass("active");
+                    $(this).siblings().removeClass("active");
+                    var id = $(this).attr("menuId");
+                    add(id);
+
+                    j = 0;
+                    $(".foodList_div ul").css("top", "0px");
+                })
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+
+    }
+
+    function add(id) {	//点击菜品添加
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.COMPUTERGOODSMS,	//companygoodms
+            data: {
+                id: companyId,
+                ifiId: id
+            },
+            success: function (data) {
+                var list = data.list;
+                var html = '';
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i].svg_price == 0) {
+                        price = list[i].price;
+                    } else {
+                        price = list[i].svg_price;
+                    }
+                    if (list[i].stock == 0) {
+                        html = html + '<li class="oneFood" onclick=javascript:onlyOKPrompt("已售罄","2") >' +
+                            '<p class="foodName">' + list[i].name + '</p>' +
+                            '<p class="stock" >库存：<span>已售罄</span></p>' +
+                            '<p>￥' + price + '</p></li>';
+                    } else {
+                        var princeTo = 0;
+                        if (list[i].svg_price > 0) {
+                            princeTo = list[i].svg_price;
+                        } else {
+                            princeTo = list[i].price;
+                        }
+                        if (list[i].stock == -1) {
+                            html = html + '<li class="oneFood" onclick="addGoodMenus(' + list[i].id + ',\'' + list[i].name + '\',' + princeTo + ',' + i + ')">' +
+                                '<p class="foodName">' + list[i].name + '</p>' +
+                                '<p class="stock">库存：<span id="stock_new' + list[i].id + '">' + '无限量' + '</span></p>' +
+                                '<p>￥' + princeTo + '</p></li>';
+                        } else {
+                            html = html + '<li class="oneFood" onclick="addGoodMenus(' + list[i].id + ',\'' + list[i].name + '\',' + princeTo + ',' + i + ')">' +
+                                '<p class="foodName">' + list[i].name + '</p>' +
+                                '<p class="stock">库存：<span id="stock_new' + list[i].id + '">' + list[i].stock + '</span></p>' +
+                                '<p>￥' + princeTo + '</p></li>';
+                        }
+                    }
+                }
+                $("#clear").html(html);
+
+                oneFood_Height = $(".oneFood").outerHeight();
+                oneFood_margin = $(".oneFood").css("margin-bottom");
+                console.log("oneFood_Height == " + oneFood_Height);
+                var food_row = parseFloat(foodList_div_Height) / (parseFloat(oneFood_Height) + parseFloat(oneFood_margin));
+                console.log("food_row == " + food_row);
+                food_Div = (parseFloat(oneFood_Height) + parseFloat(oneFood_margin)) * parseInt(food_row);
+                console.log("food_Div == " + food_Div);
+                $(".foodList_div").height(food_Div);
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    //存储菜品信息的json
+    var jsonList = [];
+    var num = 0;
+    var price = 0;
+    var natures = '';
+    var natureList = [];
+
+    function addGoodMenus(goodsId, goodsName, goodsPrice, n) {	//将添加的菜品加到Cookie
+        price = 0;
+        var re = /^[0-9]+.?[0-9]*$/;
+        if (re.test(n)) {
+            var value = parseInt($('#stock_new' + goodsId).html());	//库存值
+            if (jsonList[goodsId]) {	//判断售罄后不再能点菜
+                if (jsonList[goodsId].num == value) {
+                    onlyOKPrompt("库存量不够", "2");
+                    return;
+                }
+            }
+            if (jsonList.length != 0) {
+                num = 1;
+                for (var key in jsonList) {
+                    jsonList[goodsId];
+                    if (key == goodsId) {
+                        num = jsonList[goodsId].num;
+                        num++;
+                    }
+                }
+            } else {
+                jsonList[goodsId];
+                num = 1;
+            }
+
+            /*
+           var goods={"goodsId":goodsId,"goodsName":goodsName,"goodsPrice":goodsPrice,"num":num};
+           jsonList[goodsId]=goods;
+           document.cookie="goods="+jsonList;
+           showAddGoods(jsonList);
+           }
+           */
+            addCookie(goodsId, goodsName, goodsPrice, n)
+        }
+
+    }
+
+
+    function addCookie(goodsId, goodsName, goodsPrice, n) {
+        var natureStr = "";
+        var remarkHtmlDOM = "#NoPrint" + goodsId;
+        $(remarkHtmlDOM).find("p").html("");
+        natureStr = $(remarkHtmlDOM).find("p").html();
+        var goods = {
+            "goodsId": goodsId,
+            "goodsName": goodsName,
+            "goodsPrice": goodsPrice,
+            "num": num,
+            "natureList": natureStr
+        };
+
+        if (natureList != "") {
+            for (var k in natureList) {
+                if (goods.goodsId == natureList[k].goodsId) {
+                    if (typeof (goods.natureList) == "undefined" || natureStr == "") {
+                        natureStr = natureList[k].natureName;
+                    } else {
+                        natureStr += "," + natureList[k].natureName;
+                    }
+                }
+            }
+        }
+
+        goods = {
+            "goodsId": goodsId,
+            "goodsName": goodsName,
+            "goodsPrice": goodsPrice,
+            "num": num,
+            "natureList": natureStr
+        };
+
+        console.log(goods)
+        jsonList[goodsId] = goods;
+        document.cookie = "goods=" + jsonList;
+        showAddGoods(jsonList);
+    }
+
+
+    function showAddGoods(jsonList) {	//显示cookie中未打印的商品
+        var numsort = 1
+        var addHtml = '';
+        var count = 0;
+        price = 0;
+        for (var key in jsonList) {
+            var natureNameString = "";
+            if (typeof (jsonList[key].natureList) != "undefined") {
+                natureNameString = jsonList[key].natureList;
+            }
+            price = price + parseFloat(jsonList[key].goodsPrice) * parseInt(jsonList[key].num);
+            addHtml = addHtml + '<tr onclick=NoPgoodsList(' + jsonList[key].goodsId + ',' + jsonList[key].num + ')>' +
+                '<td>' + (numsort++) + '</td>' +
+                '<td style="text-align: left" id=NoPrint' + key + '>' + jsonList[key].goodsName + '<p>' + natureNameString + '</p></td>' +
+                '<td id=numOri' + key + ' >' + jsonList[key].num + '<p>小计</p></td>' +
+                '<td>' + jsonList[key].goodsPrice + '<p style="color: #ff7e00" id=price' + key + '>' + (jsonList[key].num * jsonList[key].goodsPrice).toFixed(2) + '</p></td>' +
+                '<td>未打印<td>' +
+                '</tr>';
+            count++;
+        }
+        if (count == 0) {
+            totalHtml = '';
+        } else {
+            totalHtml = '<tr><td style="text-align: left;border-bottom: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;text-indent: 1em;" colspan="3">共' + count + '项</td><td id="totalprice" colspan="2" style="color: #ff7e00;font-weight: bold;border-bottom: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;">总计 ' + price.toFixed(2) + '</td></tr>';
+        }
+        $("#updown").attr("style", "display:block");
+        $("#bottoms_menus").attr("style", "display:block");
+        $("#NoPrintmenu").html(addHtml + totalHtml);
+
+        //获取 tr 的高度
+        trHeight = $(".menuList table tr").outerHeight();
+        //得到tr 的数量
+        trNum = parseInt(menuList_height / trHeight);
+    }
+
+
+    function NoPgoodsList(goodsid, numb) {		//点击未打印菜品
+        goodsId = goodsid;
+        //document.getElementById("numOri").innerHTML=parseInt(numb);
+        var numstr = "#numOri" + goodsid;
+        numb = $(numstr).text();
+        $("#numOri")[0].innerHTML = parseInt(numb);
+        var numbByidDOM = "#numOri" + goodsid;
+        var numbByid = $(numbByidDOM).text();
+        $("#nature").html('');
+        $.ajax({
+            type: "POST",
+            url: BASE_URL + LOGIN_ACTION.NATRUE,
+            data: {
+                goodsId: goodsid,
+            },
+            success: function (data) {
+                if (data.success) {
+                    var list = data.list;
+                    var Html = '';
+                    var natureofLi = '';
+                    var NoPrintDOM = "#NoPrint" + goodsId;
+                    for (var i = 0; i < list.length; i++) {
+                        var natureStr = list[i].natures;
+                        var result = natureStr.split(".");
+                        for (var j = 0; j < result.length; j++) {
+                            natureofLi = result[j];
+                            var nOfLiSplit = natureofLi.split(",");
+                            if (natureofLi == '') {
+                                continue;
+                            }
+                            //Html = Html + '<li onclick=addnature("'+natureofLi+'",'+goodsId+')>'+result[j]+'</li>';
+                            Html = Html + '<li onclick=addnature("' + natureofLi + '",' + goodsId + ')>' + nOfLiSplit[1] + '</li>';  //傻大大
+                            $("#nature").html(Html);
+                        }
+                    }
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+        var remarkHtmlDOM = "#NoPrint" + goodsid;
+        var remarkfromD = $(remarkHtmlDOM).text();
+        $("#Foodremark").val(remarkfromD);
+        $("#numb").text(numbByid);
+        $("#Boxsubmit").attr("href", "javascript:confirmNum(" + goodsid + ")");
+        $("#delNoPrint").attr("onclick", "javascript:delNoPrint(" + goodsid + ")");
+        $("#butname").text(jsonList[goodsid].goodsName);
+        $("#box").show();
+        $(".box_background").show();
+    }
+
+    var naList = [];
+
+    function addnature(nature, goodsid) {	//点击备注在菜单栏下显示相应备注
+        goodsId = goodsid;
+        var naSplit = nature.split(",");
+        natureList[naSplit[0]] = {"goodsId": goodsid, "natureName": naSplit[1]};
+
+        var boolNa = false;
+        if (naList != "") {
+            for (var key1 in naList) {
+                if (key1 == naSplit[0]) {
+                    boolNa = true;
+                }
+            }
+        }
+        if (boolNa) {
+            delete natureList[naSplit[0]];
+            delete naList[naSplit[0]];
+        } else {
+            for (var key2 in natureList) {
+                naList[key2] = natureList[key2];
+            }
+        }
+
+		console.log(natureList)
+        addCookie(goodsid, jsonList[goodsid].goodsName, jsonList[goodsid].goodsPrice, jsonList[goodsid].num);
+    }
+
+    function printMenus() {	//点击打印菜单
+        if (jsonList.length <= 0) {
+            onlyOKPrompt("没有未打印的菜品", "2");
+            return;
+        }
+        var goodsIdStr = '';
+        var goodsNumb = '';
+        var goodsNature = '';
+        for (var key in jsonList) {
+            goodsIdStr += key + ',';
+            goodsNumb += jsonList[key].num + ',';
+            if (natureList[key] == undefined && natureList[key] == null) {
+                var remarkss = "";
+                var naturess = {"goodsId": key, "nature": remarkss};
+                natureList[key] = naturess;
+                goodsNature += natureList[key].nature + '@';
+            } else {
+                goodsNature += natureList[key].nature + '@';
+            }
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.RELATING_ARRSAVEINSIDE,		//线下
+            data: {
+                goodsId: goodsIdStr,
+                companyId: companyId,		//未改
+                tableNo: tableNo,
+                numb: goodsNumb,
+                nature: goodsNature,
+                orderNo: orderNo,
+                insideOrderId: insideOrderId
+            },
+            success: function (data) {
+                var remarksList = "";
+                for (var key in jsonList) {
+                    if (remarksList == "" || typeof(jsonList[key].natureList) == "undefined") {
+                        remarksList += "0;";
+                    } else {
+                        remarksList += jsonList[key].natureList + ";";
+                    }
+
+                }
+                if (data.success) {
+                    $.ajax({//修改     2018-10-06  @Tyy
+                        type: 'post',
+                        url: BASE_URL + LOGIN_ACTION.JOB_INSIDESAVEGOODS,
+                        data: {
+                            insideOrderId: insideOrderId,
+                            goodsId: goodsIdStr,
+                            nums: goodsNumb,
+                            nature: remarksList
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                DelCookie("goods");
+                                onlyOKPrompt(data.message, "1");
+                            } else {
+                                onlyOKPrompt(data.message, "1");
+                            }
+                        },
+                        error: function (error) {
+                            console.log(error);
+                        }
+                    });
+                    //注释     2018-10-06  @Tyy
+                    /*$.ajax({
+                        type:'post',
+                        url:BASE_URL+ LOGIN_ACTION.INSIDEORDER_INSIDESAVE,	//线下
+                        data:{
+                            insideorderId:insideOrderId
+                        },
+                        success:function(data){
+                            if(data.success){
+                                DelCookie("goods");
+                                onlyOKPrompt(data.message,"1");
+                            }else{
+                                onlyOKPrompt(data.message,"1");
+                            }
+                        },
+                        error: function (error) {
+                          console.log(error);
+                        }
+                    });*/
+                } else {
+                    onlyOKPrompt(data.message, "1");
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function getGoodsToTable() {		//得到已经打印的商品并显示到左侧菜单表
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.RELATING_GETONSIDE,
+            data: {
+                companyid: companyId,		//未改
+                tableNo: tableNo,
+                orderId: OrderId
+            },
+            success: function (data) {
+                if (data.success) {
+                    orderId = data.orderId;
+                    var list = data.list;
+                    var addHtml = '';
+                    var isPrint = '已打印';
+                    var totalCount = 0;
+                    if (data.totalCount == '.00') {
+                        totalCount = 0;
+                    }
+                    var numi = 1;
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].svg_price > 0) {
+                            princeTo = list[i].svg_price;
+                        } else {
+                            princeTo = list[i].price;
+                        }
+                        var isDel = '已打印';
+                        if (list[i].isDel != null) {
+                            isDel = '已退菜 (' + list[i].isDel + '份)';
+                        }
+
+                        addHtml = addHtml + '<tr><td>' + numi + '</td><td style="text-align: left">' + list[i].name + '<p>哈哈</p></td>' +
+                            '<td>' + list[i].numb + '<p>小计</p></td>' +
+                            '<td>' + princeTo + '<p style="color: #ff7e00">' + (list[i].numb * princeTo).toFixed(2) + '</p></td><td>' + isDel + '<td></tr>';
+                        numi++;
+                        totalCount += (list[i].numb * princeTo);
+                    }
+                    if (list.length == 0) {
+                        totalHtml = '';
+                        totalHtml = '<tr><td style="text-align: left;border-bottom: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;text-indent: 1em;" colspan="2">共' + (list.length + 1) + '项</td><td colspan="2" style="border-bottom: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;"><a class="printer" href="javascript:printer()"></a></td><td colspan="2" style="color: #ff7e00;font-weight: bold;border-bottom: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;" id="changetotal">(线上)总计 ' + (parseFloat(totalCount) + parseFloat(meals * tea)).toFixed(2) + '</td></tr>';
+                    } else {
+                        totalHtml = '<tr><td style="text-align: left;border-bottom: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;text-indent: 1em;" colspan="2">共' + (list.length + 1) + '项</td><td colspan="2" style="border-bottom: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;"><a class="printer" href="javascript:printer()"></a></td><td colspan="2" style="color: #ff7e00;font-weight: bold;border-bottom: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;" id="changetotal">(线上)总计 ' + (parseFloat(totalCount) + parseFloat(meals * tea)).toFixed(2) + '</td></tr>';
+                        //totalHtml = '<tr><td style="text-align: left;border-bottom: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;text-indent: 1em;" colspan="3">共'+list.length+'项</td><td colspan="2" style="color: #ff7e00;font-weight: bold;border-bottom: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;">(线上)总计 '+parseFloat(totalCount).toFixed(2)+'</td></tr>';
+                    }
+                    peopleHtml = '<tr><td>' + numi + '</td><td style="text-align: left">餐位费</td>' +
+                        '<td id="changepeople">' + meals + '<p>小计</p></td>' +
+                        '<td>' + tea + '<p style="color: #ff7e00"	id="changeprince">' + (meals * tea).toFixed(2) + '</p></td><td>已打印</td></tr>';
+                    $("#menu").append(addHtml + peopleHtml + totalHtml);
+
+                } else {
+                    message = data.message;
+                }
+
+                getInsideGoodsToTable();	//得到线下打印菜品
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function printer() {	//调用打印机   新增 2018-10-06  @Tyy
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.JOB_DESTINE,
+            data: {
+                orderId: OrderId,
+            },
+            success: function (data) {
+                onlyOKPrompt(data.message, "1");
+            },
+            error: function (error) {
+                onlyOKPrompt(data.message, "1");
+            }
+        });
+    }
+
+    function getInsideGoodsToTable() {		//得到已经打印的商品并显示到左侧菜单表	(线下菜品)
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.RELATING_GETINSIDE,
+            data: {
+                companyid: companyId,		//未改
+                tableNo: tableNo,
+                insideOrderId: insideOrderId
+            },
+            success: function (data) {
+                if (data.success) {
+                    orderId = data.orderId;
+                    var list = data.list;
+                    var addHtml = '';
+                    var isPrint = '已打印';
+                    var totalCount = 0;
+                    if (data.totalCount == '.00') {
+                        totalCount = 0;
+                    }
+                    var numi = 1;
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].svg_price > 0) {
+                            princeTo = list[i].svg_price;
+                        } else {
+                            princeTo = list[i].price;
+                        }
+                        var isDel = '已打印';		//ynw
+                        if (list[i].isDel != null) {			//ynw
+                            isDel = '已退菜 (' + list[i].isDel + '份)';			//ynw
+                        }
+                        addHtml = addHtml + '<tr><td>' + numi + '</td><td style="text-align: left">' + list[i].name + '<p>哈哈</p></td>' +
+                            '<td>' + list[i].numb + '<p>小计</p></td>' +
+                            '<td>' + princeTo + '<p style="color: #ff7e00">' + (list[i].numb * princeTo).toFixed(2) + '</p></td><td>' + isDel + '<td></tr>';
+                        numi++;
+                        totalCount += (list[i].numb * princeTo);
+                    }
+                    if (list.length == 0) {
+                        totalHtml = '';
+                    } else {
+                        totalHtml = '<tr><td style="text-align: left;border-bottom: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;text-indent: 1em;" colspan="2">共' + list.length + '项</td><td colspan="2" style="border-bottom: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;"><a class="printer" href="javascript:insideprinter()"></a></td><td colspan="2" style="color: #ff7e00;font-weight: bold;border-bottom: 1px solid #CCCCCC;border-top: 1px solid #CCCCCC;">(线下)总计 ' + parseFloat(totalCount).toFixed(2) + '</td></tr>';
+                    }
+                    $("#menu").append(addHtml + totalHtml);
+
+                } else {
+                    message = data.message;
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function insideprinter() {	//调用打印机   新增 2018-10-06  @Tyy
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.JOB_SAVEINSIDE,
+            data: {
+                insideOrderId: insideOrderId,
+            },
+            success: function (data) {
+                onlyOKPrompt(data.message, "1");
+            },
+            error: function (error) {
+                onlyOKPrompt(data.message, "1");
+            }
+        });
+    }
+
+    function clearNoprintMenus() {	//清空未打印
+        if (jsonList.length != 0) {
+            var msg = "确定要清空未打印的菜品吗？";
+        } else {
+            var msg = "暂时没有未打印的菜品...";
+        }
+        $(".promptContent").text(msg);
+        $(".backgroundPrompt").attr("style", "display:block");
+        $("#PromptCancel").click(function () {
+            $(".backgroundPrompt").hide();
+        });
+        $("#PromptOk").click(function () {
+            DelCookie("goods");
+            $(".backgroundPrompt").hide();
+            //document.location.reload();//跳转到当前页面
+            window.location.href = './insideOrderaddMenus.html?netOrder=' + orderNo + '&companyId=' + companyId + '&tableNo=' + escape(tableNo) + '&meals=' + meals + '&orderId=' + OrderId + '&insideOrderId=' + insideOrderId;
+        });
+    }
+
+    function onlyOKPrompt(msg, status) {		//弹出确认框	刷新当前页面
+        $(".onlyOKPrompt_content").text(msg);
+        $(".background_onlyOKPrompt").show();
+        $(".onlyOKPrompt_button p").click(function () {	//确认框的确认事件
+            $(".background_onlyOKPrompt").hide();
+            switch (status) {
+                case '0':	//跳转到登录页面
+                    window.location.href = BASE_URL + "/DzClient/serviceUser/login/login.html";
+                    break
+                case '1':	//当前页面刷新
+                    //window.location.reload();
+                    //window.location.href = './OrderaddMenus.html?companyId='+companyId+'&tableNo=' + escape(tableNo) + '&meals=' + meals + '&orderId=' + OrderId + '&mealFee='+tea;
+                    window.location.href = './insideOrderaddMenus.html?netOrder=' + orderNo + '&companyId=' + companyId + '&tableNo=' + escape(tableNo) + '&meals=' + meals + '&orderId=' + OrderId + '&insideOrderId=' + insideOrderId;
+                    break	//不做反应
+                case '2':
+                    break
+            }
+        });
+    }
+
+    function nameListShow() {	//退菜框的显示与否
+        if ($("#doDelete").css("display") == "none") {
+            getNameList();
+            getNameInsideList();
+            $("#doDelete").show();
+        } else {
+            $("#doDelete").hide();
+        }
+    }
+
+    var delgoodsList = [];        //线上退菜数组
+    function getNameList() {		//根据退菜数组进行退菜(线上)
+        $("#orderList").html('');
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.RELATING_GETONSIDE,
+            data: {
+                companyid: companyId,		//未改
+                tableNo: tableNo,
+                orderId: OrderId
+            },
+            success: function (data) {
+                if (data.success == true) {
+                    var list = data.list;
+                    var orderListLine = '<ul>';
+                    for (var i = 0; i < list.length; i++) {
+                        orderListLine = orderListLine +
+                            "<li class='clear'><p>" + list[i].name +
+                            "</p><p><input id=delnum" + i +
+                            " onclick=javascript:keyBoard(" + i + ")  type='text' placeholder='0' name='numb' onkeyup=(this.v=function(){this.value=this.value.replace(/[^0-9-]+/,'');}).call(this) ></p>" +
+                            "<p id=maxnum" + i + ">" + list[i].numb + "</p>" + '</li>' +
+                            "";
+
+                        var good = {
+                            "goodsId": list[i].goodsId,
+                            "goodsName": list[i].name,
+                            "goodsNum": list[i].numb
+                        };
+                        delgoodsList[i] = good;
+                    }
+                    var html = '';
+                    if (orderListLine != '') {
+                        html = html + orderListLine + '</ul>';
+                    }
+                    var totalHtml = '';
+                    html = html + '<ul class="On-line"></ul><div>以上是线上订单</div>';
+                    $("#orderList").append(html);
+                } else {
+                    onlyOKPrompt(data.message, "1");
+                    $("#doDelete").hide();
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    var delgoodsListInside = [];        //线下退菜数组
+    function getNameInsideList() {		//根据退菜数组进行退菜(线下)
+        $("#orderList").html('');
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.RELATING_GETINSIDE,
+            data: {
+                companyid: companyId,		//未改
+                tableNo: tableNo,
+                insideOrderId: insideOrderId
+            },
+            success: function (data) {
+                if (data.success == true) {
+                    var list = data.list;
+                    var orderListLine = '<ul>';
+                    for (var i = 0; i < list.length; i++) {
+                        orderListLine = orderListLine +
+                            "<li class='clear'><p>" + list[i].name +
+                            "</p><p><input id=delnuminside" + i +
+                            " onclick=javascript:keyBoardinside(" + i + ")  type='text' placeholder='0' name='numb' onkeyup=(this.v=function(){this.value=this.value.replace(/[^0-9-]+/,'');}).call(this) ></p>" +
+                            "<p id=maxnuminside" + i + ">" + list[i].numb + "</p>" + '</li>';
+
+                        var good = {
+                            "goodsId": list[i].goodsId,
+                            "goodsName": list[i].name,
+                            "goodsNum": list[i].numb
+                        };
+                        delgoodsListInside[i] = good;
+                    }
+                    var html = '';
+                    if (orderListLine != '') {
+                        html = html + orderListLine + '</ul>';
+                    }
+                    var totalHtml = '';
+                    html = html + '<ul class="On-line"></ul><div>以上是线下订单</div>';
+                    $("#orderList").append(html);
+                } else {
+                    onlyOKPrompt(data.message, "1");
+                    $("#doDelete").hide();
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function checkMoney() {	//跳转到结算页面
+        if ($("#menu tr").length == 0 && $("#NoPrintmenu tr").length == 0) {
+
+            $(".onlyOKPrompt_content").html("请先点菜");
+            $(".background_onlyOKPrompt").show();
+            $(".onlyOKPrompt_button").click(function () {
+                $(".background_onlyOKPrompt").hide();
+            })
+        } else {
+            if ($("#NoPrintmenu tr").length == 0) {
+                window.location.href = '../../computerCheck/computerCheck.html?companyid=' + companyId + '&tableNo=' + escape(tableNo) + "&meals=" + meals +
+                    "&insideOrderId=" + insideOrderId + "&tea=" + tea + "&netOrder=" + netOrder + "&orderId=" + OrderId;	//跳转到结算页面
+            } else {
+                $(".promptContent").html("还有未打印的账单，是否去结账？")
+                $(".backgroundPrompt").show();
+                //确认
+                $("#PromptOk").click(function () {
+                    window.location.href = '../../computerCheck/computerCheck.html?companyid=' + companyId + '&tableNo=' + escape(tableNo) + "&meals=" + meals +
+                        "&insideOrderId=" + insideOrderId + "&tea=" + tea + "&netOrder=" + netOrder + "&orderId=" + OrderId;	//跳转到结算页面
+                })
+                //取消
+                $("#PromptCancel").click(function () {
+                    $(".backgroundPrompt").hide();
+                })
+            }
+        }
+    }
+
+    function keyBoard(n) {	//退菜栏的显示与否
+        $("#keyboardinside").hide();
+        numbId = '#delnum' + n;
+        maxnumId = '#maxnum' + n;
+
+        $("#keyboard").show();
+    }
+
+    function keyBoardinside(n) {
+        $("#keyboard").hide();
+        numbIdinside = '#delnuminside' + n;
+        maxnumIdinside = '#maxnuminside' + n;
+        $("#keyboardinside").show();
+    }
+
+    function keyBoardNumb(num) {	//在退菜框里头显示数据  线上
+        var orinum = 0;
+        var maxnum = 0;
+        orinum = $(numbId).val();
+        orinum = orinum + num;
+        maxnum = $(maxnumId).text();
+        if (parseInt(orinum) > parseInt(maxnum)) {
+            $(numbId).val(maxnum);
+        } else if (parseInt(orinum) < 0) {
+            $(numbId).val(0);
+        } else {
+            $(numbId).val(orinum);
+        }
+    }
+
+    function keyBoardNumbinside(num) {	//在退菜框里头显示数据 线下
+        var orinuminside = 0;
+        var maxnuminside = 0;
+        orinuminside = $(numbIdinside).val();
+        orinuminside = orinuminside + num;
+        maxnuminside = $(maxnumIdinside).text();
+        if (parseInt(orinuminside) > parseInt(maxnuminside)) {
+            $(numbIdinside).val(maxnuminside);
+        } else if (parseInt(orinuminside) < 0) {
+            $(numbIdinside).val(0);
+        } else {
+            $(numbIdinside).val(orinuminside);
+        }
+    }
+
+    function deleteNumb() {		//退菜框里头的去除按钮 线上
+        var num = $(numbId).val();
+        $(numbId).val(num.substr(0, num.length - 1));
+    }
+
+    function deleteNumbinside() {		//退菜框里头的去除按钮 线下
+        var numinside = $(numbIdinside).val();
+        $(numbIdinside).val(numinside.substr(0, numinside.length - 1));
+    }
+
+    function totalOrder() {	//退菜框正一单清除	线上
+        if (delgoodsList.length > 0) {
+            for (var i = 0; i < delgoodsList.length; i++) {
+                numbId = '#delnum' + i;
+                $(numbId).val(delgoodsList[i].goodsNum);
+            }
+        }
+    }
+
+    function totalOrderinside() {	//退菜框正一单清除	线下
+        if (delgoodsListInside.length > 0) {
+            for (var i = 0; i < delgoodsListInside.length; i++) {
+                numbIdinside = '#delnuminside' + i;
+                $(numbIdinside).val(delgoodsListInside[i].goodsNum);
+            }
+        }
+    }
+
+    function delGoods() {		//确定退菜线上
+        var goodsIdStr = '';
+        var goodsNumb = '';
+        for (var i = 0; i < delgoodsList.length; i++) {	//设置退菜数
+            var delNum = $("#delnum" + i).val();
+            if (delNum == undefined || delNum == '' || delNum == "" || delNum == null || delNum == 0) {
+                delNum = 0;
+                continue;
+            }
+            delgoodsList[i].goodsNum = delNum;
+            goodsIdStr += delgoodsList[i].goodsId + ',';
+            goodsNumb += delgoodsList[i].goodsNum + ',';
+        }
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.RELATING_ARRDELONSIDE,
+            data: {
+                goodsId: goodsIdStr,
+                companyId: companyId,		//未改
+                tableNo: tableNo,
+                numb: goodsNumb,
+                OrderId: OrderId
+            },
+            success: function (data) {
+                if (data.success) {//   新增 2018-10-06  @Tyy
+                    onlyOKPrompt("退菜成功", "1");
+                    $.ajax({
+                        type: 'POST',
+                        url: BASE_URL + LOGIN_ACTION.JOB_DELETEGOODS,
+                        data: {
+                            goodsId: goodsIdStr,
+                            nums: goodsNumb,
+                            orderId: orderId
+                        },
+                        success: function (data) {
+                            return true;
+                        },
+                        error: function () {
+                            return false;
+                        }
+                    });
+                }
+            },
+            error: function (error) {
+                onlyOKPrompt("退菜失败", "1");
+            }
+        });
+        delGoodsInside();
+        $("#doDelete").hide();
+    }
+
+    function delGoodsInside() {		//确定退菜(线下)
+        var goodsIdStr = '';
+        var goodsNumb = '';
+        for (var i = 0; i < delgoodsListInside.length; i++) {	//设置退菜数
+            var delNum = $("#delnuminside" + i).val();
+            if (delNum == undefined || delNum == '' || delNum == "" || delNum == null || delNum == 0) {
+                delNum = 0;
+                continue;
+            }
+            delgoodsListInside[i].goodsNum = delNum;
+            goodsIdStr += delgoodsListInside[i].goodsId + ',';
+            goodsNumb += delgoodsListInside[i].goodsNum + ',';
+        }
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.RELATING_ARRDELINSIDE,
+            data: {
+                goodsId: goodsIdStr,
+                companyId: companyId,		//未改
+                tableNo: tableNo,
+                numb: goodsNumb,
+                insideOrderId: insideOrderId
+            },
+            success: function (data) {
+                if (data.success) {//   新增 2018-10-06  @Tyy
+                    onlyOKPrompt("退菜成功", "1");
+                    $.ajax({
+                        type: 'POST',
+                        url: BASE_URL + LOGIN_ACTION.JOB_INSIDDELETEGOODS,
+                        data: {
+                            goodsId: goodsIdStr,
+                            nums: goodsNumb,
+                            insideOrderId: insideOrderId
+                        },
+                        success: function (data) {
+                            return true;
+                        },
+                        error: function () {
+                            return false;
+                        }
+                    });
+                }
+            },
+            error: function (error) {
+                onlyOKPrompt("退菜失败", "1");
+            }
+        });
+        $("#doDelete").hide();
+    }
+
+    function delNoPrint(goodsId) {	//删除cookie中单个菜品   ynw	还待修改
+        for (var key in jsonList) {
+            if (key == goodsId) {
+                delete jsonList[key];	//删除键值对中特定的元素
+                delete natureList[key];	//删除键值对中特定的元素
+                continue;
+            }
+        }
+        showAddGoods(jsonList);
+        $("#box").hide();
+    }
+
+    function addNumOri() {	//BOX加一按钮
+        var numb = parseInt(document.getElementById("numOri").innerHTML);
+        document.getElementById("numOri").innerHTML = numb + 1;
+    }
+
+    function reduceNumOri() {//BOX减一按钮
+        var numb = parseInt(document.getElementById("numOri").innerHTML);
+        document.getElementById("numOri").innerHTML = numb - 1;
+        if (document.getElementById("numOri").innerHTML <= 0) {
+            document.getElementById("numOri").innerHTML = 1;
+        }
+    }
+
+    function deleteNum() {	//BOX后退清除按钮
+        var num = document.getElementById("numInput").value;
+        document.getElementById("numInput").value = num.substr(0, num.length - 1);
+    }
+
+    function addnum(num) {	//BOX按钮增加数量
+        document.getElementById("numInput").value += num;
+    }
+
+    function confirmNum(goodid) {	//BOX确定按钮
+        var dnum = 0;	//数量差值
+        var numb = parseInt(document.getElementById("numOri").innerHTML);//获取原数量
+        var numval = parseInt(document.getElementById("numInput").value);//获取输入的数量
+        var value = parseInt($('#stock_new' + goodsId).html());		//库存值
+        if (numval > value) {	//输入框
+            onlyOKPrompt(jsonList[goodid].goodsName + ":" + numval + "份    已超过库存量", "2");
+            return;
+        }
+        if (numb > value) {	//加减号处
+            onlyOKPrompt(jsonList[goodid].goodsName + ":" + numb + "份    已超过库存量", "2");
+            return;
+        }
+
+        var numbid = "#numOri" + goodid;
+        var nmbByid = $(numbid).text();
+        var priceid = "#price" + goodid;
+        if (numval != null && numval != '' && numval != undefined && !isNaN(numval)) {
+            if (parseInt(nmbByid) > parseInt(numval)) {
+                dnum = parseInt(nmbByid) - parseInt(numval);
+                price = price - dnum * jsonList[goodid].goodsPrice;
+            } else {
+                dnum = parseInt(numval) - parseInt(nmbByid);
+                price = price + dnum * jsonList[goodid].goodsPrice;
+            }
+            jsonList[goodid].num = numval;
+
+            var priceId = numval * jsonList[goodid].goodsPrice;
+            $(priceid).text(parseFloat(priceId).toFixed(2));
+            $(numbid).html(numval + '<p>小计</p>');
+        } else {
+            if (parseInt(nmbByid) > parseInt(numb)) {
+                dnum = parseInt(nmbByid) - parseInt(numb);
+                price = price - dnum * jsonList[goodid].goodsPrice;
+            } else {
+                dnum = parseInt(numb) - parseInt(nmbByid);
+                price = price + dnum * jsonList[goodid].goodsPrice;
+            }
+            var priceId = numb * jsonList[goodid].goodsPrice;
+            $(priceid).text(parseFloat(priceId).toFixed(2));
+            jsonList[goodid].num = numb;
+            $(numbid).html(numb + '<p>小计</p>');
+        }
+        priceDOM = "￥" + price.toFixed(2);
+        $("#totalprice").text(priceDOM);
+        $("#numInput").val('');
+        $("#box").hide();
+    }
+
+    function keepMeals(doingmeals) {		//保存就餐人数
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.BOOKTIME_KEEPPEOPLE,
+            data: {
+                OrderId: OrderId,
+                meals: doingmeals
+            },
+            success: function (data) {
+                meals = doingmeals;
+                $("#changepeople").html(doingmeals + "<p>小计</p>");
+                $("#changeprince").html((parseInt(doingmeals) * parseFloat(tea)).toFixed(2));
+                $("#changetotal").html("总计 " + (parseFloat(totalCount) + (parseInt(doingmeals) * parseFloat(tea))).toFixed(2));
+            },
+            error: function (error) {
+                onlyOKPrompt(data.message, "1");
+            }
+        });
+    }
+
+    function windowback() {	//按后退键
+        if (jsonList.length > 0) {
+            var msg = "还有菜品未打印，确定退出吗？";
+            $(".promptContent").text(msg);
+            $(".backgroundPrompt").attr("style", "display:block");
+            $("#PromptCancel").click(function () {
+                $(".backgroundPrompt").hide();
+            });
+            $("#PromptOk").click(function () {
+                //$(".backgroundPrompt").attr("style","display:none");
+                $(".backgroundPrompt").hide();
+                window.location.href = BASE_URL + "/DzClient/serviceUser/netWorkReservation/netWorkReservation.html";
+            });
+        } else {
+            window.location.href = BASE_URL + "/DzClient/serviceUser/netWorkReservation/netWorkReservation.html";
+        }
+    }
+
+</script>
+
+<!-- 退菜框 -->
+<div id="doDelete" style="display: none;">
+    <div class="doDelete_div">
+        <div class="doDelete_left">
+
+            <div id="doDeleteHead">
+                <ul>
+                    <li class="clear">
+                        <p>商品名称</p>
+                        <p>退菜数量</p>
+                        <p>点餐数量</p>
+                    </li>
+                </ul>
+            </div>
+            <div id="orderList">
+                <!-- 退菜栏 -->
+                <ul class="On-line"></ul>
+                <!-- 线上 -->
+                <div>以上是线上订单</div>
+                <ul class="UnderLine"></ul>
+                <!-- 线下 -->
+            </div>
+        </div>
+
+
+        <style>
+        </style>
+
+        <div class="oneOrderDeletepre" onclick="totalOrder()">整单(线上)退</div>
+        <div class="oneOrderDeletenex" onclick="totalOrderinside()">整单(线下)退</div>
+        <!-- 线上 -->
+        <div id="keyboard" style="display: none">
+            <span onclick="keyBoardNumb(7)">7</span>
+            <span onclick="keyBoardNumb(8)">8</span>
+            <span onclick="keyBoardNumb(9)">9</span>
+            <span onclick="keyBoardNumb(4)">4</span>
+            <span onclick="keyBoardNumb(5)">5</span>
+            <span onclick="keyBoardNumb(6)">6</span>
+            <span onclick="keyBoardNumb(1)">1</span>
+            <span onclick="keyBoardNumb(2)">2</span>
+            <span onclick="keyBoardNumb(3)">3</span>
+            <span style="width: 66.3%" onclick="keyBoardNumb(0)">0</span>
+            <span onclick="deleteNumb()">←</span>
+        </div>
+        <!-- 线下 -->
+        <div id="keyboardinside" style="display: none">
+            <span onclick="keyBoardNumbinside(7)">7</span>
+            <span onclick="keyBoardNumbinside(8)">8</span>
+            <span onclick="keyBoardNumbinside(9)">9</span>
+            <span onclick="keyBoardNumbinside(4)">4</span>
+            <span onclick="keyBoardNumbinside(5)">5</span>
+            <span onclick="keyBoardNumbinside(6)">6</span>
+            <span onclick="keyBoardNumbinside(1)">1</span>
+            <span onclick="keyBoardNumbinside(2)">2</span>
+            <span onclick="keyBoardNumbinside(3)">3</span>
+            <span style="width: 66.3%" onclick="keyBoardNumbinside(0)">0</span>
+            <span onclick="deleteNumbinside()">←</span>
+        </div>
+        <div class="tuiCai_button">
+            <!--margin-top: 80%;-->
+            <button class="sub" onclick="javascript:$('#doDelete').hide()">取消</button>
+            <button id="delFoodbut" class="sub_ok" onclick="javascript:delGoods()">确定</button>
+        </div>
+    </div>
+</div>
+
+<!--开台器 -->
+<div id="body">
+    <div class="left">
+        <div class="left_top">
+            <a onclick="windowback()"></a>
+            <p id="tableNoToTab">台2</p>
+        </div>
+        <div class="left_body">
+            <div class="menuList_body">
+                <div class="menuList">
+                    <div class="allMenuList">
+                        <table cellpadding="0" cellspacing="0" id="menu">
+                        </table>
+                        <table cellpadding="0" cellspacing="0" id="NoPrintmenu"></table>
+                    </div>
+
+                </div>
+                <div class="changesPeople_div clear">
+                    <div class="changesPeopleDiv clear">
+                        <p>人数：</p>
+                        <p class="changesPeople clear">
+                            <span class="cL">-</span>
+                            <input type="text" value="6" readonly>
+                            <span class="cR">+</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="upAndDown" id="updown" style="display: block;">
+                    <p class="up"></p>
+                    <p class="down"></p>
+                </div>
+
+            </div>
+            <div class="bottoms" id="bottoms_menus" style="display: block;">
+                <p onclick="clearNoprintMenus()"> 清空</p>
+                <p onclick="printMenus()">打印菜单</p>
+                <p onclick="nameListShow()">退菜</p>
+                <p onclick="checkMoney()">去结账</p>
+            </div>
+        </div>
+    </div>
+    <div class="right">
+        <div class="right_top">菜单</div>
+
+        <div class="food_div">
+            <div class="menuType">
+                <p class="leftMove"></p>
+                <div class="menuType_DIV">
+                    <ul id="typeName" class="clear">
+                    </ul>
+                </div>
+                <p class="rightMove"></p>
+            </div>
+
+            <div class="foodList_div">
+                <ul class="clear" id="clear">
+                </ul>
+            </div>
+
+            <script>
+                var i = 0;
+                $(function () {
+                    //$("#typeName").css("width", 121 * (list.length + 1) + "px")   //这个要放在 循环菜品类型中
+                    var liWidth = 0;
+                    $(".rightMove").click(function () {
+                        liWidth = parseInt($(".menuType_DIV ul li").css("width"));
+                        var rightNum = parseInt($(".menuType_DIV ul").css("right"));
+                        if (rightNum < 0) {
+                            if (-rightNum < liWidth) {
+                                $(".menuType_DIV ul").css("left", i * (liWidth + 1) + rightNum + "px");
+                            } else {
+                                i--;
+                                $(".menuType_DIV ul").css("left", i * (liWidth + 1) + "px");
+                            }
+                        }
+
+                    })
+                    $(".leftMove").click(function () {
+                        liWidth = parseInt($(".menuType_DIV ul li").css("width"));
+                        if (i < 0) {
+                            i++;
+                        }
+                        $(".menuType_DIV ul").css("left", i * (liWidth + 1) + "px");
+                    });
+
+
+                })
+            </script>
+        </div>
+
+
+        <div class="f_upAndDown">
+            <p class="f_up"></p>
+            <p class="f_down"></p>
+        </div>
+    </div>
+</div>
+
+
+<!-- 确认框 刷新当前页面-->
+<div class="background_onlyOKPrompt" style="display: none;">
+    <div class="onlyOKPrompt">
+        <div class="onlyOKPrompt_content">提示内容</div>
+        <div class="onlyOKPrompt_button">
+            <p>确认</p>
+        </div>
+    </div>
+</div>
+<!-- 弹窗 -->
+<div class="backgroundPrompt" style="display: none">
+    <div class="promptBox">
+        <div class="promptContent">提示内容</div>
+        <div class="promptButton">
+            <p class="cancel" id="PromptCancel">取消</p>
+            <p class="ok" id="PromptOk">确认</p>
+        </div>
+    </div>
+</div>
+<!-- 点菜器 -->
+<div class="box_background"></div>
+<div id="box" style="display: none">
+    <div class="box-a">
+        <div class="sumnum clear">
+            <button class="reduce" onclick="reduceNumOri()">-</button>
+            <div id='numOri'>0</div>
+            <button class="add" onclick='addNumOri()'>+</button>
+        </div>
+        <div class="del">
+            <button class="delete" id="delNoPrint">删除</button>
+        </div>
+        <div class="num">
+            <input type="text" name="text" id="numInput" placeholder="请输入数量"
+                   onkeyup="(this.v=function(){this.value=this.value.replace(/[^0-9-]+/,'');}).call(this)"
+                   onblur="this.v();"/>
+            <button class="jt" onclick='deleteNum()'>
+                &lt;&lt;
+            </button>
+            <table>
+                <tr>
+                    <td onclick="addnum(7)">7</td>
+                    <td onclick="addnum(8)">8</td>
+                    <td onclick="addnum(9)">9</td>
+                </tr>
+                <tr>
+                    <td onclick="addnum(4)">4</td>
+                    <td onclick="addnum(5)">5</td>
+                    <td onclick="addnum(6)">6</td>
+                </tr>
+                <tr>
+                    <td onclick="addnum(1)">1</td>
+                    <td onclick="addnum(2)">2</td>
+                    <td onclick="addnum(3)">3</td>
+                </tr>
+                <tr>
+                    <td>
+                        <a href="javascript:$('#box').hide();">取消</a>
+                    </td>
+                    <td onclick="addnum(0)">0</td>
+                    <td>
+                        <a id="Boxsubmit">确定</a>
+                    </td>
+                </tr>
+            </table>
+            <div class="last">
+				<span>备注：<p id="butname"></p> </span>
+                <div class="taste">
+                    <ul id="nature">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    
+
+    $(".changesPeople .cL").click(function () {
+        $(".changesPeople input").val(meals);
+        if (meals > 1) {
+            meals--;
+        }
+        $(".changesPeople input").val(meals);
+        keepMeals(meals);
+    })
+    $(".changesPeople .cR").click(function () {
+        $(".changesPeople input").val();
+        meals++;
+        $(".changesPeople input").val(meals);
+        keepMeals(meals);
+    })
+
+
+    
+
+    var window_height = $(window).height();
+    var left_top_height = $(".left_top").outerHeight();
+    var bottoms_height = $(".bottoms").outerHeight();
+    var upAndDown_height = $(".upAndDown").outerHeight();
+
+    $(".left_body").height(window_height - left_top_height);
+    $(".menuList_body").height(window_height - left_top_height - bottoms_height);
+    //alert(window_height + " ? " + left_top_height + " ? " + bottoms_height + " ? " + upAndDown_height)
+    var changesPeople_div_height = $(".changesPeople_div").outerHeight()
+    $(".menuList").height(window_height - left_top_height - bottoms_height - upAndDown_height - changesPeople_div_height);
+
+
+    var menuList_height = $(".menuList").outerHeight();
+    //获取 tr 的高度
+    var trHeight = 0;
+    //得到 tr 的数量
+    var trNum = 0;
+    // 获取 menus 的高度
+    var allMenuList_Height = 0;
+    /*
+    // 这三个 参数 放进方法中
+    //获取 tr 的高度
+    trHeight = $(".menuList table tr").outerHeight();
+    //得到tr 的数量
+    trNum = parseInt(menuList_height/trHeight);
+
+    //获取 allMenuList 的高度
+    allMenuList_Height = $(".allMenuList").outerHeight();
+    */
+    var roll_Height = 0;
+
+    var i = 0;
+
+    var allMenuList_Top = 0;
+    $(".up").click(function () {
+        //获取 tr 的高度
+        trHeight = $(".menuList table tr").outerHeight();
+        //得到tr 的数量
+        trNum = parseInt(menuList_height / trHeight);
+        roll_Height = trHeight * trNum;
+        //获取 allMenuList 的高度
+        allMenuList_Height = $(".allMenuList").outerHeight();
+        allMenuList_Top = parseFloat($(".allMenuList").css("top"));
+        if (parseFloat($(".allMenuList").css("top")) < 0) {
+            i++;
+        }
+        $(".allMenuList").css("top", i * roll_Height + "px");
+    });
+
+    $(".down").click(function () {
+        //获取 tr 的高度
+        trHeight = $(".menuList table tr").outerHeight();
+        //得到tr 的数量
+        trNum = parseInt(menuList_height / trHeight);
+        //获取 allMenuList 的高度
+        allMenuList_Height = $(".allMenuList").outerHeight();
+        roll_Height = trHeight * trNum;
+        //剩余高度
+        var surplus_height = allMenuList_Height + parseFloat($(".allMenuList").css("top"));
+        if (surplus_height > roll_Height) {
+            i--;
+        }
+        $(".allMenuList").css("top", i * roll_Height + "px");
+    })
+</script>
+
+
+<script>
+
+    /*LJH */
+    var right_top_Height = $(".right_top").outerHeight();
+    var f_upAndDown_Height = $(".f_upAndDown").outerHeight();
+    var f_upAndDown_Height_tm = parseFloat($(".f_upAndDown").css("margin-top"));
+    var menuType = $(".menuType").outerHeight();
+    var foodList_div_tm = parseFloat($(".foodList_div").css("margin-top"));
+
+    $(".foodList_div").height(window_height - right_top_Height - f_upAndDown_Height - 2 * f_upAndDown_Height_tm - menuType - 2 * foodList_div_tm);
+
+    var foodList_div_Height = $(".foodList_div").height();
+
+    var oneFood_Height = 0;
+    var oneFood_margin = 0;
+    var food_Div = 0;
+
+    /*
+    var oneFood_Height = $(".oneFood").outerHeight();
+    var oneFood_margin = $(".oneFood").css("margin-bottom");
+    console.log("oneFood_Height == " + oneFood_Height);
+    var food_row = parseFloat(foodList_div_Height) / (parseFloat(oneFood_Height) + parseFloat(oneFood_margin));
+    console.log("food_row == " + food_row);
+    var food_Div = (parseFloat(oneFood_Height) + parseFloat(oneFood_margin)) * parseInt(food_row);
+    console.log("food_Div == " + food_Div);
+    $(".foodList_div").height(food_Div);
+    */
+    var ul_Height = 0;
+
+    var ul_top = 0;
+    var j = 0;
+    $(".f_up").click(function () {
+        ul_top = $(".foodList_div ul").css("top");
+        if (0 > parseFloat(ul_top)) {
+            j++;
+        }
+        $(".foodList_div ul").css("top", food_Div * j + "px");
+    })
+    $(".f_down").click(function () {
+        ul_top = $(".foodList_div ul").css("top");
+        ul_Height = $(".foodList_div ul").outerHeight();
+        var f_Surplus = ul_Height + parseFloat(ul_top);
+        if (f_Surplus > food_Div + 1) {
+            j--;
+        }
+
+        $(".foodList_div ul").css("top", food_Div * j + "px");
+    })
+</script>
+</body>
+</html>

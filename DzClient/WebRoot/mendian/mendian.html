@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>门店设置</title>
+<link rel="stylesheet" href="./mendian.css">
+<link rel="stylesheet" href="../common/css/mobileSelect.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+<script type="text/javascript" src="../common/js/mobileSelect.min.js"></script>
+
+</head>
+
+<body>
+
+	<script type="text/javascript">
+			$(document).ready(function(){ 
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.APPINFO,
+				 	data: { 
+            			id:getCookie('cid'),//22
+        			},
+					success:function(data) {
+					var html='';
+					var notice='';
+					var logo='';
+					var bg='';
+					var html_2='';
+					
+					if(data.notice!=null){
+						var notice=data.notice;
+					}
+					if(data.logo!=null){
+						var logo='<img src='+data.logo+' style="width:30px;height:30px;vertical-align: middle;">';
+					}
+					if(data.img!=null){
+						var bg='<img src='+data.img+' style="width:30px;height:30px;vertical-align: middle;">';
+					
+					}
+					
+					if((data.businessTimeStart!=null)&& (data.businessTimeEnd!=null)){
+						html_2='<span>早:'+data.businessTimeStart+'-下午:'+data.businessTimeEnd+'</span>';
+					}
+					
+						html='<li>'+
+							 '<a href="javascript:void(0);">'+
+							 '<p>商家名称</p>'+
+							 '<span>'+data.name+'</span>'+
+							 '</a>'+
+						     '</li>'+
+							 '<li>'+
+							 '<a href="../xg_gonggao/xg_gonggao.html">'+
+							 '<p>餐厅公告</p>'+
+							 '<span>'+notice+'</span>'+
+							 '<i class="jt_jpg"></i>'+
+							 '</a>'+
+						     '</li>';
+						     
+						 $("#notice").append(html);
+					var html_1='';
+							html_1='<li>'+
+									'<a href="../xg_tx/xg_tx.html">'+
+								    '<p>店铺logo</p>'+
+								     '<span style="width: 30px;height: 45px;">'+logo+'</span>'+
+									'<i class="jt_jpg"></i>'+
+									 '</a>'+
+										'</li>'+
+										'<li>'+
+									'<a href="../xg_bg/xg_bg.html">'+
+								    '<p>店铺背景图</p>'+
+								     '<span style="width: 30px;height: 45px;">'+bg+'</span>'+
+									'<i class="jt_jpg"></i>'+
+									 '</a>'+
+										'</li>'+
+										'<li>'+
+									'<a href="javascript:void(0);">'+
+										'<p>餐厅电话</p>'+
+										 '<span>'+data.phone+'</span>'+
+									'</a>'+
+								'</li>'+
+								'<li>'+
+									'<a href="javascript:void(0);">'+
+										'<p>餐厅地址</p>'+
+										'<span>'+data.position+'</span>'+
+										
+									'</a>'+
+								'</li>'+
+								'<li>'+
+									'<a href="../xg_time/xg_time.html">'+
+										'<p>营业时间</p>'+html_2+
+										'<i class="jt_jpg"></i>'+
+									'</a>'+
+								'</li>';
+												
+									 $("#updateMessge").append(html_1);
+									 
+									 $("#print").append(data.print);
+						
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+				
+
+		});
+		
+		</script>
+		<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="../admin_index/admin_index.html"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>门店设置</p>
+		</div>
+	</div>
+    <div class="wrap">
+        <ul class="md" id="notice">
+			
+		</ul>
+		
+		<ul class="md" id="updateMessge">
+			
+		</ul>
+		<!--
+		<ul class="md">
+			<li>
+				<a href="#">
+					<p>营业资质</p>
+					<img src="../common/img/jt.jpg" >
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<p>配送信息</p>
+					<i class="jt_jpg"></i>
+				</a>
+			</li>
+		</ul>
+		-->
+		<ul class="md">
+			<li>
+				<a href="../companyLabor/company_labor.html">
+					<p>商家协议</p>
+					<i class="jt_jpg"></i>
+				</a>
+			</li>
+			<!-- 
+			<li>
+				<a href="#">
+					<p>管理规范</p>
+					<i class="jt_jpg"></i>
+				</a>
+			</li>
+			 -->
+		</ul>
+		<ul class="md">
+			<li>
+				<a href="../xg_print/xg_print.html">
+					<p>收银打印机</p>
+					<span id="print"></span>
+					<i class="jt_jpg"></i>
+				</a>
+			</li>
+		</ul>
+    </div>
+</body>
+<script type="text/javascript">
+	
+	
+</script>
+</html>

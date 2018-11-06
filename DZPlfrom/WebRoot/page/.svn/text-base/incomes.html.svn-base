@@ -1,0 +1,300 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>录入界面</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  </head>
+  <body>
+  	<script type="text/javascript">
+  	   Ext.onReady(function(){
+	      topStroe= new Ext.data.GroupingStore({
+			  proxy: new Ext.data.HttpProxy({url:'/GXDS/income'}),
+			  reader: new Ext.data.JsonReader({totalProperty:'totalCount', root:'list',id:'id',
+			  successProperty :'@success',
+			  fields:['id','city','shuiz','rlj','ylj','jlj','nlj']
+			  })
+		});
+
+		 topKnowGrid =new Ext.grid.GridPanel({
+					ds:topStroe,	
+					height:document.body.clientHeight-124,
+					width:document.body.clientWidth-193,
+					columns:[
+						 {header: 'id', dataIndex: 'id',width:60, sortable: true,hidden:true},
+						 {header: '城市', dataIndex: 'city',width:130, sortable: true},
+						 {header: '税种', dataIndex: 'shuiz',width:130,sortable: true},
+						 {header: '日累计', dataIndex: 'rlj',width:130, sortable: true},
+						 {header: '月累计', dataIndex: 'ylj',width:130, sortable: true},
+						 {header: '季累计', dataIndex: 'jlj',width:130,sortable: true},
+						 {header: '年累计', dataIndex: 'nlj',width:130, sortable: true}
+					],
+				closable:true,
+				stripeRows:true,
+				tbar:[{		
+					text:'添加',
+					iconCls:'select-fredd',
+					handler:function(){
+							
+						if(incomesWin){
+							incomesWin.destroy();
+						}
+
+						var year = new Ext.form.TextField({
+								fieldLabel: '年累计',
+								width:290,
+								name:'year'
+						});
+						
+						var ji = new Ext.form.TextField({
+								fieldLabel: '季累计',
+								width:290,
+								name:'ji'
+						});
+						
+						var mohth = new Ext.form.TextField({
+								fieldLabel: '月累计',
+								width:290,
+								name:'mohth'
+						});
+						
+						var day = new Ext.form.TextField({
+								fieldLabel: '日累计',
+								width:290,
+								name:'day'
+						});
+						
+						var tax = new Ext.form.ComboBox({
+							 fieldLabel: '税种',
+							 store:new Ext.data.SimpleStore({fields:[],data:[[]]}),
+							 shadow:false,
+							 mode: 'local',
+							 editable :false,
+							 width:290,
+							 triggerAction:'all',
+							 name:'tax',
+							 maxHeight: 200,
+							 tpl: '<tpl for="."><div style="height:200px"><div id="paln"></div></div></tpl>',
+							 allowBlank:false
+						});
+							var taxs = new Ext.tree.TreePanel({
+								  loader: new Ext.tree.TreeLoader({dataUrl:'/GXDS/taxTree'}),
+								  border:false,
+								  root:new Ext.tree.AsyncTreeNode({text: '请选择税种',id:'2asasa'})
+							 });
+							taxs.on('click',function(node){
+								deptny = node.text;
+								nesd = node.id
+						  		tax.setValue(node.text);
+						  		tax.collapse();
+						  	});
+							 tax.on('expand',function(){
+							 	taxs.render('paln');
+							 });
+						taxs.on('checkchange', function(node, checked) {
+							 node.expand();
+							 node.attributes.checked = checked;
+							 node.eachChild(function(child) {
+							 child.ui.toggleCheck(checked);
+							 child.attributes.checked = checked;
+							 child.fireEvent('checkchange', child, checked);
+						 });
+						},taxs);
+						
+						 var planDeperment = new Ext.form.ComboBox({
+							 fieldLabel: '税务机构',
+							 store:new Ext.data.SimpleStore({fields:[],data:[[]]}),
+							 shadow:false,
+							 mode: 'local',
+							 editable :false,
+							 width:290,
+							 name:'city',
+							 triggerAction:'all',
+							 maxHeight: 200,
+							 tpl: '<tpl for="."><div style="height:200px"><div id="paln"></div></div></tpl>',
+							 allowBlank:false
+						});
+							var cityTax = new Ext.tree.TreePanel({
+								  loader: new Ext.tree.TreeLoader({dataUrl:'/GXDS/treeCity'}),
+								  border:false,
+								  root:new Ext.tree.AsyncTreeNode({text: '请选择税务部门',id:'098'})
+							 });
+							cityTax.on('click',function(node){
+								deptny = node.text;
+								nesd = node.id
+						  		planDeperment.setValue(node.text);
+						  		planDeperment.collapse();
+						  	});
+							 planDeperment.on('expand',function(){
+							 	cityTax.render('paln');
+							 });
+						cityTax.on('checkchange', function(node, checked) {
+							 node.expand();
+							 node.attributes.checked = checked;
+							 node.eachChild(function(child) {
+							 child.ui.toggleCheck(checked);
+							 child.attributes.checked = checked;
+							 child.fireEvent('checkchange', child, checked);
+						 });
+						},cityTax);
+						
+						var incomesWin = new Ext.Window({
+					        title: '添加',
+					        width: 420,
+					        height:300,
+					        layout: 'fit',
+					        resizable:false,
+					        bodyStyle:'padding:5px;',
+					        closable :false,
+					        buttonAlign:'center',
+					        items: addincomeForm = new Ext.form.FormPanel({
+								    baseCls: 'x-plain',
+							        labelWidth: 70,
+							        defaultType: 'textfield',
+							       	items:[planDeperment,tax,day,mohth,ji,year]
+							}),
+					        modal: true,
+					        buttons: [{
+					            text: '确定',
+					            handler:function(){
+							 	if(addincomeForm.getForm().isValid()){
+						       		addincomeForm.getForm().submit({
+						       			waitMsg : '处理中，请稍等...',
+										waitTitle:'请稍等',
+						       		    url:'/GXDS/addIncome',
+						        		success :function(form,action)
+						        		{
+						        			 addincomeForm.getForm().reset();
+						        			 plandss.reload();
+						        		},
+						        		failure :function(form,action)
+						        		{
+						        			var msg = Ext.util.JSON.decode(action.response.responseText);
+						        			Ext.Msg.alert('温馨提示',msg.message);
+						        		}
+						        	});
+						        	     incomesWin.hide();
+						        		
+							       	} else {
+							       		Ext.MessageBox.alert("错误","不允许为空!" );
+							       	}
+					         	 }
+					        },{
+					            text: '取消',
+					            handler: function(){
+					            	addincomeForm.getForm().reset();
+					           		incomesWin.hide();
+					           		incomesWin.destroy();
+					            }
+					        }]
+					});
+						incomesWin.show();
+					
+					}},"-",{		
+					text:'修改',
+					iconCls:'eclts-fr',
+					handler:function(){
+						var rends = topKnowGrid.getSelections();
+						if(rends.length<=1&&rends.length!=0)
+						{
+							for(var i = 0 ; i < rends.length ; i++){
+							  var leng = rends[i];
+						   	  id.setValue(leng.get("id"));
+						   	  nlj.setValue(leng.get("nlj"));
+						   	  ylj.setValue(leng.get("ylj"));
+						   	  yylj.setValue(leng.get("ylj"));
+						 }
+						     incomeUpdate.show();
+						     
+						 id = new Ext.form.Hidden({
+		fieldLabel: 'ID',
+		allowBlank: false,
+		name:'id',
+		msgTarget: 'under'
+});
+
+nlj = new Ext.form.Hidden({
+		allowBlank: false,
+		name:'nlj',
+		msgTarget: 'under'
+});
+
+yylj = new Ext.form.Hidden({
+		allowBlank: false,
+		name:'yylj',
+		msgTarget: 'under'
+});
+
+ylj = new Ext.form.TextField({
+		fieldLabel: '月累计',
+		allowBlank: false,
+		width:200,
+		maxLength: 70,
+		minLength: 1,
+		name:'ylj',
+		msgTarget: 'under'
+});
+
+var addIncomeUpdateForm = new Ext.form.FormPanel({
+	    baseCls: 'x-plain',
+        labelWidth: 55,
+        defaultType: 'textfield',
+        items:[id,nlj,ylj,yylj]
+});	
+
+			     var incomeUpdate = new Ext.Window({
+				        title: '修改收入数据',
+				        width: 350,
+				        height:200,
+				        minWidth: 300,
+				        minHeight: 200,
+				        layout: 'fit',
+				        resizable:false,
+				        bodyStyle:'padding:5px;',
+				        closable :false, 
+				        buttonAlign:'center', 
+				        items: addIncomeUpdateForm,
+				        modal: true,
+				        buttons: [{
+				            text: '确定',
+				            handler:function(){
+						 	if(addIncomeUpdateForm.getForm().isValid()) // 判断验证是否过关
+					       	{
+					       		addIncomeUpdateForm.getForm().submit({// 提交细节
+					       			waitMsg : '处理中，请稍等...',
+									waitTitle:'请稍等',
+									method:'POST',
+					       		    url:'/GXDS/updateIncome',
+					        		success :function(form,action)
+					        		{
+					        			topStroe.reload();
+					        		},
+					        		failure :function(form,action)
+					        		{
+					        			Ext.Msg.alert('错误','后端异常');
+					        		}
+					        	});
+					        		incomeUpdate.hide();
+						       	} else {
+						       		Ext.MessageBox.alert( "错误","不允许为空!" );
+						       	}
+				         	 }
+				        },{
+				            text: '取消',
+				            handler: function(){
+				           		incomeUpdate.hide();
+				            }
+				        }]
+				});
+				
+						 }else
+					     {
+						 	Ext.Msg.alert('错误','不能多选或不选');
+					     }
+				}}]
+		});
+			topKnowGrid.render('grid-topknow');
+	});
+  	</script>
+ 	 <div id="grid-topknow" />
+  </body>
+</html>

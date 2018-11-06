@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>抢单</title>
+         <link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+         <link rel="stylesheet" href="./compete-order.css">
+		<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/jquery.timers.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+		$(function() {
+		 	 setInterval(load(),5000);
+		 	 $('body').everyTime('5s','ds1',function (){
+              	load();
+        	 });
+		});
+		
+		function load(){
+			$.ajax({
+				type:'POST',
+				url: BASE_URL + LOGIN_ACTION.SNATCHVIEW,
+			 	data: { 
+           			location:getCookie('lng')
+       			},
+				success:function(data) {
+				 var list = data.list;
+				 var html = '';
+					for(var i = 0;i < list.length;i++){
+				 		html = html + '<div class="oneOrder"><div class="title"><img src="'+list[i].logo+'" alt=""><span>'+list[i].companyName+'</span></div>'+
+      					 	   '<div class="detail-box">'+
+           				   '<div class="address dot">'+
+           				   '<span>取餐电话:'+list[i].companyPhone+'</span><br/>'+
+               			   '<span>取餐地址:'+list[i].companyPosition+'</span>'+
+               			  '<span class="distance"><img src="../common/img/addr.png" style="padding-bottom:8px;padding-right:4px;" alt="">'+list[i].distance+'米</span>'+
+           				  '</div>'+
+           				    '<div class="date dot">订餐联系人：'+list[i].userName+'</div>'+
+           				      '<div class="date dot">联系电话：'+list[i].userPhone+'</div>'+
+           				      '<div class="date dot">送餐地址：'+list[i].userAddress+list[i].room+'<img src="../common/img/addr.png"  style="width:14px;height: 18px;vertical-align: middle;margin-left: 10px;padding-bottom:8px;padding-right:4px;" alt="">'+list[i].userDistance+'米</span></div>'+
+           				      '<div class="date dot">下单时间时间：'+list[i].addTime+'</div>'+
+           				       '<div class="date dot">预计送达时间：'+list[i].time+'前送达</div>'+
+           				         '<div class="date dot" >配送费用：￥<font style="color:red;">'+list[i].cost+'</font>元</div>'+
+       					  '</div>'+
+       					  '<div class="btn-box">'+
+           				  '<span class="btn" onclick="snatch('+list[i].orderId+');">接受订单</span>'+
+       					  '</div>'; 
+					}
+					
+					$("#task-detail").html(html);
+					
+					var totalCount=data.totalCount;
+					$("#zong").html("新任务("+totalCount+")");
+				},
+				error:function(error) {
+					console.log(error);
+				}
+			});
+		}
+		
+		function playSound(){
+		      var borswer = window.navigator.userAgent.toLowerCase();
+		      if ( borswer.indexOf( "ie" ) >= 0 ) {
+		        //IE内核浏览器
+		        var strEmbed = '<embed name="embedPlay" src="../wm.wav" autostart="true" hidden="true" loop="false"></embed>';
+		        if ( $( "body" ).find( "embed" ).length <= 0 )
+		          $( "body" ).append( strEmbed );
+		        var embed = document.embedPlay;
+		
+		        //浏览器不支持 audion，则使用 embed 播放
+		        embed.volume = 100;
+		        //embed.play();这个不需要
+		      } else {
+		        //非IE内核浏览器
+		        var strAudio = "<audio id='audioPlay' src='../wm.wav' hidden='true'>";
+		        if ( $( "body" ).find( "audio" ).length <= 0 )
+		          $( "body" ).append( strAudio );
+		        var audio = document.getElementById( "audioPlay" );
+		
+		        //浏览器支持 audion
+		        audio.play();
+		      }
+   	  	}
+		
+		function snatch(orderId) {
+			$.ajax({
+				type:'POST',
+				url: BASE_URL + LOGIN_ACTION.SNATCH,
+			 	data: {
+           			token:  getCookie('token'),
+           			orderId: orderId
+       			},
+				success:function(data) {
+					valLink('alert',data.message);
+					$("#task-detail").html('');
+					$("#zong").html("新任务");
+					window.location.href="./compete-taking.html";
+				},
+				error:function(error) {
+					console.log(error);
+				}
+			});
+        }
+	function init(logo,location){
+		orderCheck("qiangdan",location,logo);
+	}		
+		</script>
+    <ul class="clearfix header">
+        <li class="f-left active"  id="zong">新任务</li>
+        <li class="f-left" onclick="window.location.href='./compete-taking.html'">待取货</li>
+        <li class="f-left" onclick="window.location.href='./compete-finish.html'">待送达</li>
+    </ul>
+    <div class="task-detail" id="task-detail">
+       
+    </div>
+</body>
+</html>

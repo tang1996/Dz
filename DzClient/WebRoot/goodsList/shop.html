@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>商家</title>
+    <link rel="stylesheet" href="./shop.css">
+    <link rel="stylesheet" href="../common/css/swiper.css">
+    <link rel="stylesheet" href="./seller-comment.css">
+    <script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../common/js/baseUrl.js"></script>
+    <script type="text/javascript" src="../common/js/common.js"></script>
+    <script type="text/javascript" src="../common/js/swiper.min.js"></script>
+    <script type="text/javascript">
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.FIND,
+            data: {
+                id: GetQueryString("cid"),
+                location: GetQueryString("location")
+            },
+            success: function (data) {
+                var list = data.list;
+                var count = data.count;
+                for (var i = 0; i < list.length; i++) {
+                    var isOpen1 = list[i].isOpen1;
+                    var isOpen2 = list[i].isOpen2;
+                    var isOpen3 = list[i].isOpen3;
+                    var isOpen4 = list[i].isOpen4;
+                    var html = '';
+                    if (isOpen1 == true) {
+                        var html =
+                            '<span class="icon">满减</span><span class="coupon-desc" style="vertical-align: sub;">' +
+                            list[i].subtraction + '</span><span class="coupon-num">' + count + '个优惠</span>';
+                        $("#shop-coupon").html(html);
+                    }
+
+                    if (isOpen2 == true) {
+                        html =
+                            '<li class="shop-coupon"><span class="icon">新</span><span class="coupon-desc">' +
+                            list[i].newUser + '</span></li>';
+                        $("#aaa").append(html);
+                    }
+                    if (isOpen3 == true) {
+                        html =
+                            '<li class="shop-coupon"><span class="icon">折扣</span><span class="coupon-desc">' +
+                            list[i].svg + '</span></li>';
+                        $("#aaa").append(html);
+                    }
+                    if (isOpen4 == true) {
+                        html =
+                            '<li class="shop-coupon"><span class="icon">卷</span><span class="coupon-desc">' +
+                            list[i].coupon + '</span></li>';
+                        $("#aaa").append(html);
+                    }
+
+                }
+
+                $("#shop-info").html(data.name + "<span>查看后厨</span>");
+                $("#ping").html("评分" + data.assess);
+                $("#yue").html("人均消费" + data.GDP+"元");
+                $("#logo").attr("src", data.logo);
+                $("#img").attr("src", data.img);
+                if (data.type == 1) {
+                    $("#pei").html("配送约" + data.time + "分钟");
+                }
+                $("#ju").html("距离" + data.range);
+                $("#shop-tips").html('<img src="../common/img/tips.png" alt="">' + data.notice);
+
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+
+        $.ajax({
+            type: 'POST',
+            url: BASE_URL + LOGIN_ACTION.FIND,
+            data: {
+                id: GetQueryString("cid"),
+                location: GetQueryString("location")
+            },
+            success: function (data) {
+                var html = '<li>' +
+                    '商家名称：' + data.name +
+                    '</li>' +
+                    '<li>' +
+                    '商家电话：' + data.phone +
+                    '</li>' +
+                    '<li>' +
+                    '营业时间：' + data.business_time +
+                    '</li>' +
+                    '<li>' +
+                    '商家地址：' + data.address +
+                    '</li>';
+                $("#info").html(html);
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+
+        $(function () {
+            $("#fix").click(function () {
+                valLink('fix', GetQueryString("cid"));
+            });
+            
+            $("#menushow").click(function(){
+             	valLink('menushow', GetQueryString("cid"));
+            });
+        });
+    </script>
+</head>
+
+<body>
+
+    <header>
+        <div class="head">
+            <div style="position: absolute;height: 150px;background-color: #fff;top: 167px;width: 100%;"></div>
+            <img id="img" alt="" src="../common/images/c_detail_bg.jpg" style="width:100%;height: 166px;position: absolute;z-index: -100;">
+            <div class="top-tx">
+                <div class="mask">
+                    <img id="logo" class="tx" src="../common/img/avatar.png" style="position: relative;width: 90px;height: 85px;left: 140px;top: 86px;border-radius: 5px;"
+                    />
+                    <div class="ma-b" style="margin-top: -37px;">
+                        <img src="../common/images/icon0.png" style="width:100%" />
+                    </div>
+                </div>
+            </div>
+            <div class="shop-desc" id="shop-desc" style="margin-top: 9px;">
+                <p class="shop-info" id="shop-info"></p>
+                <p class="shop-service">
+                    <span id="ping"></span>
+                    <span id="yue"></span>
+                    <span id="ju"></span>
+                </p>
+                <p class="shop-tips" id="shop-tips">
+                    <img src="../common/img/tips.png" alt="">
+                </p>
+                <ul>
+                    <li class="shop-coupon" id="shop-coupon">
+                        <ul id="aaa" style="display:none;">
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <ul class="sj-ul">
+                <li class="active">
+                    <span>商家</span>
+                </li>
+                <li>
+                    <span>评价</span>
+                </li>
+            </ul>
+        </div>
+    </header>
+    <div class="swiper-container">
+        <div class="swiper-wrapper">
+            <!-- 商家 -->
+            <div class="swiper-slide">
+
+                <div class="seller-box">
+                    <ul id="info">
+                    </ul>
+                    	<div class="button" id="menushow">预览菜品</div>
+                     <div class="button" id="fix">去预定</div>
+                    <br>
+                    <br>
+                </div>
+            </div>
+
+            <div class="swiper-slide">
+                <header>
+                    <div class="seller-comment">
+                        <div class="level">
+                            <p id="total">
+                                <img src="./../common/img/up.png" alt="">
+                            </p>
+                            <p>
+                                	商家评分
+                            </p>
+                        </div>
+                        <div class="desc">
+                            <p>
+                                <span>菜品口味</span>
+                                <img src="../common/img/favourable.png" alt="">
+                                <img src="../common/img/favourable.png" alt="">
+                                <img src="../common/img/favourable.png" alt="">
+                                <img src="../common/img/favourable.png" alt="">
+                                <img src="../common/img/favourable.png" alt="">
+                                <span class="num" id="attitude">4.7</span>
+                            </p>
+                            <p>
+                                <span>服务质量</span>
+                                <img src="../common/img/favourable.png" alt="">
+                                <img src="../common/img/favourable.png" alt="">
+                                <img src="../common/img/favourable.png" alt="">
+                                <img src="../common/img/favourable.png" alt="">
+                                <img src="../common/img/favourable.png" alt="">
+                                <span class="num" id="quality">4.8</span>
+                            </p>
+                        </div>
+                    </div>
+                </header>
+                <div class="comment-box">
+                    <div class="title">
+                        <span class="label active" id="totalcount">全部 312</span>
+                        <span class="label" id="imgcount">有图 200</span>
+                    </div>
+                    <ul class="list">
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var swiper = new Swiper('.swiper-container', {
+            touchAngle: 20,
+            // roundLengths: true, //设定为true将slide的宽和高取整(四舍五入)以防止某些分辨率的屏幕上文字或边界(border)模糊。 
+
+            onTransitionEnd: function (swiper) {
+                $('.sj-ul li').eq(swiper.activeIndex).addClass('active').siblings().removeClass('active');
+            }
+        });
+        $('.sj-ul li').click(function () {
+            $(this).addClass('active').siblings().removeClass('active');
+            swiper.slideTo($(this).index(), 500)
+        });
+    </script>
+</body>
+
+</html>

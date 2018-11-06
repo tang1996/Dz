@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>会员登录</title>
+<style type="text/css">
+body,html {
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+
+#outer {
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+	width: 100%;
+}
+
+#outer[id] {
+	display: table;
+	position: static;
+}
+
+#middle {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+}
+
+#middle[id] {
+	display: table-cell;
+	vertical-align: middle;
+	position: static;
+}
+
+#inner {
+	position: relative;
+	top: -50%;
+	width: 310px;
+	left: 35% !important;
+	left: -155px;
+}
+
+#container {
+	width: 310px;
+	height: 190px;
+	margin-left: auto;
+	margin-right: auto;
+}
+</style>
+<link rel="stylesheet" type="text/css"
+	href="./common/css/resources/css/ext-all.css" />
+<script type="text/javascript" src="./common/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="./common/jquery.cookie.js"></script>
+<script type="text/javascript" src="./common/baseUrl.js"></script>
+<script type="text/javascript" src="./common/ext-core/ext-base.js"></script>
+<script type="text/javascript" src="./common/ext-core/ext-all.js"></script>
+<script type="text/javascript">
+	
+	Ext.onReady(function() {
+
+		Ext.QuickTips.init();
+		Ext.form.Field.prototype.msgTarget = "qtip";
+		var loginform = new Ext.form.FormPanel({
+			renderTo : 'container',
+			title : '会员登录',
+			labelSeparator : ":",
+			collapsible : false,
+			width : 300,
+			height : 160,
+			id : 'login',
+			labelWidth : 80,
+			bodyStyle : 'padding:5px 5px 0 0',
+			border : false,
+			name : 'login',
+			frame : true,
+			defaults : {
+				width : 178,
+				xtype : 'textfield'
+			},
+			items : [ new Ext.form.TextField({
+				fram : true,
+				fieldLabel : "账户",
+				id:'username',
+				name : 'userName',
+				allowBlank : false,
+				emptyText:'请输入账户',
+				blankText : '账户信息不能为空'
+			}), {
+				fieldLabel : "密码",
+				name : 'password',
+				emptyText:'请输入密码',
+				allowBlank : false,
+				inputType : 'password',
+				id:'password',
+				blankText : '密码不能为空'
+			}, {
+				name : 'vcode',
+				id : 'vcode',
+				fieldLabel : '验证码',
+				maxLength : 4,
+				width : 80,
+				value:'7983',
+				allowBlank : false,
+				blankText : '验证码不能为空!'
+			} ],
+			keys : {
+				key : 13,
+				fn : login
+			},
+			buttons : [ {
+				text : '提 交',
+				handler :login
+			}, {
+				text : '重置',
+				handler : function() {
+					loginform.form.reset();
+				}
+			} ]
+		});
+		
+		function login(){
+			if(Ext.getCmp('login').form.isValid()){
+				Ext.Ajax.request({
+					url: BASE_URL + LOGIN_ACTION.ADMIN_LOGIN,
+					waitMsg : '正在处理......',
+					params : {
+						userName : Ext.getCmp('username').getValue(),
+						password:  Ext.getCmp('password').getValue()
+					},
+					success : function(response, options) {
+						var json = Ext.util.JSON.decode(response.responseText);
+						if(json.success == false){
+							Ext.Msg.alert('温馨提示', json.message);
+						}else{
+							$.cookie('url', json.message); 
+							window.location.href=json.message;
+						}
+					},
+					failure : function(form, action) {
+						Ext.Msg.alert('温馨提示', '服务器异常');
+					}
+				});
+			}else{
+				Ext.Msg.alert('信息', '请填写完成再提交!');
+			}
+	}
+		
+	});
+	
+</script>
+</head>
+<body style="background-color: slategray;">
+	<div id="outer">
+		<div id="middle">
+			<div id="inner">
+				<div id="container"></div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

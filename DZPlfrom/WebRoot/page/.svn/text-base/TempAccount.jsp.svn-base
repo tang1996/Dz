@@ -1,0 +1,86 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>国库对账</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+</head>
+<body>
+	<strong><script type="text/javascript">
+
+Ext.onReady(function(){
+
+var array = '';
+var fields = '';
+
+			var tempCm = new Ext.grid.ColumnModel(array);
+
+	        var tempDs = new Ext.data.GroupingStore({
+				  proxy: new Ext.data.HttpProxy({url:''}),
+				  reader: new Ext.data.JsonReader({totalProperty:'totalCount', root:'list',id:'id',
+				  successProperty :'@success',
+				  fields:fields
+				  })
+			});
+			
+			this.pagingBar = new Ext.PagingToolbar
+	        ({
+	            displayInfo:true,
+	            emptyMsg:"没有数据显示",
+	            displayMsg:"显示从{0}条数据到{1}条数据，共{2}条数据",
+	            store:tempDs,
+	            pageSize:10
+	        });
+			
+			var tempAcount = new Ext.grid.GridPanel({
+				 	    ds:tempDs,
+						cm:tempCm,
+				        height:document.body.clientHeight-120,
+						width:document.body.clientWidth-193,
+				        stripeRows:true,
+				        frame : false,
+				        renderTo : 'page_man',
+				        autoShow : true,
+				        viewConfig : {
+				            forceFit : true
+				        },
+						 tbar : [{
+				            text : '转换Excel处理',
+				            tooltip : '转换Excel处理',
+				            iconCls : 'refresh'
+				        }],
+				        bbar: pagingBar
+			 });
+
+				Ext.Ajax.request({         
+			           url: '/GXDS/sQLqueryPath',  
+			           waitMsg : '正在处理......', 
+			           params:{isColumn:'sss',accountID:text},
+			           success:function(response, options){
+			           var msg = Ext.util.JSON.decode(response.responseText);
+						   tempAcount.reconfigure(
+							new Ext.data.JsonStore({
+								url:"/GXDS/sQLqueryPath", 
+								root:"list", 
+								totalProperty:"totalCount",successProperty :'@success', fields:msg.column
+							}),
+							new Ext.grid.ColumnModel(msg.columnModel)); 
+						
+						var tempStore = tempAcount.getStore();
+						this.pagingBar.bind(tempStore);   
+						accountDs.load({params:{start:0, limit:100}});
+						accountDs.on('beforeload',function(loader){
+							loader.baseParams = { accountID:text };
+						});
+												
+			           },failure: function(form,action){
+			        	Ext.Msg.alert('温馨提示','后端异常');
+			           } 
+				 });	
+		});
+	
+	</script></strong>
+	<div id='page_man'></div>
+</body>
+</html>

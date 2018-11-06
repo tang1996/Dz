@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>商家申请入驻下一步</title>
+<link rel="stylesheet" href="./request_shop.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/ajaxfileupload.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+
+
+</head>
+
+<body>
+<script type="text/javascript">
+   $(document).ready(function(){
+			var id=GetQueryString("id");
+			if(id==null){
+				var url="../treasure/treasure.html";
+				window.location.href=url;
+			}
+
+	});
+	/*
+	function add(n){
+		var id=GetQueryString("id");
+			switch(n){
+				case 1:
+						var file=$('#charter').val();
+						var type='charter';
+						var fileElementId='charter';
+							if(file.length==0){
+							valLink("alter","请上传营业执照!");
+								return false;
+							}
+						
+							break;
+				case 2:
+						var file=$('#health').val();
+						var type='health';
+						var fileElementId='health';
+							if(file.length==0){
+							valLink("alter","请上传食品卫生许可证!");
+								return false;
+							}
+						
+							break;
+				case 3:
+						var file=$('#card').val();
+						var type='card';
+						var fileElementId='card';
+							if(file.length==0){
+							valLink("alter","请上传法人身份证正反面照!");
+								return false;
+							}
+						
+							break;
+				case 4:
+						var file=$('#take').val();
+						var type='take';
+						var fileElementId='take';
+							if(file.length==0){
+							valLink("alter","请上传法人手持身份证照!");
+								return false;
+							}
+						
+							break;
+				}
+				$.ajaxFileUpload({
+					 secureuri: false, //是否需要安全协议，一般设置为false
+					 type: 'post', 
+					url: BASE_URL + LOGIN_ACTION.EXAMINELOGOUPLOAD, //用于文件上传的服务器端请求地址
+					fileElementId: fileElementId, //文件上传域的ID
+					data:{
+						id:id,
+            			type:type,
+            			file:file
+					},
+					dataType: 'json', //返回值类型 一般设置为json
+					success: function (data, status){
+							if(n==1){
+								$('#charter1').append('<img src="../common/img/success.png" />');
+							}else if(n==2){
+								$('#health1').append('<img src="../common/img/success.png" />');
+							}else if(n==3){
+								$('#card1').append('<img src="../common/img/success.png" />');
+							}else if(n==4){
+								$('#take1').append('<img src="../common/img/success.png" />');
+							}
+						
+					},
+					error: function (data, status, e){
+							    alert(e);
+					}
+				})
+	}
+	*/
+	</script>
+    <div class="head">
+        <div class="h-div"><!--
+            <a class="h-l" href="../treasure/treasure.html">
+                <img class="jt" src="../common/img/iconjt.png" alt="">
+            </a>
+            --><p>商家申请入驻下一步</p>
+        </div>
+    </div>
+    <div class="wrap sort_add">
+   		 <ul class="md" id="md">
+			
+		</ul>
+		
+        <!-- <p><font style="color:red;">*</font>&nbsp;营业执照上传</p>
+        <input class="sc_img" type="button" onclick="cnm('charter');" value="选择图片"/><div style="float:right;margin-right:35px;margin-top:-36px;" id="charter1"></div>
+        <input  class="sc_i" type="file" name="charter" id="charter"  onchange="javascript:add(1);"/>
+        <p><font style="color:red;">*</font>&nbsp;食品卫生许可证上传</p>
+        <button class="sc_img" type="button">选择图片</button><div style="float:right;margin-right:35px;margin-top:-36px;" id="health1"></div>
+       <input  class="sc_i" type="file" name="health" id="health"    onchange="javascript:add(2);" />
+		 <p><font style="color:red;">*</font>&nbsp;法人身份证正反面照上传</br>(请将法人身份证正反面放在一张图片里上传)</p>
+        <button class="sc_img" type="button">选择图片</button><div style="float:right;margin-right:35px;margin-top:-36px;" id="card1"></div>
+        <input  class="sc_i" type="file" name="card" id="card"    onchange="javascript:add(3);" />
+		 <p><font style="color:red;">*</font>&nbsp;法人手持身份证照上传</p>
+        <button class="sc_img" type="button">选择图片</button><div style="float:right;margin-right:35px;margin-top:-36px;" id="take1"></div>
+        <input  class="sc_i" type="file" name="take" id="take"    onchange="javascript:add(4);" /> -->
+    </div>
+    <div class="foot_sort">
+    	<!-- <button type="button" onclick="add();">完成</button> -->
+		<button type="button" onclick="submit();">完成</button>
+	</div>
+</body>
+<script type="text/javascript">
+			$(document).ready(function(){ 
+			var id = GetQueryString("id");
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.COMPANY_EXAMINE_FIND,
+				 	data: { 
+            			id : id
+        			},
+					success:function(data) {
+					var charter='';
+					var health='';
+					var card='';
+					var take='';
+					
+					if(data.charter!=null){
+						charter='<img src='+data.charter+' style="width:30px;height:30px;vertical-align: middle;">';
+					}
+					if(data.health!=null){
+						health='<img src='+data.health+' style="width:30px;height:30px;vertical-align: middle;">';
+					}
+					
+					if(data.card!=null){
+						card='<img src='+data.card+' style="width:30px;height:30px;vertical-align: middle;">';
+					}
+					if(data.take!=null){
+						take='<img src='+data.take+' style="width:30px;height:30px;vertical-align: middle;">';
+					}
+					
+					var html='';
+							html='<li>'+
+									'<p><font style="color:red;">*</font>&nbsp;营业执照上传</p>'+
+									'<a href="../request_shop/upload.html?id='+id+'&type=charter">'+
+										'<p>营业执照</p>'+
+										'<span style="width: 30px;height: 45px;">'+charter+'</span> <i class="jt_jpg"></i>'+
+									'</a>'+
+								'</li>'+
+								'<li>'+
+									'<p><font style="color:red;">*</font>&nbsp;食品卫生许可证上传</p> '+
+									'<a href="../request_shop/upload.html?id='+id+'&type=health">'+
+										'<p>食品卫生许可证</p>'+
+										'<span style="width: 30px;height: 45px;">'+health+'</span> <i class="jt_jpg"></i>'+
+									'</a>'+
+								'</li>'+
+								'<li>'+
+									'<p><font style="color:red;">*</font>&nbsp;法人身份证正反面照上传</br>(请将法人身份证正反面放在一张图片里上传)</p>'+
+									'<a href="../request_shop/upload.html?id='+id+'&type=card">'+
+										'<p>法人身份证正反面照</p>'+
+										'<span style="width: 30px;height: 45px;">'+card+'</span> <i class="jt_jpg"></i>'+
+									'</a>'+
+								'</li>'+
+								'<li>'+
+									'<p><font style="color:red;">*</font>&nbsp;法人手持身份证照上传</p>'+
+									'<a href="../request_shop/upload.html?id='+id+'&type=take">'+
+										'<p>法人手持身份证照</p>'+
+										'<span style="width: 30px;height: 45px;">'+take+'</span> <i class="jt_jpg"></i>'+
+									'</a>'+
+								'</li>';
+					$("#md").html(html);
+									 
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+				
+
+		});
+		
+		function submit(){//提交
+		var id=GetQueryString("id");
+			$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.COMPANY_EXAMINE_SUBMIT,
+				 	data: { 
+            			id : id
+        			},
+					success:function(data) {
+					alert(data.message);
+						if(data.success){
+							var url="../treasure/treasure.html";
+							window.location.href=url;
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+		}
+</script>
+
+</html>

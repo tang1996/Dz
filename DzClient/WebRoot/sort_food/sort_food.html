@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>管理分类</title>
+<link rel="stylesheet" href="./sort_food.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+<body>
+<script type="text/javascript">	
+			$(document).ready(function(){ 
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.GETIFICATIONCOMMON,
+				 	data: { 
+            			id: getCookie('cid'),
+            			type:2
+        			},
+					success:function(data) {
+						 var list = data.list;
+						 var html='';
+						for(var i = 0;i < list.length;i++){
+						html='<li>'+
+							 '<p>'+list[i].name+'<span>'+list[i].totail+'个美食菜品</span></p>'+
+							 '<button type="button" onclick="sbList('+list[i].id+');">菜品列表</button>'+
+							 '<button type="button" onclick="edit('+list[i].id+')">编辑分类</button>'+
+							 '</li>';
+						$("#sort").append(html);
+										
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+		});
+
+function edit(cid){
+			var url="../sort_edit_food/sort_edit_food.html";
+			window.location.href=url+"?"+"cid="+cid;
+
+}
+function sbList(cid){
+			var url="../sp_food/sp_food.html";
+			window.location.href=url+"?"+"cid="+cid+"&id="+getCookie('cid');
+}
+		
+		</script>
+		<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="../goods_management/goods_management.html?m=2"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>管理分类</p>
+		</div>
+	</div>
+    <div class="wrap">
+        <ul class="attr sort" id="sort">
+		
+		</ul>
+    </div>
+	<ul class="foot-nav foot-sort">
+		<li class="active">
+			<a href="../sort_add_food/sort_add_food.html"><img src="../common/img/sp33.png" ><span>添加分类</span></a>
+		</li>
+		<li class="active">
+			<a href="../add_sp_food/add_sp_food.html"><img src="../common/img/sp33.png" ><span>添加菜品</span></a>
+		</li>
+	</ul>
+</body>
+
+</html>

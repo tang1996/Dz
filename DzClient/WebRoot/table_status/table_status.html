@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>更改餐桌状态</title>
+<link rel="stylesheet" type="text/css" href="../table_status/table_status.css" />
+<link rel="stylesheet" type="text/css" href="../table_status/chuang.css" />
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+
+
+</head>
+
+<body style="background: #fff;">
+<script type="text/javascript">
+$(document).ready(function(){ 
+				datingLoad();
+
+});
+function view(pid,t,h,m){
+	        $.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.BOOKTIMEVIEW,
+				 	data: { 
+            			reservesId:pid
+        			},
+					success:function(data) {
+						 var totalCount=data.totalCount;
+						if(totalCount>0){
+							var list = data.list;
+							var html='';
+							var n=list.length;
+							$("#time").html('');
+							for(var i = 0;i < list.length;i++){
+								html='<p>'+list[i].time+'</p>';
+								$("#time").append(html);
+								
+							}
+							$("#tips-box").html('<p>重要提示:当前桌已有'+n+'人预定,还同意改变餐桌状态吗？</p><p>如果设为空桌,意味着还可以接受预订.</p>');
+							$("#footer-box").html('<span onclick="javascript:set('+pid+','+t+','+m+');">确认修改</span>');
+							$("#foot-nav").hide();
+							$("#mask").show();
+						}else{
+							if(h=='p'){
+								$("#p"+pid).attr("checked","checked");
+							}else if(h=='b'){
+								$("#b"+pid).attr("checked","checked");
+							}else if(h=='q'){
+								$("#q"+pid).attr("checked","checked");
+							}else if(h=='f'){
+								$("#f"+pid).attr("checked","checked");
+							}else if(h=='n'){
+								$("#n"+pid).attr("checked","checked");
+							}else if(h=='c'){
+								$("#c"+pid).attr("checked","checked");
+							}
+							set(pid,t,m);
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});		
+}
+
+
+	function cancel(){
+		$("#foot-nav").css("display", "block");
+		  $("#mask").css("display", "none");
+		
+	}
+
+function set(pid,t,m){
+	 $.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RESERVEUPDATESTATUS,
+				 	data: { 
+            			id:pid,
+						status:t
+        			},
+					success:function(data){
+						if(data.success){
+							if(m=="bx"){
+								 baoxiangLoad();
+							}else{
+								 datingLoad();
+							}
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});		
+}
+
+function datin(){
+	 $(".active").removeClass('active');
+	 $("#da").addClass('active');
+	 $("#jiu").html('');
+	 $("#kong").html('');
+	 $("#yu").html('');
+	 datingLoad();	
+}
+
+
+function baoxiang(){
+	 $(".active").removeClass('active');
+	 $("#bao").addClass('active');
+	 $("#jiu").html('');
+	 $("#kong").html('');
+	 $("#yu").html('');
+	 baoxiangLoad();
+}
+
+function baoxiangLoad(){
+	$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RESERVEVIEW,
+				 	data: { 
+            			companyId:getCookie('cid'),
+						seat:'bx'
+        			},
+					success:function(data) {
+							
+						   var list = data.list;
+						   var html_1='';
+						   var html_2='';
+						   var html_3='';
+						for(var i = 0;i < list.length;i++){
+								var status=parseInt(list[i].status);
+								switch(status){
+									case 0://空桌
+												html_1= html_1 + '<li>'+
+													   '<img src="../common/img/z2.png" alt="">'+
+													   '<p>'+list[i].name+list[i].tableNo+'号桌</p>'+
+													    '<div class="li-bottom">'+
+														'<div>'+
+														'<input  id="p'+list[i].id+'" type="radio">'+
+													    '<label for="r11" onclick="view('+list[i].id+','+2+',\'p\',\'bx\');">设为就餐</label>'+
+														'</div>'+
+														'<div>'+
+														'<input  id="b'+list[i].id+'" type="radio">'+
+														'<label for="r12" onclick="view('+list[i].id+','+1+',\'b\',\'bx\');">设为预定</label>'+
+														'</div>'+
+														'</div>'+
+													    '</li>';
+													
+															break;
+									case 1://已预定
+												html_2= html_2 + '<li>'+
+													   '<img src="../common/img/z3.png" alt="">'+
+													   '<p>'+list[i].tableNo+'号桌</p>'+
+													    '<div class="li-bottom">'+
+														'<div>'+
+														'<input  id="q'+list[i].id+'" type="radio">'+
+													    '<label for="r11" onclick="view('+list[i].id+','+0+',\'q\',\'bx\');">设为空桌</label>'+
+														'</div>'+
+														'<div>'+
+														'<input  id="f'+list[i].id+'" type="radio">'+
+														'<label for="r12" onclick="view('+list[i].id+','+2+',\'f\',\'bx\');">设为就餐</label>'+
+														'</div>'+
+														'</div>'+
+													    '</li>';
+														    break;
+									case 2://就餐中
+													html_3=html_3 +'<li>'+
+													   '<img src="../common/img/z1.png" alt="">'+
+													   '<p>'+list[i].tableNo+'号桌</p>'+
+													    '<div class="li-bottom">'+
+														'<div>'+
+														'<input  id="n'+list[i].id+'" type="radio">'+
+													    '<label for="r11" onclick="view('+list[i].id+','+0+',\'n\',\'bx\');">设为空桌</label>'+
+														'</div>'+
+														'<div>'+
+														'<input  id="c'+list[i].id+'" type="radio">'+
+														'<label for="r12" onclick="view('+list[i].id+','+1+',\'c\',\'bx\');">设为预定</label>'+
+														'</div>'+
+														'</div>'+
+													    '</li>';
+														    break;
+									}
+									$("#jiu").html(html_1);
+									$("#kong").html(html_2);
+									$("#yu").html(html_3);
+							}
+								
+							
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}
+
+function datingLoad(){
+	$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RESERVEVIEW,
+				 	data: { 
+            			companyId:getCookie('cid'),
+						seat:'dt'
+        			},
+					success:function(data) {
+							
+						   var list = data.list;
+						   var html_1='';
+						   var html_2='';
+						   var html_3='';
+						for(var i = 0;i < list.length;i++){
+								var status=parseInt(list[i].status);
+								//alert(status);
+								switch(status){
+									case 0://空桌
+												html_1= html_1 + '<li>'+
+													   '<img src="../common/img/z2.png" alt="">'+
+													   '<p>'+list[i].tableNo+'号桌</p>'+
+													    '<div class="li-bottom">'+
+														'<div>'+
+														'<input  id="p'+list[i].id+'" type="radio">'+
+													    '<label for="r11" onclick="view('+list[i].id+','+2+',\'p\',\'dt\');">设为就餐</label>'+
+														'</div>'+
+														'<div>'+
+														'<input  id="b'+list[i].id+'" type="radio">'+
+														'<label for="r12" onclick="view('+list[i].id+','+1+',\'b\',\'dt\');">设为预定</label>'+
+														'</div>'+
+														'</div>'+
+													    '</li>';
+													
+															break;
+									case 1://已预定
+												html_2= html_2 + '<li>'+
+													   '<img src="../common/img/z3.png" alt="">'+
+													   '<p>'+list[i].tableNo+'号桌</p>'+
+													    '<div class="li-bottom">'+
+														'<div>'+
+														'<input  id="q'+list[i].id+'" type="radio">'+
+													    '<label for="r11" onclick="view('+list[i].id+','+0+',\'q\',\'dt\');">设为空桌</label>'+
+														'</div>'+
+														'<div>'+
+														'<input  id="f'+list[i].id+'" type="radio">'+
+														'<label for="r12" onclick="view('+list[i].id+','+2+',\'f\',\'dt\');">设为就餐</label>'+
+														'</div>'+
+														'</div>'+
+													    '</li>';
+														    break;
+									case 2://就餐中
+													html_3=html_3 +'<li>'+
+													   '<img src="../common/img/z1.png" alt="">'+
+													   '<p>'+list[i].tableNo+'号桌</p>'+
+													    '<div class="li-bottom">'+
+														'<div>'+
+														'<input  id="n'+list[i].id+'" type="radio">'+
+													    '<label for="r11" onclick="view('+list[i].id+','+0+',\'n\',\'dt\');">设为空桌</label>'+
+														'</div>'+
+														'<div>'+
+														'<input  id="c'+list[i].id+'" type="radio">'+
+														'<label for="r12" onclick="view('+list[i].id+','+1+',\'c\',\'dt\');">设为预定</label>'+
+														'</div>'+
+														'</div>'+
+													    '</li>';
+														    break;
+									}
+									$("#jiu").html(html_1);
+									$("#kong").html(html_2);
+									$("#yu").html(html_3);
+							}
+								
+							
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}
+
+</script>
+	<div class="mask" id="mask" style="display:none;">
+			<div class="container">
+				<div class="info" id="info">
+					
+				</div>
+				<div class="tel-box" id="tel-box">
+					<p class="title">预订时间</p><div class="input-box" id="time"></div>
+				</div>
+				<div class="tips-box" id="tips-box" style="color:red;">
+						
+				</div>
+
+				<div class="footer-box clearfix" id="footer-box">
+					
+			
+				</div>
+				<span onclick="cancel();">
+				<img class="close-btn" src="../common/img/close.png" alt="">
+				</span>
+			</div>
+		</div>
+    <div class="head">
+        <div class="h-div">
+            <a class="h-l" href="../admin_index/admin_index.html">
+                <img class="jt" src="../common/img/iconjt.png" alt="">
+            </a>
+            <p>更改餐桌状态</p>
+            
+        </div>
+    </div>
+    <div class="wrap xg">
+        <div class="xg-h">
+            <a class="active" href="javascript:datin();" id="da">大厅</a>
+            <a href="javascript:baoxiang();" id="bao">包厢</a>
+            <div class="xg-zt" >
+                <p>
+                    <i></i>就餐中</p>
+                <p>
+                    <i></i>空桌</p>
+                <p>
+                    <i></i>预定</p>
+            </div>
+        </div>
+        <ul id="jiu">
+         
+        </ul>
+        <ul id="kong">
+        
+           
+        </ul>
+        <ul id="yu">
+        
+        </ul>
+    </div>
+
+		<ul class="foot-nav foot-sort" id="foot-nav">
+		<li class="active">
+			<a href="../table_list/table_list.html"><img src="../common/img/sp22.png" ><span>桌子列表</span></a>
+		</li>
+		<li class="active">
+			<a href="../add_table/add_table.html"><img src="../common/img/sp33.png" ><span>新建桌子</span></a>
+		</li>
+	</ul>
+</body>
+
+</html>

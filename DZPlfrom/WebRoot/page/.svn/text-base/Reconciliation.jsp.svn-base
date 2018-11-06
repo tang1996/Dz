@@ -1,0 +1,298 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<html>
+  <head>
+    <title>国库对账查询</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  </head>
+  <body>
+  <script type="text/javascript">
+var depatmentID = '<%=request.getSession().getAttribute("depatmentID")%>';
+var userName = '<%=request.getSession().getAttribute("userName")%>';
+Controller = function()
+{
+var reconDate;
+var startDate;
+	function createGrid()
+	{
+ 
+ 	var recon = new Date();
+	recon = recon.format('Ymd');
+
+    var recordIndex = Ext.data.Record.create([
+   		{name: 'organ'},
+     	{name: 'gks' },
+     	{name: 'dss' },
+     	{name: 'cha' },
+     	{name: 'id' },
+    	{name: '_parent', type: 'auto'},
+     	{name: '_is_leaf', type: 'bool'}
+   	]);
+    var storeIndex = new Ext.ux.maximgb.treegrid.AdjacencyListStore({
+    			proxy: new Ext.data.HttpProxy({
+					 url:'/GXDS/reconciliation',   
+		             autoAbort:true,   
+		             disableCaching:true,
+		             timeout:18000000,   
+		             method:'POST'  
+		        }),
+				reader: new Ext.data.JsonReader(
+				{
+					id: 'id',
+					root: 'list',
+					totalProperty: 'totalCount',
+					successProperty: '@success'
+				}, 
+				recordIndex
+			)
+    });
+    
+    var gridIndex = new Ext.ux.maximgb.treegrid.GridPanel({
+      store: storeIndex,
+      master_column_id : 'organ',
+      height:document.body.clientHeight-124,
+	  width:document.body.clientWidth-193,
+	  loadMask : true,// 载入遮罩动画
+	  id:"secendPanel_skill_tree",
+      columns: [
+      	{header: "id", width: 160, sortable: true, dataIndex: 'id',hidden:true},
+        {id:'organ',header: "对账机关", width: 175, sortable: true, dataIndex: 'organ'},
+        {header: "国库入库", width: 175,align: 'right', sortable: true, dataIndex: 'gks'},
+        {header: "地税入库", width: 185,align: 'right', sortable: true, dataIndex: 'dss'},
+        {header: "差额", width: 185, align: 'right',sortable: true, dataIndex: 'cha'}
+      ],
+      stripeRows: true,
+      autoExpandColumn: 'organ',
+      root_title: '广西地税', 
+      viewConfig : {
+      	enableRowBody : true
+      },
+      tbar:[{		
+					text:'查询',
+					iconCls:'select-fredd',
+					handler:function(){
+
+		   	    reconDate = new Ext.form.DateField({
+					 	 width:200,
+					 	 fieldLabel:'对账日期选择(止)',
+					     showToday:true,
+					     format:'Ymd',
+					     value:recon
+				});
+				
+			    startDate = new Ext.form.DateField({
+					 	 width:200,
+					 	 fieldLabel:'对账日期选择(起)',
+					     showToday:true,
+					     format:'Ymd',
+					     value:recon
+				});
+
+			var reconForm = new Ext.form.FormPanel({
+			        labelWidth: 100,
+			        width: 500,
+			        height:350,
+			        defaultType: 'textfield',
+			        items:[startDate,reconDate]
+			});
+
+			var reconWindow = new Ext.Window({
+			        title: '条件查询',
+			        width: 513,
+			        height:410,
+			        resizable:false,
+			        closable :false, 
+			        buttonAlign:'center', 
+			        items: reconForm,
+			        buttons: [{
+			            text: '确定',
+			            handler:function(){
+					 		if(reconForm.getForm().isValid()){
+					 		Ext.getCmp('dates').setText("对账日期：<span style='color:green'>"+startDate.value+"起 至 "+reconDate.value+" 止</span>");
+			       			storeIndex.load({
+				       			 params:{startDate:startDate.value,date:reconDate.value}
+						    });
+			        		reconWindow.destroy();
+					       	} else {
+					       		Ext.MessageBox.alert( "错误","不允许为空!" );
+					       	}
+			         	 }
+			        },{
+			            text: '取消',
+			            handler: function(){
+			            	reconForm.getForm().reset();
+			           		reconWindow.destroy();
+			            }
+			        }]
+		     });
+						reconWindow.show();
+				}},"-",{		
+					text:'导出Excle',
+					iconCls:'execle',
+					handler:function(){
+					var xml = "";
+
+					if( reconDate ==null || reconDate == 'undefined') {
+						Ext.MessageBox.alert( "错误","请查询数据!" );
+						return;
+					}
+					
+					date = reconDate.value;	
+					storeIndex.each(function(record) {
+						if( record.get('cha').length >2 ){
+						var chaer = record.get('cha');
+						var strat = chaer.indexOf("<span style='color:red'>");
+						var end = chaer.indexOf("</span>");
+						chaer = chaer.substring(strat+24,end);
+							xml = xml + record.get('organ')+"|"+record.get('gks')+"|"+record.get('dss')+"|"+chaer+";";
+						}else{
+							xml = xml + record.get('organ')+"|"+record.get('gks')+"|"+record.get('dss')+"|"+record.get('cha')+";";
+						}
+					 });
+
+						if(xml){
+						 var desstr="国库对账("+date+").xls";
+						 var XLObj = new ActiveXObject("Excel.Application" );
+						 var xlBook = XLObj.Workbooks.Add; //新增工作簿
+						 var ExcelSheet =xlBook.Worksheets(1);  
+						
+					    ExcelSheet.Cells(1,1).HorizontalAlignment = 3;
+					    ExcelSheet.Cells(1,1).VerticalAlignment = 2;
+						//垂直对齐方式枚举*(1-靠上，2-居中，3-靠下，4-两端对齐，5-分散对齐)
+					    ExcelSheet.Cells(1,1).Font.Size = 14;
+						 //设置为10号字*
+					    ExcelSheet.Cells(1,1).Font.Name = "宋体";
+							//设置字体
+					    ExcelSheet.Cells(1,1).Font.Bold = true;
+						//设置为粗体*
+					    ExcelSheet.cells(1,1)="    广西地税-国库对账("+date+")    ";
+					    ExcelSheet.cells(1,1).Interior.ColorIndex =14 ;
+					    
+					    XLObj.Range("A1",XLObj.Cells(1, 13)).MergeCells = true;
+					    ExcelSheet.Application.Visible = true;
+					   
+					    ExcelSheet.cells(2,2)="         对账单位      ";
+					    ExcelSheet.cells(2,2).Interior.ColorIndex =54 ;
+					    
+					    XLObj.Range("A2",XLObj.Cells(2, 3)).MergeCells = true;
+
+					    ExcelSheet.cells(2,5)="         国库入库     ";
+					    ExcelSheet.cells(2,5).Interior.ColorIndex =54 ;
+					    
+					    XLObj.Range("D2",XLObj.Cells(2, 6)).MergeCells = true;
+					    
+					    ExcelSheet.cells(2,8)="         地税入库      ";
+					    ExcelSheet.cells(2,8).Interior.ColorIndex =54 ;
+					    
+					    XLObj.Range("G2",XLObj.Cells(2, 9)).MergeCells = true;
+					    
+					    ExcelSheet.cells(2,11)="            差额        ";
+					    ExcelSheet.cells(2,11).Interior.ColorIndex =54 ;
+					    
+					    XLObj.Range("J2",XLObj.Cells(2, 13)).MergeCells = true;
+
+					    var arr_row=xml.split(';');
+					      var msg = 0;
+					    for(var i=0;i<arr_row.length;i++){
+					        var arr_clum=arr_row[i].split('|');
+					          for(var j=0;j<arr_clum.length;j++){
+					          if( j==0 ){
+					          	msg = 1
+					           }else if(j==1){
+					           	msg = msg + 4;
+					           }else{
+					             msg = msg + 3;
+					           }
+						      ExcelSheet.cells(i+3,msg)=arr_clum[j];
+						    }
+						 }
+						}
+					}
+			},"-",{		
+					text:'保存',
+					iconCls:'execle',
+					handler:function(){
+
+					if( reconDate ==null || reconDate == 'undefined') {
+						Ext.MessageBox.show({
+					           title: '严重错误',
+					           msg: '请查询数据!',
+					           buttons: Ext.MessageBox.OK,
+					           icon: Ext.MessageBox.ERROR
+					       });
+					       return;
+					}
+
+					if( depatmentID == 'null' || depatmentID == 'undefined' ){
+						Ext.MessageBox.show({
+					           title: '严重错误',
+					           msg: '超级管理员无所属部门,无法保存!',
+					           buttons: Ext.MessageBox.OK,
+					           icon: Ext.MessageBox.ERROR
+					       });
+					       return;
+					}
+
+						var unt_name = "";
+						var unt_id = "";
+						var gk_shu = "";
+						var ds_shu = "";
+						var cha_er = "";
+
+						if( depatmentID=='24561000000'||userName=='admin' ){
+								storeIndex.each(function(record) {
+									if( record.data._parent == null && record.data.cha != 0){
+										unt_name = unt_name + record.data.organ+',';
+										unt_id = unt_id + record.data.id+',';
+										gk_shu = gk_shu + record.data.gks+',';
+										ds_shu = ds_shu + record.data.dss+',';
+										cha_er = cha_er + record.data.cha+',';
+									}
+					 			});
+						}else{
+							storeIndex.each(function(record) {
+							var id = record.data.id.substring(0,5);
+							var depamnt = depatmentID.substring(0,5);
+							var length = record.data.id.length;
+								if( id == depamnt && length == 7 && record.data.cha != 0){
+									unt_name = unt_name + record.data.organ+',';
+									unt_id = unt_id + record.data.id+',';
+									gk_shu = gk_shu + record.data.gks+',';
+									ds_shu = ds_shu + record.data.dss+',';
+									cha_er = cha_er + record.data.cha+',';
+								}
+				 			});
+						}
+
+					      	Ext.Ajax.request({         
+					           url: '/GXDS/through',  
+					           waitMsg : '正在处理......', 
+					           params: { organ : unt_name, unt_id:unt_id, gk_shu:gk_shu, ds_shu:ds_shu, cha_er:cha_er, reconDate:reconDate.value  },
+					           success:function(form,action)
+					           {
+					        	 Ext.Msg.alert('错误','保存成功');
+					           },failure: function(form,action){
+					           	 Ext.Msg.alert('错误','后端异常');
+					           } 
+						 	});	
+					}
+			},'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',{text:'',id:'dates'}]
+    });
+
+   	 gridIndex.render('tree_grid');
+
+	}
+	
+	return {
+		init : function()
+		{
+			createGrid();
+		}
+	}
+}();
+
+Ext.onReady(Controller.init);
+
+  	</script>
+  	<div id="tree_grid" ></div>
+  </body>
+</html>

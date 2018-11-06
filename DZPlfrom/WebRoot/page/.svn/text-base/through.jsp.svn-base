@@ -1,0 +1,121 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>查询对账是否通过</title>
+</head>
+<body>
+<script type="text/javascript">
+Ext.onReady(function(){
+	var throughStore = new Ext.data.Store({
+		  proxy: new Ext.data.HttpProxy({url:'/GXDS/selectThrough'}),
+		  reader: new Ext.data.JsonReader({totalProperty:'totalCount', root:'list',id:'id',
+		  successProperty :'@success',
+		  fields:['id','organ','rent','treasury','serachDate','userName','assessmentDate','difference','depatment']
+		  })
+	});
+
+	var throughcm=new Ext.grid.ColumnModel([
+		{header: 'id', dataIndex: 'id',width:20,sortable: true,hidden:true},
+		{header: '机关名称', dataIndex: 'organ',width:80,sortable: true},
+		{header: '地税入库', dataIndex: 'rent',width:80,sortable: true},
+		{header: '国库入库', dataIndex: 'treasury',width:80,sortable: true},
+		{header: '差额', dataIndex: 'difference',width:80,sortable: true},
+		{header: '查询时间', dataIndex: 'serachDate',width:80,sortable: true},
+		{header: '保存时间', dataIndex: 'assessmentDate',width:80,sortable: true},
+		{header: '所属部门', dataIndex: 'depatment',width:80,sortable: true,hidden:true},
+		{header: '用户名', dataIndex: 'userName',width:80,sortable: true}
+	]);
+
+	var throughGrid =new Ext.grid.GridPanel({
+			ds:throughStore,
+			cm:throughcm,
+	        height:document.body.clientHeight-124,
+			width:document.body.clientWidth-193,
+	        stripeRows:true,
+	        frame : false,
+	        autoShow : true,
+	        viewConfig : {
+	            forceFit : true
+	        },
+	        	tbar:[{		
+					text:'查询',
+					iconCls:'select-fredd',
+					handler:function(){
+
+		   	         throughDate = new Ext.form.DateField({
+					 	 width:200,
+					 	 fieldLabel:'查询时间选择',
+					     readOnly:true,
+					     showToday:true,
+					     allowBlank: true,
+					     format:'Ymd'
+					     
+				});
+				throughDate2 = new Ext.form.DateField({
+					 	 width:200,
+					 	 fieldLabel:'保存时间选择',
+					     readOnly:true,
+					     showToday:true,
+					     allowBlank: true,
+					     format:'Ymd'
+					     
+				});
+				
+				var throughForm = new Ext.form.FormPanel({
+				        labelWidth: 95,
+				        width: 500,
+				        height:342,
+				        defaultType: 'textfield',
+				        items:[throughDate,throughDate2]
+				});
+
+			var throughWindow = new Ext.Window({
+			        title: '条件查询',
+			        width: 513,
+			        height:410,
+			        resizable:false,
+			        closable :false, 
+			        buttonAlign:'center', 
+			        items: throughForm,
+			           buttons: [{
+			            text: '确定',
+			            handler:function(){
+					 		if(throughForm.getForm().isValid()){
+					 		//Ext.getCmp('dates').setText("日期：<span style='color:green'>"+throughDate.value+"</span>");
+			       			throughStore.load({
+				       			 params:{date:throughDate.value,date2:throughDate2.value,start:0,limit:20}
+						    });
+			        		throughWindow.destroy();
+					       	} else {
+					       		Ext.MessageBox.alert( "错误","不允许为空!" );
+					       	}
+			         	 }
+			        },{
+			            text: '取消',
+			            handler: function(){
+			            	throughForm.getForm().reset();
+			           		throughWindow.destroy();
+			            }
+			        }]
+		     });
+						throughWindow.show();
+				}}
+			],
+	        bbar: new Ext.PagingToolbar({
+				pageSize: 20,
+				store: throughStore,
+				displayInfo: true,
+				displayMsg: '显示第 {0} 条到 {1} 条记录，一共 {2} 条',
+				emptyMsg:'没有记录'
+			})});
+
+	throughStore.load({params:{start:0,limit:20}});
+	throughGrid.render('grid-through');
+});
+
+</script>
+<div id="grid-through"></div>
+</body>
+</html>

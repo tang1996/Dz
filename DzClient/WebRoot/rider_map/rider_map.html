@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<style type="text/css">
+		body, html,#allmap {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+	</style>
+			<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=O4wDBYRU4GgpUh5FzaUjLKxXyYPOGiMH"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="http://api.map.baidu.com/library/AreaRestriction/1.2/src/AreaRestriction_min.js"></script> <!-- 百度地图范围对象 -->
+</head>
+<body>
+<div id="allmap"></div>
+
+<script type="text/javascript">
+		$(document).ready(function(){
+
+			var CLocationLon = GetQueryString("cLocationlon");	//得到商家的经度
+			var CLocationLat = GetQueryString("cLocationlat");	//得到商家的维度
+			var CLogo = GetQueryString("cLogo");	//得到商家LOGO
+			var val = GetQueryString("val");	//获得骑手的状态
+
+			switch(val){
+				case "qiangdan":
+						map = new BMap.Map("allmap");	//建立地图容器
+
+						companypoint = new BMap.Point(CLocationLat,CLocationLon);	//根据商家的经纬度建立坐标
+						var companyIcon = new BMap.Icon(CLogo, new BMap.Size(50,50));	//设置商家的图标
+						companymarker = new BMap.Marker(companypoint,{icon:companyIcon});
+						map.centerAndZoom(companypoint, 16);	//将商家的坐标设置为中心
+						map.addOverlay(companymarker);	//将商家标注显示在地图上
+
+						var sContent ="<img style='float:left;' id='imgDemo' src='"+LOGIN_ACTION.MAP_GRIL+"' width='30' height='30' />" ;	
+						var size = new BMap.Size(-22,-45);	//信息框的偏移量
+						var opts = {	//信息框的配置
+							width:50,	//长
+							height:20,	//高
+							offset:size,	//相对于图标标注的偏移量
+							enableAutoPan:false,	//平移
+							enableCloseOnClick:false,	//点击地图则关闭
+							enableMessage:false,	//设置发送信息
+							}
+						infoWindow = new BMap.InfoWindow(sContent,opts); //建立信息框对象
+						infoWindow.addEventListener("open", function(){	//infowindow一建立打开就调用的事件
+							var bm_pop = document.getElementsByClassName("BMap_pop");	//得到包含infowindow的div块
+							if(bm_pop[0].childNodes.length == 14){	//如果关闭按钮被移除，则不再调用
+								var closebut = bm_pop[0].childNodes[9];	//得到infowindow的关闭按钮
+								bm_pop[0].removeChild(closebut);	//去除infowindow的关闭按钮
+							}
+							});
+						infoWindow.addEventListener("close", function(){	//infowindow被关闭就调用的事件
+							marker2.openInfoWindow(infoWindow);				//将关闭消失的Infowindow显示出来
+							});	
+						
+						riderIcon = new BMap.Icon(LOGIN_ACTION.MAP_GRIL, new BMap.Size(100,100));	//骑手的图标
+					break;
+
+				case "quhuo":
+						window.location.href = "http://api.map.baidu.com/direction?origin=latlng:34.264642646862,108.95108518068|name:我家&destination=大雁塔&mode=driving&region=西安&output=html&src=webapp.dzkj.dzrunning";
+					break;
+			
+			}
+
+		});
+					
+		function RiderReceipt(Rlon,Rlat){//骑手的位置
+			
+			map.clearOverlays();	//将前4秒的覆盖物全部清除	
+			map.addOverlay(companymarker);	//显示商家的图标
+		    riderpoint = new BMap.Point(Rlon,Rlat);	//骑手的经纬度
+			ridermarker = new BMap.Marker(riderpoint,{icon:riderIcon});	//创建骑手标注
+			map.addOverlay(ridermarker);	//将骑手标注显示在地图上
+			ridermarker.openInfoWindow(infoWindow);	//将信息框显示在绑定的标注上
+
+			var distince = map.getDistance(riderpoint,companypoint).toFixed(0);//得到两点间的距离toFixed(int):int为小数点精度
+			if(distince >= 1000){		//距离如果大于1000M则以公里数显示
+				range = parseFloat(distince)/1000;
+				range = range.toFixed(1);	//公里数小数点后保留1位
+						
+				infoWindow.setContent("<img style='float:left; id='imgDemo' src='"+LOGIN_ACTION.MAP_GRIL+"' width='30' height='30'/>" + "<p backgroud-color:gray style='margin:0;line-height:3;font-size:13px;text-indent:2em'>距离商家"+range+"km</p>" );//重新设置信息框内容
+			}else{
+				infoWindow.setContent("<img style='float:left; id='imgDemo' src='"+LOGIN_ACTION.MAP_GRIL+"' width='30' height='30'/>" + "<p backgroud-color:gray style='margin:0;line-height:3;font-size:13px;text-indent:2em'>距离商家"+distince+"m</p>" );//重新设置信息框内容
+			}	
+			
+			//根据骑手与商家的距离自决定地图的中心和显示级别
+			 var points = [riderpoint,companypoint];
+			 var view = map.getViewport(eval(points));
+			 var mapZoom = view.zoom;
+			 var centerPoint = view.center;
+			 	 map.centerAndZoom(centerPoint,mapZoom);
+		}
+					
+</script>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>餐厅地址</title>
+<link rel="stylesheet" href="./xg_address.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+
+</head>
+
+<body>
+<script type="text/javascript">
+	function add(){		
+			var address=$('#address').val();
+			if(address.length==0){
+				valLink("alter","请输入餐厅地址!");
+				return false;
+			}
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.COMPANYUPDATE,
+				 	data: { 
+            			id:getCookie('cid'),
+            			position:address
+            			
+        			},
+					success:function(data) {
+						if(data.success){
+							var url="../mendian/mendian.html";
+							window.location.href=url;
+						}
+						
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+	}	
+	
+function cancel(){
+	var url="../mendian/mendian.html";
+	window.location.href=url;
+}
+		</script>
+	<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="../mendian/mendian.html"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>餐厅地址</p>
+		</div>
+	</div>
+    <div class="wrap sort_add">
+        <p>餐厅地址</p>
+		<input type="text" name="address" id="address" placeholder="请输入餐厅地址" value="" />
+    </div>
+	<div class="foot_xg">
+		<button type="button" onclick="cancel();">取消</button>
+		<button type="button" onclick="add();">保存</button>
+	</div>
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>预定成功</title>
+    <link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+    <link rel="stylesheet" href="./predefined-success.css">
+    	<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+		<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+<body>
+	<script type="text/javascript">
+			
+			$(document).ready(function(){ 
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RESTULVIEW,
+				 	data: { 
+            			token: 'cOZ6cjmF9NF',
+            			orderId: 8
+        			},
+					success:function(data) {
+				
+							var html = '<ul>'+
+            						   '<li >订单号：'+data.orderNo+'</li>'+
+          						       '<li>商家名称：'+data.companyName+'</li>'+
+            							'<li>商家电话：'+data.companyphone+'</li>'+
+            							'<li>预定时间：'+data.time+'</li>'+
+            							'<li>就餐人数：'+data.meale+'人</li>'+
+            							'<li>支付金额：<span class="price">¥'+data.pay+'</span></li>'+
+        								'</ul>';
+						
+							$("#list-box").append(html);
+
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+		});
+		
+		</script>
+
+    <header>
+        <img src="../common/img/success.png" alt="">
+        <span>订单预定成功！</span>
+    </header>
+    <div class="list-box" id="list-box">
+        
+    </div>
+    <div class="rules">
+        <p>取消规则：</p>
+         您可以在当日18:00前取消或变更订单；在此之后取消或变更，动致将扣除您的定金或点餐费用作为违约的费用。
+    </div>
+</body>
+</html>

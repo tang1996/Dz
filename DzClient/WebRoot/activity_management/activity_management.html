@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>活动管理</title>
+    <link rel="stylesheet" type="text/css" href="./activity_management.css">
+	<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="../common/js/jquery.lazyload.min.js" ></script>
+	<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+	<script type="text/javascript" src="../common/js/common.js"></script>
+</head>
+
+<body>
+<script>
+    $(function(){
+    		$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.APPINFO,
+				 	data: { 
+            			id:getCookie('cid')
+        			},
+					success:function(data) {
+					var shopType=data.shopType;
+					var html='';
+					if(shopType=="1,2"){
+						  html= html+'<div class="yiWanCheng click_div click" id="wai" onclick="wai(\'wai\');">'+
+                                '<div class="zhangDan_div">'+
+                                '<p></p>'+
+                                '<p class="manyOrder"><i>外卖活动</i></p>'+
+                                '</div>'+
+                                '<p class="shiShou"></p>'+
+	                            '</div>'+
+	                            '<div class="yiWanCheng click_div" id="mei" onclick="mei(\'mei\');">'+
+                                '<div class="zhangDan_div">'+
+                                '<p></p>'+
+                                '<p class="manyOrder"><i>美食活动</i></p>'+
+                                '</div>'+
+                                '<p class="shiShou"></p>'+
+                            	'</div>';
+                        }else if(shopType=="2"){
+                        	 html=html+'<div class="yiWanCheng click_div click" id="mei" onclick="mei(\'mei\');">'+
+                                '<div class="zhangDan_div">'+
+                                '<p></p>'+
+                                '<p class="manyOrder"><i>美食活动</i></p>'+
+                                '</div>'+
+                                '<p class="shiShou"></p>'+
+                            	'</div>';
+                        }else if(shopType=="1"){
+                        		html=html+ '<div class="yiWanCheng click_div click" id="wai" onclick="wai(\'wai\');">'+
+                                '<div class="zhangDan_div">'+
+                                '<p></p>'+
+                                '<p class="manyOrder"><i>外卖活动</i></p>'+
+                                '</div>'+
+                                '<p class="shiShou"></p>'+
+	                            '</div>';
+                        }
+							$("#dan_div").html(html);
+							 var m=GetQueryString("m");
+				    		if(m==1){
+				    			$("#wai").addClass("click");
+				    			$("#wai").siblings().removeClass("click");
+				    			
+				    		}else if(m==2){
+				    			$("#mei").addClass("click");
+				    			$("#mei").siblings().removeClass("click");
+				    		}	
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});	
+				
+						
+    })
+    
+   				 function wai(id){
+    				   $("#"+id).addClass("click");
+			           $("#"+id).siblings().removeClass("click");
+			            window.location.href="../activity_list/activity_list.html";
+    			}
+    			
+    			function mei(id){
+    				$("#"+id).addClass("click");
+			         $("#"+id).siblings().removeClass("click");
+			         window.location.href="../activity_list_food/activity_list_food.html";
+    			}
+</script>
+            <div class="head">
+		<div class="h-div clear">
+				<a class="h-l" href="../admin_index/admin_index.html"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+				<p>活动管理</p>
+			
+			</div>
+                </div>
+                        <div class="title clear">
+                            <p><em class="dingDan_em"></em>活动管理</p>
+                        </div>
+                       
+                        <div class="dan_div clear" id="dan_div">
+                          
+                        </div>
+                            
+                        
+                        
+
+
+
+</body>
+
+</html>

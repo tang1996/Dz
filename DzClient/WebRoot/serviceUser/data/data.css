@@ -1,0 +1,217 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+#body{
+    position: fixed;
+    height: 100%;
+    width: 100%;
+}
+.clear:after{
+    clear: both;
+    display: block;
+    content: " ";
+}
+ul{
+    list-style: none;
+}
+#left_div{
+    width: 11%;
+    height: 100%;
+    float: left;
+    position: relative;
+}
+#left_div .left_top{
+    height: 60px;
+}
+.left_ul{
+    line-height: 60px;
+    text-align: center;
+}
+.left_ul li{
+    background:#fff;
+    border-bottom: 1px solid #eee;
+}
+.left_ul li.click{
+    background: #373c40;
+    color: #fff;
+    border-bottom: 1px solid #373c40;
+}
+.deliciousFoodOrderNum{
+    display: block;
+    width: 22px;
+    position: absolute;
+    top: 5px;
+    right: 15%;
+    border-radius: 50%;
+    background:#f40;
+    color: #ffffff;
+    font-size: 12px;
+    font-style: normal;
+    line-height: 23px;
+    text-align: center;
+}
+.exit{
+    position: absolute;
+    bottom: 12px;
+    height: 60px;
+    text-align: center;
+    width: 100%;
+}
+.exit i{
+    background: url("../../common/img/efdbd5e6568464e86a04292696d26a5e.png") no-repeat center;
+    background-size: 100%;
+    width: 60px;
+    height: 60px;
+    display: inline-block;
+}
+
+#right_div{
+    width:89%;
+    height: 100%;
+    float: right;
+    background: #dfcdbb;
+}
+#right_div .right{
+    padding: 15px;
+    position: relative;
+    margin-top: 50px;
+}
+.dateTime{
+    font-size: 25px;
+    font-weight: bold;
+    background: #7b634a;
+    text-align: center;
+    padding: 10px 0;
+}
+.dateTime input{
+    font-size: 20px;
+    line-height: 30px;
+    border: 1px solid #dfcdbb;
+    width: 200px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    outline: none;
+}
+input[type="date"]::-webkit-clear-button{
+    display:none;
+}
+input[type="date"]::-webkit-inner-spin-button { visibility: hidden; }
+.data_title{
+    line-height: 60px;
+    font-size: 20px;
+    color: #333333;
+    font-weight: bold;
+}
+.data_title i{
+    width: 14px;
+    height: 16px;
+    display: inline-block;
+    background: url("../../common/images/u1234565487.png") no-repeat center;
+    background-size: 100% 100%;
+    margin: 0 8px;
+}
+.order_div{
+    display: flex;
+    margin-bottom: 20px;
+}
+.order{
+    border: 1px solid #7b634a;
+    border-radius: 10px;
+    background: #ffffff;
+    padding: 15px 20px;
+    margin-right: 12px;
+    text-align: center;
+    color: #333333;
+}
+.order .orderAbove{
+    min-width: 100px;
+    margin: auto;
+}
+.order .orderAbove h1{
+    font-size: 18px;
+    line-height: 25px;
+}
+.order .orderAbove p{
+    line-height: 35px;
+}
+.order .orderAbove p i{
+    font-size: 24px;
+    font-style: normal;
+    font-weight: bold;
+    color: #ff7e00;
+    padding: 0 5px;
+}
+.orderMoney{
+    line-height: 25px;
+}
+.backgroundPrompt{
+		position: fixed;
+		width: 100%;
+		height: 100%;
+		background: rgba(0,0,0,0.2);
+		z-index: 1000;
+	}
+	.promptBox{
+		background: #fff;
+		width: 500px;
+		height: 200px;
+		margin: 180px auto;
+		border-radius:10px;
+		overflow: hidden;
+		box-shadow: 3px 3px 35px rgba(0,0,0,0.5);
+	}
+	.promptBox .promptContent{
+		line-height: 150px;
+		text-align: center;
+		font-size: 20px;
+	}
+	.promptBox .promptButton{
+		line-height: 50px;
+		text-align: center;
+		border-top: 1px solid #ccc;
+	}
+	.promptBox .promptButton p{
+		width: 49.9%;
+		float: left;
+		color: #fff;
+	}
+	.promptBox .promptButton p.cancel{
+		border-right: 1px solid #ccc;
+		background: #ccc;
+	}
+	.promptBox .promptButton p.ok{
+		background: #ff7e00;
+	}
+/*3*/
+.background_onlyOKPrompt{
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.2);
+	z-index: 100;
+}
+.onlyOKPrompt{
+	background: #fff;
+	width: 350px;
+	height: 200px;
+	margin: 180px auto;
+	border-radius:10px;
+	overflow: hidden;
+	box-shadow: 3px 3px 35px rgba(0,0,0,0.5);
+}
+.onlyOKPrompt_content{
+	line-height: 150px;
+	text-align: center;
+	font-size: 20px;
+}
+.onlyOKPrompt_button{
+	text-align: center;
+	line-height: 50px;
+}
+.onlyOKPrompt_button p{
+	text-align: center;
+	background: #ff7e00;
+	color: #fff;
+}

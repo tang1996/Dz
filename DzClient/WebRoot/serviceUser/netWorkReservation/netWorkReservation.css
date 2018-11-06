@@ -1,0 +1,430 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+#body{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+.left{
+    width: 11%;
+    height: 100%;
+    float: left;
+    position: relative;
+}
+.left ul{
+    list-style: none;
+}
+.left li{
+    line-height: 60px;
+    height: 60px;
+    border-bottom: 1px solid #f5f5f5;
+    text-align: center;
+}
+.left li.click{
+    background: #373c40;
+    color: #fff;
+    border-bottom: 1px solid #373c40;
+}
+
+.deliciousFoodOrderNum{
+    display: block;
+    width: 22px;
+    position: absolute;
+    top: 5px;
+    right: 15%;
+    border-radius: 50%;
+    background:#f40;
+    color: #ffffff;
+    font-size: 12px;
+    font-style: normal;
+    line-height: 23px;
+    text-align: center;
+}
+.exit{
+    position: absolute;
+    bottom: 10px;
+    text-align: center;
+    width: 100%;
+}
+.exit i{
+    background: url("../../common/img/efdbd5e6568464e86a04292696d26a5e.png") no-repeat center;
+    background-size: 100%;
+    width: 60px;
+    height: 60px;
+    display: inline-block;
+}
+
+
+
+
+.right{
+    width: 89%;
+    height: 100%;
+    float: right;
+    background: #dfcdbb;
+    position: relative;
+    overflow-y : auto;
+}
+.choose{
+    position: absolute;
+    z-index: 1;
+}
+.choose p{
+    float: left;
+    margin: 12px 0 0 12px;
+    font-size: 16px;
+    padding: 15px 20px;
+    background: rgba(255,126,0,0.6);
+    border-radius: 5px;
+    color: #ffffff;
+    cursor: pointer;
+}
+.choose p.click{
+    background: #ff7e00;
+}
+.noAddFood,.addFoodEnd{
+    padding: 12px;
+    position: relative;
+    height: 97%;
+}
+.Search_div{
+    height: 70px;
+}
+.Search{
+    width: 450px;
+    border: 2px solid #ffffff;
+    border-radius: 50px;
+    height: 45px;
+    float: right;
+    overflow: hidden;
+    padding-left: 15px;
+    background: rgba(255,255,255,0.2);
+}
+.Search input{
+    float: left;
+    font-size: 16px;
+    color: #fff;
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 370px;
+    font-weight: bold;
+    height: 45px;
+}
+.Search input::-webkit-input-placeholder{
+	color: #fff;
+}
+.Search p{
+    float: right;
+    line-height: 45px;
+    color: #a6896b;
+    width: 80px;
+    text-align: center;
+    background: #fff;
+    font-weight: bold;
+}
+/*
+.AddFoodList{
+
+}
+.AddFoodList table{
+    width: 100%;
+    font-size: 14px;
+    color: #ffffff;
+    text-align: center;
+}
+.AddFoodList table tr{
+    height: 45px;
+}
+.AddFoodList table tr a{
+    color: #ffffff;
+    width: 90%;
+    height: 41px;
+    display: inline-block;
+    line-height: 45px;
+    background: rgba(255,126,0,0.7); linear-gradient(rgba(255,178,102,1), rgba(255,126,0,0.85),rgba(255,178,102,1));
+    box-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+}
+.AddFoodList table th{
+    background: #a6896b;
+}
+.AddFoodList table tr:nth-of-type(even){
+    background: rgba(166,137,107,0.5);
+}
+.AddFoodList table tr:nth-of-type(odd){
+    background: rgba(166,137,107,0.8);
+}
+.AddFoodList table tr:nth-of-type(odd){
+*/
+.AddFoodList{
+
+}
+.AddFoodList table{
+    width: 100%;
+    font-size: 14px;
+    color: #ffffff;
+    text-align: center;
+}
+
+.AddFoodList table tr{
+    height: 65px;
+}
+.AddFoodList table tr:nth-of-type(1){
+    height: 45px;
+}
+.AddFoodList table tr a{
+    color: #ffffff;
+    width: 90%;
+    height: 41px;
+    display: inline-block;
+    line-height: 45px;
+    background: rgba(255,126,0,0.7);/*linear-gradient(rgba(255,178,102,1), rgba(255,126,0,0.85),rgba(255,178,102,1));*/
+    box-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    text-align: center;
+}
+.AddFoodList table th{
+    background: #a6896b;
+}
+.AddFoodList table tr:nth-of-type(even){
+    background: rgba(166,137,107,0.5);
+}
+.AddFoodList table tr:nth-of-type(odd){
+    background: rgba(166,137,107,0.8);
+}
+
+.AddFoodList table tr td:nth-of-type(5) p span:last-of-type{
+    float: right;
+}
+.AddFoodList table tr td:nth-of-type(5) p span:nth-of-type(2){
+    width: 45px;
+    text-align: right;
+    display: inline-block;
+}
+.AddFoodList table tr td .Total{
+    color: #ffffff;
+    font-weight: bold;
+}
+.noPay{
+	color: #ff0;
+	margin: 0 10px;
+	font-style: normal;
+}
+		
+
+.page{
+    text-align: center;
+    height: 45px;
+    line-height: 45px;
+    position: absolute;
+    bottom: 10px;
+    width: 98%;
+}
+.page a{
+    padding: 10px 15px;
+    text-decoration: none;
+    margin: 0 5px;
+    background: #a6896b;
+    color: #ffffff;
+    font-size: 14px;
+}
+.page span{
+    font-size: 16px;
+    color: #ffffff;
+    font-weight: bold;
+    margin: 0 15px;
+}
+
+.lookOneOrder_background{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    background: rgba(0,0,0,0.2);
+}
+.lookOneOrder{
+    width: 400px;
+    height: 730px;
+    background: #ffffff;
+    margin: 70px auto;
+    position: relative;
+    box-shadow: 1px 1px 10px rgba(0,0,0,0.8);
+    border-radius: 3px;
+}
+.oneOrderTitle{
+    text-align: center;
+    font-size: 18px;
+    color: #333333;
+    line-height: 50px;
+    font-weight: bold;
+}
+.oneOrder{
+    height: 599px;
+    border-bottom: 1px solid #EEEEEE;
+    overflow-y: auto;
+}
+.oneOrder table{
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+}
+.oneOrder table tr{
+    height: 45px;
+}
+.oneOrder table tr:nth-of-type(odd){
+    background: #f5f5f5;
+}
+.oneOrder_bottom{
+    padding: 15px 0;
+    position: absolute;
+    bottom: 0;
+}
+.oneOrder_bottom p{
+    line-height: 50px;
+    float: left;
+    width: 130px;
+    background: #ff7e00;
+    text-align: center;
+    color: #ffffff;
+    border-radius: 3px;
+    margin: auto 35px;
+    cursor: pointer;
+}
+.oneOrder_bottom p.cancel{
+    background: #CCCCCC;
+}
+
+	
+/*iframe鏍峰紡*/
+#myiframe{
+   height: 100%;
+   width: 100%;
+}
+#addMenusIframe{
+   height: 100%;
+   width: 100%;
+}
+#billIframe{
+ height: 100%;
+ width: 100%;
+}
+#inventoryIframe{
+   height: 100%;
+   width: 100%;
+}
+#netCheckMoneyIframe{
+	height: 100%;
+	width: 100%;
+}
+/*3	纭妗� 璺宠浆*/
+.background_onlyOKPrompt{
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.2);
+	z-index: 100;
+}
+.onlyOKPrompt{
+	background: #fff;
+	width: 350px;
+	height: 200px;
+	margin: 180px auto;
+	border-radius:10px;
+	overflow: hidden;
+	box-shadow: 3px 3px 35px rgba(0,0,0,0.5);
+}
+.onlyOKPrompt_content{
+	line-height: 150px;
+	text-align: center;
+	font-size: 20px;
+}
+.onlyOKPrompt_button{
+	text-align: center;
+	line-height: 50px;
+}
+.onlyOKPrompt_button p{
+	text-align: center;
+	background: #ff7e00;
+	color: #fff;
+}
+/*3	纭妗� 涓嶅仛鍙嶅簲*/
+.background_onlyOKPrompt1{
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.2);
+	z-index: 100;
+}
+.onlyOKPrompt1{
+	background: #fff;
+	width: 350px;
+	height: 200px;
+	margin: 180px auto;
+	border-radius:10px;
+	overflow: hidden;
+	box-shadow: 3px 3px 35px rgba(0,0,0,0.5);
+}
+.onlyOKPrompt_content1{
+	line-height: 150px;
+	text-align: center;
+	font-size: 20px;
+}
+.onlyOKPrompt_button1{
+	text-align: center;
+	line-height: 50px;
+}
+.onlyOKPrompt_button1 p{
+	text-align: center;
+	background: #ff7e00;
+	color: #fff;
+}
+
+/* 鎻愮ず妗� */
+.backgroundPrompt{
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.2);
+	z-index: 1000;
+}
+.promptBox{
+	background: #fff;
+	width: 500px;
+	height: 200px;
+	margin: 180px auto;
+	border-radius:10px;
+	overflow: hidden;
+	box-shadow: 3px 3px 35px rgba(0,0,0,0.5);
+}
+.promptBox .promptContent{
+	line-height: 150px;
+	text-align: center;
+	font-size: 20px;
+}
+.promptBox .promptButton{
+	line-height: 50px;
+	text-align: center;
+	border-top: 1px solid #ccc;
+}
+.promptBox .promptButton p{
+	width: 49.9%;
+	float: left;
+	color: #fff;
+}
+.promptBox .promptButton p.cancel{
+	border-right: 1px solid #ccc;
+	background: #ccc;
+}
+.promptBox .promptButton p.ok{
+	background: #ff7e00;
+}
+
+

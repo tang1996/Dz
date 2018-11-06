@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<title>订单跟踪</title>
+		
+   	<link rel="stylesheet" type="text/css" href="../common/css/common.css" />
+		<link rel="stylesheet" type="text/css" href="./orderDetail.css" />
+		<link rel="stylesheet" type="text/css" href="./order.css" />
+		<style type="text/css">
+html {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	margin: 0 auto;
+	padding: 0;
+	max-width: 1000px;
+	background: #f5f6f8;
+	font-size: 14px;
+}
+
+.m-header {
+	position: relative;
+	height: 0.48rem;
+	line-height: 0.48rem;
+	font-size: 0.16rem;
+	border-bottom: 1px solid #EBEBEB;
+	text-align: center;
+	color: #2C2C2C;
+	letter-spacing: 0;
+	background: #fff;
+}
+
+.m-return {
+	position: absolute;
+	display: inline-block;
+	top: 0.13rem;
+	left: 0.12rem;
+	width: 0.14rem;
+	height: 0.22rem;
+	background-image:
+		url(http://c2.cgyouxi.com/website/mobile/img/arrow-l.png?v=20180122);
+	background-size: 100% 100%;
+}
+
+.m-tab {
+	position: relative;
+	padding: 0.40rem 0 0;
+	width: 100%;
+	background: #fff;
+	position:fixed;
+	width:100%;
+	top:0px;
+	border-bottom:1px solid #EBEBEB;
+	height:10px;
+	line-height:45px;
+	background-color:#fff;
+	z-index:99999
+}
+
+.m-tab a {
+	position: absolute;
+	display: inline-block;
+	width: 50%;
+	font-size: 0.14rem;
+	color: #2C2C2C;
+	letter-spacing: 0;
+	line-height: 0.48rem;
+	text-align: center;
+	text-decoration: none;
+}
+
+.m-tab a:first-child {
+	top: 0;
+	left: 0;
+}
+
+.m-tab a.m-coupons {
+	top: 0;
+	right: 0;
+}
+
+.m-tab a.active {
+	border-bottom: 2px solid #FFAC28;
+}
+
+.m-view1 {
+	background: #fff;
+	height: 200px;
+}
+
+.m-view2 {
+	background: #fff;
+	height: 200px;
+}
+
+.footer{display:block;position:fixed;height:50px;width:100%;z-index:3;bottom:0px;color:#f03c03;background:#FF7E00;line-height:35px;font-size:15px;}
+.footer .left{float:left;margin:5px 10px;}
+.footer .right{float:right; }
+.footer .right .disable{background:#818181;font-size:16px}
+.footer .xhlbtn{font-size:20px;display:block;text-align:center;line-height:50px;padding:0 15px;color:#fff;}
+
+@media screen and (min-width: 360px) {
+	html {
+		font-size: 100px !important;
+	}
+}
+</style>
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+		<script type="text/javascript">
+	document.documentElement.style.fontSize = document.documentElement.clientWidth / 3.6 + 'px';
+	(function(doc, win) {
+		var docEl = doc.documentElement;
+		var resizeEvt = 'orientationchange' in window ? 'orientationchange'
+				: 'resize';
+
+		var recalc = function() {
+			var clientWidth = docEl.clientWidth;
+			if (!clientWidth) {
+				return;
+			}
+			docEl.style.fontSize = 100 * (clientWidth / 360) + 'px';
+		};
+
+		if (!doc.addEventListener) {
+			return;
+		}
+		win.addEventListener(resizeEvt, recalc, false);
+		doc.addEventListener('DOMContentLoaded', recalc, false);
+	})(document, window);
+
+</script>
+	</head>
+	<body>
+		<div class="m-tab">
+			<a href="javascript:void(0);" id="m-my-invite" class="active">订单状态</a>
+			<a href="javascript:void(0);" id="m-my-coupons" class="m-coupons">订单详情</a>
+		</div>
+		<div id="m-view1" class="m-view1">
+				<br/><br/>
+			  <div class="order-box">
+		        <ul class="order-status" id="order-status" >
+		         
+		        </ul>
+		    </div>
+		</div>
+		<div id="m-view2" class="m-view2" style="display: none;">
+			<br/><br/>
+			<div class="product-info-box">
+		        <ul>
+		           <li class="title" id="companyname"></li>
+		            <li id="cart-list"></li>
+
+		            <li id="jian"></li>
+		           <a id="companyPhone"><li class="contanct"><img src="../common/img/phone.png" alt="">联系商家:<span class="price" id = "price">¥0</span><span>实付</span></li></a>
+		        </ul>
+		    </div>
+		    <div class="delivery-info-box">
+		        <ul>
+		            <li class="title">配送信息</li>
+		            <li class="time">送达时间<span id = "time"></span></li>
+		            <li class="addr">
+		                <div class="left">收货地</div>
+		                <div class="right">
+		                    <p id="address"></p>
+		                    <p id="username"></p>
+		                </div>
+		            </li>
+		            <li class="way">配送方式<span id="way">动致专送</span></li>
+		        </ul>
+		    </div>
+		    <div class="social-box">
+		        <h3>啄呗邀您入群</h3>
+		        <div class="group">
+		            <div class="avatar"></div>
+		            <div class="group-info">
+		                <p class="title">啄呗官方强红包群</p>
+		                <p class="info">群成员专享：进群抢红包，抢到红包换酒钱</p>
+		            </div>
+		        </div>
+		        <div class="join-button"><span><a href="javascript:valLink('redPack','zhuobei')">立即加入</a></span></div>
+		    </div>
+		    <div class="order-info-box">
+		        <ul>
+		            <li class="title">订单信息</li>
+		            <li>订单号<span id="orderNo"></span></li>
+		            <li>支付方式<span>在线支付</span></li>
+		            <li>下单时间<span id="addTime"></span></li>
+		            <li>备注
+		                <p id="remarks"></p>
+		            </li>
+		        </ul>
+		    </div>
+		    <br/>
+		    <div class="footer">  
+				<a id="btnselect" class="xhlbtn disable">订单进行中</a>  
+			</div>
+		</div>
+		<script type="text/javascript">
+				$('#m-return').on('click', function() {
+					window.history.back()
+				});
+				var myCoupons = $('#m-my-coupons');
+				var myInvite = $('#m-my-invite');
+				var view1 = $('#m-view1');
+				var view2 = $('#m-view2');
+				$('#m-return').on('click', function() {
+					window.history.back()
+				});
+				myInvite.on('click', function() {
+					myCoupons.removeClass('active');
+					myInvite.addClass('active');
+					view2.hide();
+					view1.show();
+					//订单追踪状态
+					leftPage();
+				});
+				myCoupons.on('click', function() {
+					myInvite.removeClass('active');
+					myCoupons.addClass('active');
+					view1.hide();
+					view2.show();
+					// 获取地址
+					rightPage();
+				});
+				
+				$(document).ready(function() {
+					// 获取地址
+					rightPage();
+					
+					//订单追踪状态
+					leftPage();
+				});
+				
+				function leftPage(){
+					$.ajax( {
+								type : 'POST',
+								url : BASE_URL + LOGIN_ACTION.TRACKVIEW,
+								data : {
+									id: GetQueryString("orderId")
+								},
+								success:function(data) {
+									var list=data.list;
+									var html='';
+									for(var i = 0;i < list.length;i++){
+										if(i==0){
+										    if(list[i].status=='taking'){
+											    html+='<li class="chat"><p><span>'+list[i].runName+'</span><span class="date">'+list[i].createTime+'</span></p> <p class="tel"><span style="color:#5CACEE">'+list[i].runPhone+'</span><span><a onclick=privateChat(\''+list[i].runPhone+'\',\''+list[i].runName+'\')>进入聊天</a></span></p></li>';
+										    }else{
+												html+='<li class="active"><span class="active">'+list[i].bewrite+'</span><span class="date">'+list[i].createTime+'</span></li>';
+											}
+										}else{
+											if(list[i].status=='taking'){
+												 html+='<li class="chat"><p><span>'+list[i].runName+'</span><span class="date">'+list[i].createTime+'</span></p> <p class="tel"><span style="color:#5CACEE">'+list[i].runPhone+'</span><span><a onclick=privateChat(\''+list[i].runPhone+'\',\''+list[i].runName+'\')>进入聊天</a></span></p></li>';
+											}else{
+												html+='<li><span>'+list[i].bewrite+'</span><span class="date">'+list[i].createTime+'</span></li>';
+											}
+										}
+										 $("#order-status").html(html);
+									}
+								
+								},
+								error:function(error) {
+									console.log(error);
+								}
+							});
+				}
+				
+				function privateChat(phone,name){
+					moreLink('privateChat', phone, name);
+				}
+				
+				function rightPage(){
+					$.ajax({type : 'POST',
+							url : BASE_URL + LOGIN_ACTION.GET_ADDRESS,
+							data : {
+								token : GetQueryString("token")
+							},
+							success:function(data) {
+								if(data.success){
+									$("#username").html(data.username+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+data.phone);
+									$("#address").html(data.address);
+								}
+							},
+							error:function(error) {
+								console.log(error);
+							}
+						});
+						
+						$.ajax( {
+								type : 'POST',
+								url : BASE_URL + LOGIN_ACTION.NUSER_VIEW,
+								data : {
+									token : GetQueryString("token"),
+									orderId: GetQueryString("orderId")
+								},
+								success:function(data) {
+									$("#companyname").html('<a href="javascript:valLink(\'search\',\''+data.companyId+'\');"><span><img src='+data.companyLogo+' style="width:37px;height:37px;"  alt=""></span>'+data.companyName+'<img src="../common/img/arrow.png" alt=""></a>');
+									$("#orderNo").html(data.orderNo+"&nbsp;|&nbsp;<b>复制</b>");
+									$("#addTime").html(data.addTime);
+									$("#remarks").html(data.remarks);
+									$("#time").html(data.shipTime);
+									$("#way").html(data.way);
+									$("#coupon").html(data.discount);
+									$("#price").html("¥" + data.pay);
+									$("#activityName").html(data.activityName);
+									$("#type").html(data.type);
+									$("#companyPhone").attr('href','tel:' + data.companyPhone);
+									$("#time").html(data.shoptime);
+									$("#way").html(data.mode);
+									var goodslist = data.list;
+									var totalCount='';
+									var line = '';
+									
+									for(var i = 0;i < goodslist.length; i++){
+										totalCount = totalCount + goodslist[i].price;
+										line = line + '<li>'+	goodslist[i].name+
+											'<span>¥'+goodslist[i].price+'</span>'+
+											'<span>x'+ goodslist[i].number +'</span>'+
+										'</li>';
+									}
+									$("#cart-list").html(line);
+									if(data.boxprice>0){
+										$("#cart-list").append('<li>包装费<span>¥'+data.boxprice+'</span><span></span></li>');
+									}
+									$("#cart-list").append('<li>配送费<span>¥'+data.distribution+'</span><span></span></li>');
+									$("#cart-list").append('<li>总金额<span>¥'+data.sumPrice+'</span><span></span></li>');
+									if(data.activity > 0){
+									 $("#jian").html('<p class="coupon" id = "type">减</p><i id = "activityName">在线支付立减优惠</i><span class="coupon-money" id = "coupon">-¥'+data.activity+'</span>'); 
+									}
+									
+									$("#total-money").html("¥"+totalCount);
+								},
+								error:function(error) {
+									console.log(error);
+								}
+							});
+				}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>桌子列表</title>
+<link rel="stylesheet" href="./table_list.css">
+<script type="text/javascript" src="../common/js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../common/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../common/js/baseUrl.js"></script>
+<script type="text/javascript" src="../common/js/common.js"></script>
+
+</head>
+
+<body>
+<script type="text/javascript">
+			$(document).ready(function(){ 
+				var mm=GetQueryString("mm");
+				if(mm==1){
+					  load();
+				  }else if(mm==2){
+					  baoxiang();
+				  }else{
+					 load();
+				  }
+				
+		     });
+
+function datin(){
+	 $(".active").removeClass('active');
+	 $("#da").addClass('active');
+	 $("#sp-right").html('');
+	 load();	
+}
+
+
+function baoxiang(){
+	 $(".active").removeClass('active');
+	 $("#bao").addClass('active');
+	 $("#sp-right").html('');
+	 baoxiangLoad();
+}
+function edit(wid,t){
+	if(t=="dt"){
+		var url="../table_edit/table_edit.html";
+	}else if(t=="bx"){
+		var url="../table_edit/table_edit_bao.html";
+	}
+	
+	window.location.href=url+"?"+"wid="+wid;
+}
+function clo(cid,m){
+		$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RESERVEISOPEN,
+					data:{ 
+            			id:cid,
+            			isOpen:0
+					},
+					success:function(data) {
+						valLink("alert",data.message);
+						if(data.success){
+							$("#sp-right").html('');
+							if(m=='dt'){
+								load();
+							}else if(m=='bx'){
+								baoxiangLoad()
+							}
+							
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+
+}
+function ope(cid,m){
+		$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RESERVEISOPEN,
+					data:{ 
+            			id:cid,
+            			isOpen:1
+					},
+					success:function(data) {
+						if(data.success){
+							$("#sp-right").html('');
+							if(m=='dt'){
+								load();
+							}else if(m=='bx'){
+								baoxiangLoad()
+							}
+						}
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}
+function del(id,w){
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RESERVEDELETE,
+					data:{ 
+            			id:id
+					},
+					success:function(data) {
+						if(data.success){
+							if(w==1){
+								load();
+							}else if(w==2){
+								baoxiangLoad()
+							}
+						}
+					},
+					error:function(error) {
+						valLink("alert",message);
+					}
+				});
+
+}
+
+
+function load(){
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RESERVEALLVIEW,
+					data:{ 
+            			companyId:getCookie('cid'),
+            			seat:'dt'
+					},
+					success:function(data) {
+					    var list = data.list;
+						var html='';
+						for(var i = 0;i < list.length;i++){
+							var  seat=list[i].seat;
+							var  isOpen=parseInt(list[i].isOpen);
+							var  status=parseInt(list[i].status);
+							var  val='';
+							var  img='';
+							var  huo='';
+							var del='';
+							if(status==0){
+								val='空桌';
+								img='../common/img/z2.png';
+								del='<img src="../common/img/down.png" style="width:24px;height:24px;float:right;" onclick="del('+list[i].id+',1);"/>';
+							}else if(status==1){
+								val='预定中';
+								img='../common/img/z3.png';
+							}else{
+								val='就餐中';
+								img='../common/img/z1.png';
+							}
+								
+							 if(isOpen==0){
+									huo='<button type="button" onclick="edit('+list[i].id+',\'dt\');" >编辑桌子</button><button type="button" id='+list[i].id+' onclick="ope('+list[i].id+',\'dt\')">开启桌台</button>';
+							 }else if(isOpen==1){
+									huo='<button type="button" onclick="edit('+list[i].id+',\'dt\');" >编辑桌子</button><button type="button" id='+list[i].id+' onclick="clo('+list[i].id+',\'dt\')">关闭桌台</button>';
+							 }
+
+							html= html + '<li>'+
+								  '<a href="#">'+
+								  '<div class="top">'+
+									'<img src="'+img+'" width=120 height=121>'+
+									'<h3>位置:大厅'+del+'</h3>'+
+									'<h3>桌号:'+list[i].tableNo+'</h3>'+
+									'<h3>状态:'+val+'</h3>'+
+									'<p style="color:#000000;">预定定金:'+list[i].deposit+'元</p>'+
+									'<p style="color:#000000;">可坐人数:'+list[i].meals+'</p>'+
+								'</div>'+
+								'<div class="bottom">'+huo+
+								'</div>'+
+							'</a>'+
+						    '</li>';
+						}
+
+						   $("#sp-right").html(html);
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+}
+
+			function baoxiangLoad(){
+				$.ajax({
+					type:'POST',
+					url: BASE_URL + LOGIN_ACTION.RESERVEALLVIEW,
+					data:{ 
+		          			companyId:getCookie('cid'),
+		          			seat:'bx'
+					},
+					success:function(data) {
+					    var list = data.list;
+						var html='';
+						for(var i = 0;i < list.length;i++){
+							var  seat=list[i].seat;
+							var  isOpen=parseInt(list[i].isOpen);
+							var  status=parseInt(list[i].status);
+							var  val='';
+							var  img='';
+							var  huo='';
+							var  del='';
+							if(status==0){
+								val='空桌';
+								img='../common/img/z2.png';
+								del='<img src="../common/img/down.png" style="width:24px;height:24px;float:right;" onclick="del('+list[i].id+',2);"/>';
+							}else if(status==1){
+								val='预定中';
+								img='../common/img/z3.png';
+							}else{
+								val='就餐中';
+								img='../common/img/z1.png';
+							}
+								
+							 if(isOpen==0){
+									huo='<button type="button" onclick="edit('+list[i].id+',\'bx\');" >编辑桌子</button><button type="button" id='+list[i].id+' onclick="ope('+list[i].id+',\'bx\')">开启桌台</button>';
+							 }else if(isOpen==1){
+									huo='<button type="button" onclick="edit('+list[i].id+',\'bx\');" >编辑桌子</button><button type="button" id='+list[i].id+' onclick="clo('+list[i].id+',\'bx\')">关闭桌台</button>';
+							 }
+		
+							html= html + '<li>'+
+								  '<a href="#">'+
+								  '<div class="top">'+
+									'<img src="'+img+'" width=120 height=121>'+
+									'<h3>位置:包厢'+del+'</h3>'+
+									'<h3>包厢名称:'+list[i].name+'</h3>'+
+									'<h3>状态:'+val+'</h3>'+
+									'<p style="color:#000000;">预定定金:'+list[i].deposit+'元</p>'+
+									'<p style="color:#000000;">可坐人数:'+list[i].meals+'</p>'+
+								'</div>'+
+								'<div class="bottom">'+huo+
+								'</div>'+
+							'</a>'+
+						    '</li>';
+						}
+		
+						   $("#sp-right").html(html);
+					},
+					error:function(error) {
+						console.log(error);
+					}
+				});
+		}
+		
+		</script>
+
+
+<div class="head">
+		<div class="h-div">
+			<a class="h-l" href="../admin_index/admin_index.html"><img class="jt" src="../common/img/iconjt.png" alt=""></a>
+			<p>桌子列表</p>
+			<!--<a class="h-r" href="#"><img class="sp-ss" src="../common/img/sp-ss.png" alt=""></a>-->
+		</div>
+	</div>
+    <div class="wrap sp">
+	<div class="xg-h">
+            <a class="active" href="javascript:datin();" id="da">大厅</a>
+            <a href="javascript:baoxiang();" id="bao">包厢</a>
+        </div>
+     
+		<div class="sp-right">
+			<ul id="sp-right">
+				
+			</ul>
+		</div>
+    </div>
+		<ul class="foot-nav foot-sort">
+		<li class="active">
+				<a href="../add_table/add_table.html"><img src="../common/img/sp33.png" ><span>新建桌子</span></a>
+		</li>
+	</ul>
+
+</body>
+
+</html>
